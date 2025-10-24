@@ -1,17 +1,72 @@
-# React + TypeScript + Vite
+# Drikkescore - Blood Alcohol Content Tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A real-time drinking session tracker with blood alcohol content (BAC) calculation and leaderboards.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- User authentication and registration with BAC calculation profile
+- Create and join drinking sessions using session codes
+- Track drinks by volume (ml) and alcohol percentage
+- Real-time BAC calculation using the Widmark formula
+- Automatic BAC decay over time
+- Live leaderboard showing rankings during sessions
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+- **Frontend**: React 19 + TypeScript + Vite
+- **Database**: Supabase (PostgreSQL)
+- **Authentication**: Supabase Auth
+- **Styling**: CSS (easily replaceable with Tailwind, etc.)
+- **BAC Calculation**: Widmark Formula
 
-Note: This will impact Vite dev & build performances.
+## Project Structure
+
+```
+src/
+├── components/          # Reusable UI components
+│   ├── auth/           # Login, Register components
+│   ├── session/        # Session management components
+│   ├── drinks/         # Drink entry components
+│   └── leaderboard/    # Leaderboard display
+├── pages/              # Page components
+├── lib/                # Utility libraries (Supabase client)
+├── utils/              # Helper functions (BAC calculator)
+├── hooks/              # Custom React hooks
+├── types/              # TypeScript type definitions
+├── context/            # React context providers
+└── styles/             # Global styles
+```
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- Supabase account and project
+
+### Installation
+
+1. Install dependencies:
+```bash
+npm install
+```
+
+2. Set up environment variables in `.env`:
+```env
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+3. Run database migrations (see `DATABASE_SCHEMA.md`)
+
+4. Start the development server:
+```bash
+npm run dev
+```
+
+## Database Schema
+
+See `DATABASE_SCHEMA.md` for complete database schema and SQL setup queries.
 
 ## Expanding the ESLint configuration
 
