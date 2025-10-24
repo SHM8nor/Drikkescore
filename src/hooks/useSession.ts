@@ -107,9 +107,6 @@ export function useSession(sessionId: string | null) {
       )
       .subscribe((status) => {
         console.log('Subscription status:', status);
-        if (status === 'SUBSCRIPTION_ERROR') {
-          console.error('Failed to subscribe to real-time updates');
-        }
       });
 
     return () => {
