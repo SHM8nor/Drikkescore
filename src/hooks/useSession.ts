@@ -38,18 +38,25 @@ export function useSession(sessionId: string | null) {
         // Fetch participants
         const { data: participantsData, error: participantsError } = await supabase
           .from('session_participants')
-          .select(`
-            user_id,
-            profiles (*)
-          `)
+          .select('user_id')
           .eq('session_id', sessionId);
 
         if (participantsError) throw participantsError;
 
-        const participantProfiles = participantsData
-          .map((p: any) => p.profiles)
-          .filter(Boolean) as Profile[];
-        setParticipants(participantProfiles);
+        // Fetch profiles for all participants
+        const userIds = participantsData.map((p: any) => p.user_id);
+
+        if (userIds.length > 0) {
+          const { data: profilesData, error: profilesError } = await supabase
+            .from('profiles')
+            .select('*')
+            .in('id', userIds);
+
+          if (profilesError) throw profilesError;
+          setParticipants(profilesData as Profile[]);
+        } else {
+          setParticipants([]);
+        }
 
         // Fetch all drinks for the session
         const { data: drinksData, error: drinksError } = await supabase
@@ -71,8 +78,9 @@ export function useSession(sessionId: string | null) {
     fetchSessionData();
 
     // Subscribe to real-time drink updates
-    const drinkSubscription = supabase
-      .channel(`drinks:${sessionId}`)
+    const channel = supabase.channel(`drinks:${sessionId}`);
+
+    channel
       .on(
         'postgres_changes',
         {
@@ -82,21 +90,31 @@ export function useSession(sessionId: string | null) {
           filter: `session_id=eq.${sessionId}`,
         },
         (payload) => {
+          console.log('Real-time update received:', payload);
           if (payload.eventType === 'INSERT') {
+            console.log('Adding new drink to state:', payload.new);
             setDrinks((prev) => [payload.new as DrinkEntry, ...prev]);
           } else if (payload.eventType === 'UPDATE') {
+            console.log('Updating drink in state:', payload.new);
             setDrinks((prev) =>
               prev.map((d) => (d.id === payload.new.id ? (payload.new as DrinkEntry) : d))
             );
           } else if (payload.eventType === 'DELETE') {
+            console.log('Removing drink from state:', payload.old);
             setDrinks((prev) => prev.filter((d) => d.id !== payload.old.id));
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Subscription status:', status);
+        if (status === 'SUBSCRIPTION_ERROR') {
+          console.error('Failed to subscribe to real-time updates');
+        }
+      });
 
     return () => {
-      drinkSubscription.unsubscribe();
+      console.log('Cleaning up subscription');
+      supabase.removeChannel(channel);
     };
   }, [sessionId]);
 
@@ -131,18 +149,32 @@ export function useSession(sessionId: string | null) {
 
   // Add a drink
   const addDrink = async (volumeMl: number, alcoholPercentage: number) => {
+    console.log('addDrink called with:', { volumeMl, alcoholPercentage, user, sessionId });
+
     if (!user || !sessionId) {
+      console.error('Validation failed:', { user, sessionId });
       throw new Error('User not authenticated or no session');
     }
 
-    const { error } = await supabase.from('drink_entries').insert({
+    console.log('Attempting to insert drink into database...');
+    const { data, error } = await supabase.from('drink_entries').insert({
       session_id: sessionId,
       user_id: user.id,
       volume_ml: volumeMl,
       alcohol_percentage: alcoholPercentage,
-    });
+    }).select().single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Database error:', error);
+      throw error;
+    }
+
+    console.log('Drink inserted successfully!', data);
+
+    // Optimistically update the local state
+    if (data) {
+      setDrinks((prev) => [data as DrinkEntry, ...prev]);
+    }
   };
 
   // Get current user's BAC
@@ -182,13 +214,17 @@ export function useCreateSession() {
 
     try {
       // Generate session code (done by database function)
-      const { data, error: createError } = await supabase.rpc('generate_session_code');
+      console.log('Calling generate_session_code...');
+      const { data: sessionCode, error: codeError } = await supabase.rpc('generate_session_code');
 
-      if (createError) throw createError;
-
-      const sessionCode = data;
+      console.log('generate_session_code result:', { sessionCode, codeError });
+      if (codeError) {
+        console.error('generate_session_code error:', codeError);
+        throw codeError;
+      }
 
       // Create session
+      console.log('Creating session with code:', sessionCode);
       const { data: sessionData, error: sessionError } = await supabase
         .from('sessions')
         .insert({
@@ -200,9 +236,14 @@ export function useCreateSession() {
         .select()
         .single();
 
-      if (sessionError) throw sessionError;
+      console.log('Session creation result:', { sessionData, sessionError });
+      if (sessionError) {
+        console.error('Session creation error:', sessionError);
+        throw sessionError;
+      }
 
       // Add creator as participant
+      console.log('Adding participant for session:', sessionData.id);
       const { error: participantError } = await supabase
         .from('session_participants')
         .insert({
@@ -210,11 +251,17 @@ export function useCreateSession() {
           user_id: user.id,
         });
 
-      if (participantError) throw participantError;
+      console.log('Participant addition result:', { participantError });
+      if (participantError) {
+        console.error('Participant addition error:', participantError);
+        throw participantError;
+      }
 
+      console.log('Session created successfully!', sessionData);
       setLoading(false);
       return sessionData as Session;
     } catch (err: any) {
+      console.error('Error creating session:', err);
       setError(err.message);
       setLoading(false);
       throw err;
@@ -277,6 +324,7 @@ export function useJoinSession() {
       setLoading(false);
       return sessionData as Session;
     } catch (err: any) {
+      console.error('Error joining session:', err);
       setError(err.message);
       setLoading(false);
       throw err;

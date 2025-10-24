@@ -75,22 +75,27 @@ export function SessionPage() {
 
   const handleAddDrink = async (e: FormEvent) => {
     e.preventDefault();
+    console.log('Add drink clicked!', { volumeMl, alcoholPercentage });
     setSubmitting(true);
     setAddError(null);
 
     if (volumeMl <= 0 || alcoholPercentage < 0) {
+      console.error('Invalid drink values');
       setAddError('Invalid drink values');
       setSubmitting(false);
       return;
     }
 
     try {
+      console.log('Calling addDrink...');
       await addDrink(volumeMl, alcoholPercentage);
+      console.log('Drink added successfully!');
       setSubmitting(false);
       // Reset to defaults
       setVolumeMl(330);
       setAlcoholPercentage(4.5);
     } catch (err: any) {
+      console.error('Error adding drink:', err);
       setAddError(err.message || 'Failed to add drink');
       setSubmitting(false);
     }

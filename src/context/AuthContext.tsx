@@ -22,56 +22,116 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Fetch user profile from database
   const fetchProfile = async (userId: string) => {
     try {
-      const { data, error } = await supabase
+      console.log('fetchProfile: Starting fetch for user:', userId);
+
+      // Add timeout to profile fetch
+      const timeoutPromise = new Promise<null>((resolve) => {
+        setTimeout(() => {
+          console.log('fetchProfile: Timeout after 5 seconds');
+          resolve(null);
+        }, 5000);
+      });
+
+      const fetchPromise = supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single();
+        .single()
+        .then(({ data, error }) => {
+          console.log('fetchProfile: Query completed', { data, error });
+          if (error) {
+            console.error('fetchProfile: Error fetching profile:', error);
+            return null;
+          }
+          return data as Profile;
+        });
 
-      if (error) {
-        console.error('Error fetching profile:', error);
-        return null;
-      }
-
-      return data as Profile;
+      const result = await Promise.race([fetchPromise, timeoutPromise]);
+      console.log('fetchProfile: Returning result:', result);
+      return result;
     } catch (err) {
-      console.error('Exception fetching profile:', err);
+      console.error('fetchProfile: Exception fetching profile:', err);
       return null;
     }
   };
 
   // Initialize auth state
   useEffect(() => {
+    let mounted = true;
+    let sessionLoaded = false;
+
+    console.log('AuthContext: Initializing...');
+
+    // Fallback timeout in case getSession hangs
+    const timeout = setTimeout(() => {
+      if (mounted && !sessionLoaded) {
+        console.log('AuthContext: getSession timed out, setting loading to false');
+        setLoading(false);
+      }
+    }, 3000);
+
     // Get initial session
     supabase.auth.getSession()
       .then(async ({ data: { session } }) => {
+        console.log('AuthContext: Got session:', session?.user?.id);
+        sessionLoaded = true;
+        clearTimeout(timeout);
+        if (!mounted) return;
         setUser(session?.user ?? null);
         if (session?.user) {
+          console.log('AuthContext: Fetching profile for user:', session.user.id);
           const userProfile = await fetchProfile(session.user.id);
-          setProfile(userProfile);
+          console.log('AuthContext: Profile fetched:', userProfile);
+          if (mounted) setProfile(userProfile);
         }
-        setLoading(false);
+        if (mounted) {
+          console.log('AuthContext: Setting loading to false');
+          setLoading(false);
+        }
       })
       .catch((err) => {
-        console.error('Error getting session:', err);
-        setLoading(false);
+        console.error('AuthContext: Error getting session:', err);
+        sessionLoaded = true;
+        clearTimeout(timeout);
+        if (mounted) {
+          setLoading(false);
+        }
       });
 
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      console.log('AuthContext: Auth state changed:', _event, session?.user?.id);
+
+      // If this is the first auth event and session hasn't loaded yet, handle it here
+      if (!sessionLoaded) {
+        sessionLoaded = true;
+        clearTimeout(timeout);
+      }
+
+      if (!mounted) return;
       setUser(session?.user ?? null);
       if (session?.user) {
+        console.log('AuthContext: Fetching profile from auth state change for user:', session.user.id);
         const userProfile = await fetchProfile(session.user.id);
-        setProfile(userProfile);
+        console.log('AuthContext: Profile fetched from auth state change:', userProfile);
+        if (mounted) setProfile(userProfile);
       } else {
-        setProfile(null);
+        if (mounted) setProfile(null);
       }
-      setLoading(false);
+      if (mounted) {
+        console.log('AuthContext: Setting loading to false from auth state change');
+        setLoading(false);
+      }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      console.log('AuthContext: Cleaning up');
+      mounted = false;
+      clearTimeout(timeout);
+      subscription.unsubscribe();
+    };
   }, []);
 
   // Sign up with email and create profile
