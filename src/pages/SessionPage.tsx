@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import type { FormEvent } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSession } from '../hooks/useSession';
 import { useAuth } from '../context/AuthContext';
 import { formatBAC, getBACDescription } from '../utils/bacCalculator';
+import { calculateTotalAlcoholGrams, convertGramsToBeers } from '../utils/chartHelpers';
 import BACLineChart from '../components/charts/BACLineChart';
 import AlcoholConsumptionChart from '../components/charts/AlcoholConsumptionChart';
 import ChartContainer from '../components/charts/ChartContainer';
@@ -84,6 +85,14 @@ export function SessionPage() {
     return () => clearInterval(interval);
   }, [getCurrentUserBAC]);
 
+  // Calculate user's total beer units consumed
+  const userBeerUnits = useMemo(() => {
+    if (!user) return 0;
+    const userDrinks = drinks.filter((d) => d.user_id === user.id);
+    const totalGrams = calculateTotalAlcoholGrams(userDrinks);
+    return convertGramsToBeers(totalGrams);
+  }, [drinks, user]);
+
   const handleAddDrink = async (e: FormEvent) => {
     e.preventDefault();
     console.log('Add drink clicked!', { volumeMl, alcoholPercentage });
@@ -158,6 +167,11 @@ export function SessionPage() {
             <span className="bac-value">{formatBAC(currentUserBAC)}</span>
             <span className="bac-description">{getBACDescription(currentUserBAC)}</span>
           </div>
+          <p className="user-stats">
+            <span className="stat-item">
+              <strong>{userBeerUnits.toFixed(1)}</strong> beer units consumed
+            </span>
+          </p>
           {userLeaderboardEntry && (
             <p className="user-rank">
               Current Rank: #{userLeaderboardEntry.rank}
@@ -353,6 +367,7 @@ export function SessionPage() {
               drinks={drinks}
               view={consumptionView}
               unit={consumptionUnit}
+              currentUserId={user?.id}
             />
           </ChartContainer>
         )}
