@@ -12,7 +12,24 @@ interface AlcoholConsumptionChartProps {
   drinks: DrinkEntry[];
   view: 'per-participant' | 'session-total';
   unit: 'grams' | 'beers';
+  currentUserId?: string; // Optional: to match colors with BAC chart
 }
+
+/**
+ * Color palette matching BACLineChart for consistency
+ */
+const CHART_COLORS = [
+  '#1976d2', // Blue
+  '#d32f2f', // Red
+  '#388e3c', // Green
+  '#f57c00', // Orange
+  '#7b1fa2', // Purple
+  '#0097a7', // Cyan
+  '#c2185b', // Pink
+  '#fbc02d', // Yellow
+  '#5d4037', // Brown
+  '#455a64', // Blue Grey
+];
 
 /**
  * AlcoholConsumptionChart Component
@@ -30,12 +47,27 @@ export default function AlcoholConsumptionChart({
   drinks,
   view,
   unit,
+  currentUserId,
 }: AlcoholConsumptionChartProps) {
   // Prepare chart data based on view mode
   const chartData = useMemo(() => {
     if (view === 'per-participant') {
       // Use helper function to calculate per-participant data
-      return prepareBarChartData(participants, drinks, unit);
+      const data = prepareBarChartData(participants, drinks, unit);
+
+      // Assign colors to match BAC chart
+      return data.map((item, index) => {
+        const participant = participants.find(p => p.full_name === item.participant);
+        let color: string;
+
+        if (currentUserId && participant?.id === currentUserId) {
+          color = '#1976d2'; // Primary blue for current user
+        } else {
+          color = CHART_COLORS[index % CHART_COLORS.length];
+        }
+
+        return { ...item, color };
+      });
     } else {
       // Calculate total session consumption
       const totalGrams = calculateTotalAlcoholGrams(drinks);
@@ -45,10 +77,11 @@ export default function AlcoholConsumptionChart({
         {
           participant: 'Total',
           value: Math.round(value * 100) / 100,
+          color: '#1976d2',
         },
       ];
     }
-  }, [participants, drinks, view, unit]);
+  }, [participants, drinks, view, unit, currentUserId]);
 
   // Format value for display based on unit
   const formatValue = (value: number): string => {
@@ -94,7 +127,26 @@ export default function AlcoholConsumptionChart({
 
   // Prepare data in MUI BarChart format
   const xAxisData = chartData.map((d) => d.participant);
-  const seriesData = chartData.map((d) => d.value);
+
+  // Create individual series for each participant to enable different colors
+  const series = chartData.map((item, index) => {
+    const data = new Array(chartData.length).fill(0);
+    data[index] = item.value;
+
+    return {
+      data: data,
+      label: item.participant,
+      color: item.color,
+      stack: 'total', // Stack them so they appear in same position
+      valueFormatter: (value: number | null) => {
+        if (value === null || value === 0) return '';
+        const formatted = formatValue(value);
+        return unit === 'beers'
+          ? `${formatted} units`
+          : `${formatted}g`;
+      },
+    };
+  });
 
   return (
     <div style={{
@@ -104,10 +156,55 @@ export default function AlcoholConsumptionChart({
       display: 'flex',
       flexDirection: 'column',
     }}>
+      {/* Custom legend for per-participant view */}
+      {view === 'per-participant' && (
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '15px',
+          padding: '8px 0 12px 0',
+        }}>
+          {chartData.map((item) => (
+            <div
+              key={item.participant}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+              }}
+            >
+              <div
+                style={{
+                  width: '10px',
+                  height: '10px',
+                  backgroundColor: item.color,
+                  borderRadius: '2px',
+                }}
+              />
+              <span style={{ fontSize: '13px', fontWeight: 500 }}>
+                {item.participant}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+      {/* Display total value prominently when in session-total view */}
+      {view === 'session-total' && chartData.length > 0 && (
+        <div style={{
+          textAlign: 'center',
+          padding: '16px 0 8px 0',
+          fontSize: '24px',
+          fontWeight: 'bold',
+          color: 'var(--primary-color)',
+        }}>
+          {formatValue(chartData[0].value)} {unit === 'beers' ? 'Beer Units' : 'g'}
+        </div>
+      )}
       <BarChart
         xAxis={[
           {
-            id: 'participant',
             scaleType: 'band',
             data: xAxisData,
             label: view === 'per-participant' ? 'Participant' : '',
@@ -115,7 +212,6 @@ export default function AlcoholConsumptionChart({
         ]}
         yAxis={[
           {
-            id: 'consumption',
             label: yAxisLabel,
             valueFormatter: (value: number | null) => {
               if (value === null) return '';
@@ -123,24 +219,20 @@ export default function AlcoholConsumptionChart({
             },
           },
         ]}
-        series={[
-          {
-            data: seriesData,
-            label: unit === 'beers' ? 'Beer Units' : 'Grams',
-            xAxisId: 'participant',
-            yAxisId: 'consumption',
-            valueFormatter: (value: number | null) => {
-              if (value === null) return '';
-              const formatted = formatValue(value);
-              return unit === 'beers'
-                ? `${formatted} units`
-                : `${formatted}g`;
-            },
-          },
-        ]}
+        series={series}
         margin={{ top: 20, right: 20, bottom: 60, left: 80 }}
         grid={{ vertical: false, horizontal: true }}
         axisHighlight={{ x: 'none', y: 'none' }}
+        barLabel="value"
+        slotProps={{
+          barLabel: {
+            style: {
+              fontSize: '12px',
+              fontWeight: 600,
+              fill: '#fff',
+            },
+          },
+        }}
         slots={{
           legend: () => null,
         }}
