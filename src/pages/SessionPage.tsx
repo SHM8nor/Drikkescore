@@ -33,6 +33,7 @@ export function SessionPage() {
     loading,
     error,
     addDrink,
+    deleteDrink,
     getCurrentUserBAC,
   } = useSession(sessionId || null);
 
@@ -93,6 +94,37 @@ export function SessionPage() {
     return convertGramsToBeers(totalGrams);
   }, [drinks, user]);
 
+  // Find the most recent drink added by current user
+  const lastUserDrink = useMemo(() => {
+    if (!user) return null;
+    const userDrinks = drinks.filter((d) => d.user_id === user.id);
+    if (userDrinks.length === 0) return null;
+    // Drinks are already sorted by consumed_at descending
+    return userDrinks[0];
+  }, [drinks, user]);
+
+  // Check if the last drink can be undone (added within last 2 minutes)
+  const [canUndoLastDrink, setCanUndoLastDrink] = useState(false);
+
+  useEffect(() => {
+    const checkUndoAvailability = () => {
+      if (!lastUserDrink) {
+        setCanUndoLastDrink(false);
+        return;
+      }
+      const drinkTime = new Date(lastUserDrink.consumed_at).getTime();
+      const now = new Date().getTime();
+      const twoMinutesInMs = 2 * 60 * 1000;
+      setCanUndoLastDrink((now - drinkTime) < twoMinutesInMs);
+    };
+
+    checkUndoAvailability(); // Initial check
+
+    const interval = setInterval(checkUndoAvailability, 10000); // Check every 10 seconds
+
+    return () => clearInterval(interval);
+  }, [lastUserDrink]);
+
   const handleAddDrink = async (e: FormEvent) => {
     e.preventDefault();
     console.log('Add drink clicked!', { volumeMl, alcoholPercentage });
@@ -117,6 +149,24 @@ export function SessionPage() {
     } catch (err: any) {
       console.error('Error adding drink:', err);
       setAddError(err.message || 'Failed to add drink');
+      setSubmitting(false);
+    }
+  };
+
+  const handleUndoDrink = async () => {
+    if (!lastUserDrink) return;
+
+    setSubmitting(true);
+    setAddError(null);
+
+    try {
+      console.log('Undoing last drink:', lastUserDrink.id);
+      await deleteDrink(lastUserDrink.id);
+      console.log('Drink undone successfully!');
+      setSubmitting(false);
+    } catch (err: any) {
+      console.error('Error undoing drink:', err);
+      setAddError(err.message || 'Failed to undo drink');
       setSubmitting(false);
     }
   };
@@ -217,6 +267,23 @@ export function SessionPage() {
             <button type="submit" className="btn-primary" disabled={submitting || sessionEnded}>
               {submitting ? 'Legger til...' : 'Legg til enhet'}
             </button>
+
+            {canUndoLastDrink && !sessionEnded && (
+              <button
+                type="button"
+                onClick={handleUndoDrink}
+                className="btn-secondary"
+                disabled={submitting}
+                style={{
+                  marginTop: '8px',
+                  backgroundColor: '#ff9800',
+                  borderColor: '#ff9800',
+                  color: 'white'
+                }}
+              >
+                {submitting ? 'Angrer...' : 'Angre siste enhet'}
+              </button>
+            )}
           </form>
 
           {/* Quick preset buttons */}
