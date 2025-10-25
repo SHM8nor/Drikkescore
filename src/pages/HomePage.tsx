@@ -66,14 +66,12 @@ export function HomePage() {
     <div className="home-page">
       <header className="home-header">
         <h1>Drikkescore</h1>
-        {profile && (
-          <div className="user-info">
-            <span>Welcome, {profile.full_name}</span>
-            <button onClick={handleSignOut} className="btn-secondary">
-              Logout
-            </button>
-          </div>
-        )}
+        <div className="user-info">
+          {profile && <span>Welcome, {profile.full_name}</span>}
+          <button onClick={handleSignOut} className="btn-secondary">
+            Logout
+          </button>
+        </div>
       </header>
 
       <div className="home-content">
