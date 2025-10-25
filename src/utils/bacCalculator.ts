@@ -125,13 +125,13 @@ export function formatBAC(bac: number): string {
  * @returns Description of impairment level
  */
 export function getBACDescription(bac: number): string {
-  if (bac === 0) return 'Sober';
-  if (bac < 0.02) return 'Minimal effects';
-  if (bac < 0.05) return 'Mild impairment';
-  if (bac < 0.08) return 'Reduced coordination';
-  if (bac < 0.15) return 'Significant impairment';
-  if (bac < 0.30) return 'Severe impairment';
-  return 'Life threatening';
+  if (bac === 0) return 'Edru';
+  if (bac < 0.02) return 'Minimale effekter';
+  if (bac < 0.05) return 'Lett påvirket';
+  if (bac < 0.08) return 'Redusert koordinasjon';
+  if (bac < 0.15) return 'Tydelig påvirket';
+  if (bac < 0.30) return 'Kraftig påvirket';
+  return 'Livstruende';
 }
 
 /**

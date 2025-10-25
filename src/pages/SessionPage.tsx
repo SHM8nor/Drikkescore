@@ -122,16 +122,16 @@ export function SessionPage() {
   };
 
   if (loading) {
-    return <div className="loading">Loading session...</div>;
+    return <div className="loading">Laster økt...</div>;
   }
 
   if (error || !session) {
     return (
       <div className="error-page">
-        <h2>Error</h2>
-        <p>{error || 'Session not found'}</p>
+        <h2>Feil</h2>
+        <p>{error || 'Økt ikke funnet'}</p>
         <button onClick={() => navigate('/')} className="btn-primary">
-          Go Home
+          Gå hjem
         </button>
       </div>
     );
@@ -143,55 +143,55 @@ export function SessionPage() {
     <div className="session-page">
       <header className="session-header">
         <div>
-          <h1>Session: {session.session_code}</h1>
+          <h1>Økt: {session.session_code}</h1>
           <p className="session-time">
             {sessionEnded ? (
-              <strong style={{ color: 'var(--danger-color)' }}>Session Ended!</strong>
+              <strong style={{ color: 'var(--danger-color)' }}>Økten er avsluttet!</strong>
             ) : (
               <>
-                <strong>Time Remaining:</strong> {formatTime(timeRemaining)}
+                <strong>Tid gjenstående:</strong> {formatTime(timeRemaining)}
               </>
             )}
           </p>
         </div>
         <button onClick={() => navigate('/')} className="btn-secondary">
-          Leave Session
+          Forlat økt
         </button>
       </header>
 
       <div className="session-content">
         {/* User's current BAC */}
         <div className="user-bac-card">
-          <h2>Your BAC</h2>
+          <h2>Din promille</h2>
           <div className="bac-display">
             <span className="bac-value">{formatBAC(currentUserBAC)}</span>
             <span className="bac-description">{getBACDescription(currentUserBAC)}</span>
           </div>
           <p className="user-stats">
             <span className="stat-item">
-              <strong>{userBeerUnits.toFixed(1)}</strong> beer units consumed
+              <strong>{userBeerUnits.toFixed(1)}</strong> enheter konsumert
             </span>
           </p>
           {userLeaderboardEntry && (
             <p className="user-rank">
-              Current Rank: #{userLeaderboardEntry.rank}
+              Nåværende plassering: #{userLeaderboardEntry.rank}
             </p>
           )}
         </div>
 
         {/* Add drink form */}
         <div className="add-drink-card">
-          <h2>Add Drink</h2>
+          <h2>Legg til enhet</h2>
           {sessionEnded && (
             <div className="error-message" style={{ background: '#fff3cd', color: '#856404', borderColor: '#ffc107' }}>
-              Session has ended. No more drinks can be added.
+              Økten er avsluttet. Flere enheter kan ikke legges til.
             </div>
           )}
           {addError && <div className="error-message">{addError}</div>}
 
           <form onSubmit={handleAddDrink} className="add-drink-form">
             <div className="form-group">
-              <label htmlFor="volume">Volume (ml)</label>
+              <label htmlFor="volume">Volum (ml)</label>
               <input
                 id="volume"
                 type="number"
@@ -203,7 +203,7 @@ export function SessionPage() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="alcohol">Alcohol %</label>
+              <label htmlFor="alcohol">Alkohol %</label>
               <input
                 id="alcohol"
                 type="number"
@@ -215,7 +215,7 @@ export function SessionPage() {
             </div>
 
             <button type="submit" className="btn-primary" disabled={submitting || sessionEnded}>
-              {submitting ? 'Adding...' : 'Add Drink'}
+              {submitting ? 'Legger til...' : 'Legg til enhet'}
             </button>
           </form>
 
@@ -228,7 +228,7 @@ export function SessionPage() {
               }}
               className="preset-btn"
             >
-              Beer (330ml, 4.5%)
+              Øl (330ml, 4.5%)
             </button>
             <button
               onClick={() => {
@@ -246,7 +246,7 @@ export function SessionPage() {
               }}
               className="preset-btn"
             >
-              Wine (150ml, 12%)
+              Vin (150ml, 12%)
             </button>
             <button
               onClick={() => {
@@ -262,7 +262,7 @@ export function SessionPage() {
 
         {/* Leaderboard */}
         <div className="leaderboard-card">
-          <h2>{sessionEnded ? 'Final Highscore' : 'Leaderboard'}</h2>
+          <h2>{sessionEnded ? 'Sluttresultat' : 'Toppliste'}</h2>
           {sessionEnded && leaderboard.length > 0 && (
             <div style={{
               background: 'linear-gradient(135deg, #fff9c4, #fff59d)',
@@ -272,11 +272,11 @@ export function SessionPage() {
               textAlign: 'center',
               fontWeight: 'bold'
             }}>
-              {leaderboard[0]?.full_name} wins with {formatBAC(leaderboard[0]?.bac)}!
+              {leaderboard[0]?.full_name} vinner med {formatBAC(leaderboard[0]?.bac)}!
             </div>
           )}
           {leaderboard.length === 0 ? (
-            <p className="no-data">No participants yet</p>
+            <p className="no-data">Ingen deltakere ennå</p>
           ) : (
             <div className="leaderboard">
               {leaderboard.map((entry) => (
@@ -296,20 +296,20 @@ export function SessionPage() {
         {/* BAC Evolution Chart */}
         {participants.length > 0 && user?.id && (
           <ChartContainer
-            title="BAC Evolution Over Time"
+            title="Promilleutvikling over tid"
             controls={
               <div className="chart-controls">
                 <button
                   className={`preset-btn ${bacView === 'all' ? 'active' : ''}`}
                   onClick={() => setBacView('all')}
                 >
-                  All Participants
+                  Alle deltakere
                 </button>
                 <button
                   className={`preset-btn ${bacView === 'self' ? 'active' : ''}`}
                   onClick={() => setBacView('self')}
                 >
-                  My BAC
+                  Min promille
                 </button>
               </div>
             }
@@ -328,7 +328,7 @@ export function SessionPage() {
         {/* Alcohol Consumption Chart */}
         {participants.length > 0 && (
           <ChartContainer
-            title="Alcohol Consumption"
+            title="Alkoholforbruk"
             controls={
               <div className="chart-controls">
                 <div style={{ display: 'flex', gap: '8px' }}>
@@ -336,13 +336,13 @@ export function SessionPage() {
                     className={`preset-btn ${consumptionView === 'per-participant' ? 'active' : ''}`}
                     onClick={() => setConsumptionView('per-participant')}
                   >
-                    Per Participant
+                    Per deltaker
                   </button>
                   <button
                     className={`preset-btn ${consumptionView === 'session-total' ? 'active' : ''}`}
                     onClick={() => setConsumptionView('session-total')}
                   >
-                    Session Total
+                    Totalt for økt
                   </button>
                 </div>
                 <div style={{ display: 'flex', gap: '8px' }}>
@@ -350,13 +350,13 @@ export function SessionPage() {
                     className={`preset-btn ${consumptionUnit === 'beers' ? 'active' : ''}`}
                     onClick={() => setConsumptionUnit('beers')}
                   >
-                    Beer Units
+                    Antall enheter
                   </button>
                   <button
                     className={`preset-btn ${consumptionUnit === 'grams' ? 'active' : ''}`}
                     onClick={() => setConsumptionUnit('grams')}
                   >
-                    Grams
+                    Gram
                   </button>
                 </div>
               </div>

@@ -24,7 +24,7 @@ export function HomePage() {
     setError(null);
 
     if (!duration || duration <= 0) {
-      setError('Please select a session duration');
+      setError('Vennligst velg en øktvarighet');
       return;
     }
 
@@ -36,7 +36,7 @@ export function HomePage() {
       const session = await createSession(start, end);
       navigate(`/session/${session.id}`);
     } catch (err: any) {
-      setError(err.message || 'Failed to create session');
+      setError(err.message || 'Kunne ikke opprette økt');
     }
   };
 
@@ -45,7 +45,7 @@ export function HomePage() {
     setError(null);
 
     if (!sessionCode.trim()) {
-      setError('Please enter a session code');
+      setError('Vennligst skriv inn en øktkode');
       return;
     }
 
@@ -53,7 +53,7 @@ export function HomePage() {
       const session = await joinSession(sessionCode.toUpperCase().trim());
       navigate(`/session/${session.id}`);
     } catch (err: any) {
-      setError(err.message || 'Failed to join session');
+      setError(err.message || 'Kunne ikke bli med i økt');
     }
   };
 
@@ -67,9 +67,9 @@ export function HomePage() {
       <header className="home-header">
         <h1>Drikkescore</h1>
         <div className="user-info">
-          {profile && <span>Welcome, {profile.full_name}</span>}
+          {profile && <span>Velkommen, {profile.full_name}</span>}
           <button onClick={handleSignOut} className="btn-secondary">
-            Logout
+            Logg ut
           </button>
         </div>
       </header>
@@ -84,7 +84,7 @@ export function HomePage() {
                 setError(null);
               }}
             >
-              Create Session
+              Opprett økt
             </button>
             <button
               className={`tab ${activeTab === 'join' ? 'active' : ''}`}
@@ -93,7 +93,7 @@ export function HomePage() {
                 setError(null);
               }}
             >
-              Join Session
+              Bli med i økt
             </button>
           </div>
 
@@ -101,45 +101,45 @@ export function HomePage() {
 
           {activeTab === 'create' ? (
             <form onSubmit={handleCreateSession} className="session-form">
-              <h2>Create New Session</h2>
+              <h2>Opprett ny økt</h2>
               <p className="form-description">
-                Choose how long your drinking session will last
+                Velg hvor lenge drikkeøkten skal vare
               </p>
 
               <div className="form-group">
-                <label htmlFor="duration">Session Duration</label>
+                <label htmlFor="duration">Øktvarighet</label>
                 <select
                   id="duration"
                   value={duration}
                   onChange={(e) => setDuration(parseInt(e.target.value))}
                   required
                 >
-                  <option value={1}>1 minute (testing)</option>
-                  <option value={30}>30 minutes</option>
-                  <option value={60}>1 hour</option>
-                  <option value={90}>1.5 hours</option>
-                  <option value={120}>2 hours</option>
-                  <option value={150}>2.5 hours</option>
-                  <option value={180}>3 hours</option>
-                  <option value={240}>4 hours</option>
-                  <option value={300}>5 hours</option>
-                  <option value={360}>6 hours</option>
+                  <option value={1}>1 minutt (testing)</option>
+                  <option value={30}>30 minutter</option>
+                  <option value={60}>1 time</option>
+                  <option value={90}>1,5 timer</option>
+                  <option value={120}>2 timer</option>
+                  <option value={150}>2,5 timer</option>
+                  <option value={180}>3 timer</option>
+                  <option value={240}>4 timer</option>
+                  <option value={300}>5 timer</option>
+                  <option value={360}>6 timer</option>
                 </select>
               </div>
 
               <button type="submit" className="btn-primary" disabled={createLoading}>
-                {createLoading ? 'Creating...' : 'Create Session'}
+                {createLoading ? 'Oppretter...' : 'Opprett økt'}
               </button>
             </form>
           ) : (
             <form onSubmit={handleJoinSession} className="session-form">
-              <h2>Join Existing Session</h2>
+              <h2>Bli med i eksisterende økt</h2>
               <p className="form-description">
-                Enter the 6-character session code to join
+                Skriv inn 6-tegns øktkoden for å bli med
               </p>
 
               <div className="form-group">
-                <label htmlFor="session_code">Session Code</label>
+                <label htmlFor="session_code">Øktkode</label>
                 <input
                   id="session_code"
                   type="text"
@@ -153,7 +153,7 @@ export function HomePage() {
               </div>
 
               <button type="submit" className="btn-primary" disabled={joinLoading}>
-                {joinLoading ? 'Joining...' : 'Join Session'}
+                {joinLoading ? 'Blir med...' : 'Bli med i økt'}
               </button>
             </form>
           )}

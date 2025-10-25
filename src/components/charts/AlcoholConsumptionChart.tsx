@@ -92,7 +92,7 @@ export default function AlcoholConsumptionChart({
   };
 
   // Get axis label based on unit
-  const yAxisLabel = unit === 'beers' ? 'Beer Units' : 'Pure Alcohol (g)';
+  const yAxisLabel = unit === 'beers' ? 'Antall enheter' : 'Rent alkohol (g)';
 
   // Handle edge cases
   if (participants.length === 0) {
@@ -105,7 +105,7 @@ export default function AlcoholConsumptionChart({
         color: 'var(--color-text-secondary)',
         fontSize: '14px',
       }}>
-        No participants in this session
+        Ingen deltakere i denne økten
       </div>
     );
   }
@@ -120,7 +120,7 @@ export default function AlcoholConsumptionChart({
         color: 'var(--color-text-secondary)',
         fontSize: '14px',
       }}>
-        No drinks recorded yet
+        Ingen enheter registrert ennå
       </div>
     );
   }
@@ -199,7 +199,7 @@ export default function AlcoholConsumptionChart({
           fontWeight: 'bold',
           color: 'var(--primary-color)',
         }}>
-          {formatValue(chartData[0].value)} {unit === 'beers' ? 'Beer Units' : 'g'}
+          {formatValue(chartData[0].value)} {unit === 'beers' ? 'enheter' : 'g'}
         </div>
       )}
       <BarChart
