@@ -23,7 +23,7 @@ export function useSession(sessionId: string | null) {
       return;
     }
 
-    const fetchSessionData = async () => {
+    const fetchSessionData = async (isInitialLoad = false) => {
       try {
         // Fetch session
         const { data: sessionData, error: sessionError } = await supabase
@@ -43,8 +43,11 @@ export function useSession(sessionId: string | null) {
 
         if (participantsError) throw participantsError;
 
+        console.log('Fetched participants:', participantsData);
+
         // Fetch profiles for all participants
         const userIds = participantsData.map((p: any) => p.user_id);
+        console.log('User IDs to fetch profiles for:', userIds);
 
         if (userIds.length > 0) {
           const { data: profilesData, error: profilesError } = await supabase
@@ -52,7 +55,12 @@ export function useSession(sessionId: string | null) {
             .select('*')
             .in('id', userIds);
 
-          if (profilesError) throw profilesError;
+          console.log('Fetched profiles:', profilesData, 'Error:', profilesError);
+
+          if (profilesError) {
+            console.error('Profile fetch error:', profilesError);
+            throw profilesError;
+          }
           setParticipants(profilesData as Profile[]);
         } else {
           setParticipants([]);
@@ -68,49 +76,90 @@ export function useSession(sessionId: string | null) {
         if (drinksError) throw drinksError;
         setDrinks(drinksData);
 
-        setLoading(false);
+        if (isInitialLoad) {
+          setLoading(false);
+        }
       } catch (err: any) {
         setError(err.message);
-        setLoading(false);
+        if (isInitialLoad) {
+          setLoading(false);
+        }
       }
     };
 
-    fetchSessionData();
+    fetchSessionData(true);
 
-    // Subscribe to real-time drink updates
-    const channel = supabase.channel(`drinks:${sessionId}`);
+    // Poll for updates every 5 seconds as a fallback
+    const pollInterval = setInterval(() => {
+      fetchSessionData(false);
+    }, 5000);
 
-    channel
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'drink_entries',
-          filter: `session_id=eq.${sessionId}`,
-        },
-        (payload) => {
-          console.log('Real-time update received:', payload);
-          if (payload.eventType === 'INSERT') {
-            console.log('Adding new drink to state:', payload.new);
-            setDrinks((prev) => [payload.new as DrinkEntry, ...prev]);
-          } else if (payload.eventType === 'UPDATE') {
-            console.log('Updating drink in state:', payload.new);
-            setDrinks((prev) =>
-              prev.map((d) => (d.id === payload.new.id ? (payload.new as DrinkEntry) : d))
-            );
-          } else if (payload.eventType === 'DELETE') {
-            console.log('Removing drink from state:', payload.old);
-            setDrinks((prev) => prev.filter((d) => d.id !== payload.old.id));
-          }
+    // Subscribe to real-time updates for drinks and participants
+    const channel = supabase.channel(`session:${sessionId}`);
+
+    // Subscribe to drink updates
+    channel.on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'drink_entries',
+        filter: `session_id=eq.${sessionId}`,
+      },
+      (payload) => {
+        console.log('Real-time drink update received:', payload);
+        if (payload.eventType === 'INSERT') {
+          console.log('Adding new drink to state:', payload.new);
+          setDrinks((prev) => [payload.new as DrinkEntry, ...prev]);
+        } else if (payload.eventType === 'UPDATE') {
+          console.log('Updating drink in state:', payload.new);
+          setDrinks((prev) =>
+            prev.map((d) => (d.id === payload.new.id ? (payload.new as DrinkEntry) : d))
+          );
+        } else if (payload.eventType === 'DELETE') {
+          console.log('Removing drink from state:', payload.old);
+          setDrinks((prev) => prev.filter((d) => d.id !== payload.old.id));
         }
-      )
-      .subscribe((status) => {
-        console.log('Subscription status:', status);
-      });
+      }
+    );
+
+    // Subscribe to participant updates
+    channel.on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'session_participants',
+        filter: `session_id=eq.${sessionId}`,
+      },
+      async (payload) => {
+        console.log('Real-time participant update received:', payload);
+        if (payload.eventType === 'INSERT') {
+          // Fetch the new participant's profile
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', payload.new.user_id)
+            .single();
+
+          if (!profileError && profileData) {
+            console.log('Adding new participant to state:', profileData);
+            setParticipants((prev) => [...prev, profileData as Profile]);
+          }
+        } else if (payload.eventType === 'DELETE') {
+          console.log('Removing participant from state:', payload.old);
+          setParticipants((prev) => prev.filter((p) => p.id !== payload.old.user_id));
+        }
+      }
+    );
+
+    channel.subscribe((status) => {
+      console.log('Subscription status:', status);
+    });
 
     return () => {
-      console.log('Cleaning up subscription');
+      console.log('Cleaning up subscription and polling');
+      clearInterval(pollInterval);
       supabase.removeChannel(channel);
     };
   }, [sessionId]);
@@ -167,11 +216,7 @@ export function useSession(sessionId: string | null) {
     }
 
     console.log('Drink inserted successfully!', data);
-
-    // Optimistically update the local state
-    if (data) {
-      setDrinks((prev) => [data as DrinkEntry, ...prev]);
-    }
+    // Note: Polling will update the drinks list automatically
   };
 
   // Get current user's BAC

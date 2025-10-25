@@ -134,6 +134,11 @@ export default function BACLineChart({
         }]}
         series={seriesConfig}
         margin={{ top: 50, right: 20, bottom: 60, left: 80 }}
+        grid={{ vertical: false, horizontal: true }}
+        axisHighlight={{ x: 'none', y: 'none' }}
+        slots={{
+          legend: () => null,
+        }}
         sx={{
           width: '100%',
           height: '100%',
