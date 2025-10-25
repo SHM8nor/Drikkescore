@@ -100,7 +100,7 @@ export default function BACLineChart({
           fontSize: '14px',
         }}
       >
-        No BAC data available yet. Add some drinks to see the chart!
+        Ingen promilledata tilgjengelig ennå. Legg til noen enheter for å se grafen!
       </div>
     );
   }
@@ -139,12 +139,12 @@ export default function BACLineChart({
       <LineChart
         xAxis={[{
           data: xAxisData,
-          label: 'Time (minutes)',
+          label: 'Tid (minutter)',
           min: 0,
           max: chartData.sessionDurationMinutes,
         }]}
         yAxis={[{
-          label: 'BAC %',
+          label: 'Promille %',
           min: 0,
         }]}
         series={seriesConfig}

@@ -27,19 +27,19 @@ export function RegisterPage() {
 
     // Validation
     if (!formData.email || !formData.password || !formData.full_name) {
-      setError('Please fill in all required fields');
+      setError('Vennligst fyll inn alle obligatoriske felt');
       setLoading(false);
       return;
     }
 
     if (formData.weight_kg <= 0 || formData.height_cm <= 0) {
-      setError('Weight and height must be positive numbers');
+      setError('Vekt og høyde må være positive tall');
       setLoading(false);
       return;
     }
 
     if (formData.age < 18) {
-      setError('You must be at least 18 years old');
+      setError('Du må være minst 18 år gammel');
       setLoading(false);
       return;
     }
@@ -56,7 +56,7 @@ export function RegisterPage() {
       // Success - redirect to home
       navigate('/');
     } catch (err: any) {
-      setError(err.message || 'Failed to register');
+      setError(err.message || 'Kunne ikke registrere');
       setLoading(false);
     }
   };
@@ -64,14 +64,14 @@ export function RegisterPage() {
   return (
     <div className="auth-page">
       <div className="auth-container">
-        <h1>Create Account</h1>
-        <p className="auth-subtitle">Register to start tracking your BAC</p>
+        <h1>Opprett konto</h1>
+        <p className="auth-subtitle">Registrer deg for å begynne å spore promillen din</p>
 
         {error && <div className="error-message">{error}</div>}
 
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email">E-post</label>
             <input
               id="email"
               type="email"
@@ -82,7 +82,7 @@ export function RegisterPage() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password">Passord</label>
             <input
               id="password"
               type="password"
@@ -94,7 +94,7 @@ export function RegisterPage() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="full_name">Full Name</label>
+            <label htmlFor="full_name">Fullt navn</label>
             <input
               id="full_name"
               type="text"
@@ -106,7 +106,7 @@ export function RegisterPage() {
 
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="weight_kg">Weight (kg)</label>
+              <label htmlFor="weight_kg">Vekt (kg)</label>
               <input
                 id="weight_kg"
                 type="number"
@@ -118,7 +118,7 @@ export function RegisterPage() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="height_cm">Height (cm)</label>
+              <label htmlFor="height_cm">Høyde (cm)</label>
               <input
                 id="height_cm"
                 type="number"
@@ -132,20 +132,20 @@ export function RegisterPage() {
 
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="gender">Gender</label>
+              <label htmlFor="gender">Kjønn</label>
               <select
                 id="gender"
                 value={formData.gender}
                 onChange={(e) => setFormData({ ...formData, gender: e.target.value as Gender })}
                 required
               >
-                <option value="male">Male</option>
-                <option value="female">Female</option>
+                <option value="male">Mann</option>
+                <option value="female">Kvinne</option>
               </select>
             </div>
 
             <div className="form-group">
-              <label htmlFor="age">Age</label>
+              <label htmlFor="age">Alder</label>
               <input
                 id="age"
                 type="number"
@@ -159,12 +159,12 @@ export function RegisterPage() {
           </div>
 
           <button type="submit" className="btn-primary" disabled={loading}>
-            {loading ? 'Creating account...' : 'Register'}
+            {loading ? 'Oppretter konto...' : 'Registrer'}
           </button>
         </form>
 
         <p className="auth-footer">
-          Already have an account? <Link to="/login">Login here</Link>
+          Har du allerede en konto? <Link to="/login">Logg inn her</Link>
         </p>
       </div>
     </div>

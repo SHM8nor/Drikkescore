@@ -18,7 +18,7 @@ export function LoginPage() {
     setError(null);
 
     if (!email || !password) {
-      setError('Please fill in all fields');
+      setError('Vennligst fyll inn alle felt');
       setLoading(false);
       return;
     }
@@ -35,7 +35,7 @@ export function LoginPage() {
       // Success - redirect to home
       navigate('/');
     } catch (err: any) {
-      setError(err.message || 'Failed to login');
+      setError(err.message || 'Kunne ikke logge inn');
       setLoading(false);
     }
   };
@@ -43,14 +43,14 @@ export function LoginPage() {
   return (
     <div className="auth-page">
       <div className="auth-container">
-        <h1>Welcome Back</h1>
-        <p className="auth-subtitle">Login to continue tracking</p>
+        <h1>Velkommen tilbake</h1>
+        <p className="auth-subtitle">Logg inn for å fortsette</p>
 
         {error && <div className="error-message">{error}</div>}
 
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email">E-post</label>
             <input
               id="email"
               type="email"
@@ -62,7 +62,7 @@ export function LoginPage() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password">Passord</label>
             <input
               id="password"
               type="password"
@@ -73,12 +73,12 @@ export function LoginPage() {
           </div>
 
           <button type="submit" className="btn-primary" disabled={loading}>
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? 'Logger inn...' : 'Logg inn'}
           </button>
         </form>
 
         <p className="auth-footer">
-          Don't have an account? <Link to="/register">Register here</Link>
+          Har du ikke en konto? <Link to="/register">Registrer deg her</Link>
         </p>
       </div>
     </div>
