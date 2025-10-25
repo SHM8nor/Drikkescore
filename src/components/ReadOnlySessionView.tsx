@@ -55,78 +55,239 @@ export function ReadOnlySessionView({ session, participants, drinks }: ReadOnlyS
   }, [drinks, participants, user, session.end_time, leaderboard]);
 
   return (
-    <div className="readonly-session-view">
-      <div className="session-info">
-        <h2>{session.session_name || 'Økt'}</h2>
-        <p>Kode: {session.session_code}</p>
-        <p>Startet: {new Date(session.start_time).toLocaleString('no-NO')}</p>
-        <p>Avsluttet: {new Date(session.end_time).toLocaleString('no-NO')}</p>
+    <div className="readonly-session-view" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <div className="session-info-card" style={{
+        background: 'white',
+        padding: '1.5rem',
+        borderRadius: '8px',
+        boxShadow: '0 2px 8px rgba(0, 48, 73, 0.1)'
+      }}>
+        <h2 style={{ marginBottom: '1.5rem', color: '#003049' }}>
+          {session.session_name || 'Økt'}
+        </h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <strong style={{ color: '#003049', minWidth: '90px' }}>Kode:</strong>
+            <span style={{
+              color: '#003049',
+              background: '#eae2b7',
+              padding: '0.25rem 0.75rem',
+              borderRadius: '4px',
+              fontWeight: '500'
+            }}>
+              {session.session_code}
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <strong style={{ color: '#003049', minWidth: '90px' }}>Startet:</strong>
+            <span style={{ color: '#003049' }}>
+              {new Date(session.start_time).toLocaleString('no-NO', {
+                dateStyle: 'short',
+                timeStyle: 'short'
+              })}
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <strong style={{ color: '#003049', minWidth: '90px' }}>Avsluttet:</strong>
+            <span style={{ color: '#003049' }}>
+              {new Date(session.end_time).toLocaleString('no-NO', {
+                dateStyle: 'short',
+                timeStyle: 'short'
+              })}
+            </span>
+          </div>
+        </div>
       </div>
 
       {user && participants.find((p) => p.id === user.id) && (
-        <div className="user-stats-card">
-          <h3>Dine resultater</h3>
-          <div className="stats-grid">
-            <div className="stat-item">
-              <span className="stat-label">Sluttresultat</span>
-              <span className="stat-value">{formatBAC(userStats.bac)}</span>
-              <span className="stat-description">{getBACDescription(userStats.bac)}</span>
+        <div className="user-stats-card" style={{
+          background: 'white',
+          padding: '1.5rem',
+          borderRadius: '8px',
+          boxShadow: '0 2px 8px rgba(0, 48, 73, 0.1)'
+        }}>
+          <h3 style={{ marginBottom: '1.5rem', color: '#003049' }}>Dine resultater</h3>
+          <div className="stats-grid" style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+            gap: '1.5rem'
+          }}>
+            <div className="stat-item" style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.5rem',
+              padding: '1rem',
+              background: '#eae2b7',
+              borderRadius: '6px',
+              borderLeft: '4px solid #f77f00'
+            }}>
+              <span className="stat-label" style={{ fontSize: '0.875rem', color: '#003049', opacity: 0.8 }}>
+                Sluttresultat
+              </span>
+              <span className="stat-value" style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#003049' }}>
+                {formatBAC(userStats.bac)}
+              </span>
+              <span className="stat-description" style={{ fontSize: '0.875rem', color: '#003049' }}>
+                {getBACDescription(userStats.bac)}
+              </span>
             </div>
-            <div className="stat-item">
-              <span className="stat-label">Enheter konsumert</span>
-              <span className="stat-value">{userStats.beerUnits.toFixed(1)}</span>
+            <div className="stat-item" style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.5rem',
+              padding: '1rem',
+              background: '#eae2b7',
+              borderRadius: '6px',
+              borderLeft: '4px solid #f77f00'
+            }}>
+              <span className="stat-label" style={{ fontSize: '0.875rem', color: '#003049', opacity: 0.8 }}>
+                Enheter konsumert
+              </span>
+              <span className="stat-value" style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#003049' }}>
+                {userStats.beerUnits.toFixed(1)}
+              </span>
             </div>
-            <div className="stat-item">
-              <span className="stat-label">Plassering</span>
-              <span className="stat-value">#{userStats.rank}</span>
+            <div className="stat-item" style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.5rem',
+              padding: '1rem',
+              background: '#eae2b7',
+              borderRadius: '6px',
+              borderLeft: '4px solid #f77f00'
+            }}>
+              <span className="stat-label" style={{ fontSize: '0.875rem', color: '#003049', opacity: 0.8 }}>
+                Plassering
+              </span>
+              <span className="stat-value" style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#003049' }}>
+                #{userStats.rank}
+              </span>
             </div>
           </div>
         </div>
       )}
 
-      <div className="leaderboard-card">
-        <h3>Sluttresultat</h3>
+      <div className="leaderboard-card" style={{
+        background: 'white',
+        padding: '1.5rem',
+        borderRadius: '8px',
+        boxShadow: '0 2px 8px rgba(0, 48, 73, 0.1)'
+      }}>
+        <h3 style={{ marginBottom: '1.5rem', color: '#003049' }}>Sluttresultat</h3>
         {leaderboard.length > 0 && (
           <div style={{
-            background: 'linear-gradient(135deg, #fff9c4, #fff59d)',
-            padding: '12px',
-            borderRadius: '6px',
-            marginBottom: '16px',
+            background: 'linear-gradient(135deg, #fcbf49, #f77f00)',
+            padding: '1rem',
+            borderRadius: '8px',
+            marginBottom: '1.5rem',
             textAlign: 'center',
-            fontWeight: 'bold'
+            fontWeight: 'bold',
+            color: '#003049',
+            fontSize: '1.125rem',
+            boxShadow: '0 2px 4px rgba(0, 48, 73, 0.1)'
           }}>
             {leaderboard[0]?.full_name} vant med {formatBAC(leaderboard[0]?.bac)}!
           </div>
         )}
         {leaderboard.length === 0 ? (
-          <p className="no-data">Ingen deltakere</p>
+          <p className="no-data" style={{ textAlign: 'center', color: '#003049', opacity: 0.6 }}>
+            Ingen deltakere
+          </p>
         ) : (
-          <div className="leaderboard">
-            {leaderboard.map((entry) => (
+          <div className="leaderboard" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {leaderboard.map((entry, index) => (
               <div
                 key={entry.user_id}
                 className="leaderboard-entry"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '1rem',
+                  background: index === 0 ? '#fcbf49' : '#eae2b7',
+                  borderRadius: '6px',
+                  gap: '1rem',
+                  transition: 'transform 0.2s',
+                  cursor: 'default',
+                  border: index === 0 ? '2px solid #f77f00' : 'none'
+                }}
               >
-                <span className="rank">#{entry.rank}</span>
-                <span className="name">{entry.full_name}</span>
-                <span className="bac">{formatBAC(entry.bac)}</span>
+                <span className="rank" style={{
+                  fontWeight: 'bold',
+                  color: '#003049',
+                  minWidth: '40px',
+                  fontSize: '1.125rem'
+                }}>
+                  #{entry.rank}
+                </span>
+                <span className="name" style={{
+                  flex: 1,
+                  color: '#003049',
+                  fontWeight: index === 0 ? 'bold' : 'normal',
+                  fontSize: index === 0 ? '1.125rem' : '1rem'
+                }}>
+                  {entry.full_name}
+                </span>
+                <span className="bac" style={{
+                  fontWeight: 'bold',
+                  color: '#003049',
+                  fontSize: '1.125rem',
+                  background: index === 0 ? '#f77f00' : '#fcbf49',
+                  padding: '0.25rem 0.75rem',
+                  borderRadius: '4px'
+                }}>
+                  {formatBAC(entry.bac)}
+                </span>
               </div>
             ))}
           </div>
         )}
       </div>
 
-      <div className="participants-card">
-        <h3>Deltakere ({participants.length})</h3>
-        <div className="participants-list">
-          {participants.map((participant) => (
-            <div key={participant.id} className="participant-item">
-              <span>{participant.full_name}</span>
-              <span className="participant-drinks">
-                {drinks.filter((d) => d.user_id === participant.id).length} enheter
-              </span>
-            </div>
-          ))}
+      <div className="participants-card" style={{
+        background: 'white',
+        padding: '1.5rem',
+        borderRadius: '8px',
+        boxShadow: '0 2px 8px rgba(0, 48, 73, 0.1)'
+      }}>
+        <h3 style={{ marginBottom: '1.5rem', color: '#003049' }}>
+          Deltakere ({participants.length})
+        </h3>
+        <div className="participants-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          {participants.map((participant) => {
+            const drinkCount = drinks.filter((d) => d.user_id === participant.id).length;
+            return (
+              <div
+                key={participant.id}
+                className="participant-item"
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '1rem',
+                  background: '#eae2b7',
+                  borderRadius: '6px',
+                  gap: '1rem'
+                }}
+              >
+                <span style={{ color: '#003049', fontWeight: '500' }}>
+                  {participant.full_name}
+                </span>
+                <span
+                  className="participant-drinks"
+                  style={{
+                    color: '#003049',
+                    background: '#fcbf49',
+                    padding: '0.25rem 0.75rem',
+                    borderRadius: '4px',
+                    fontSize: '0.875rem',
+                    fontWeight: '500'
+                  }}
+                >
+                  {drinkCount} {drinkCount === 1 ? 'enhet' : 'enheter'}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
