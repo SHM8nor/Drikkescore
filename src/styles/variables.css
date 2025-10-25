@@ -1,0 +1,226 @@
+/**
+ * Drikkescore Design System Variables
+ *
+ * All design tokens for the application.
+ * Based on the official design system: guidelines/DESIGN_SYSTEM.md
+ */
+
+:root {
+  /* ========================================
+     PRIMARY COLOR PALETTE
+     ======================================== */
+
+  --prussian-blue: #003049;
+  --fire-engine-red: #d62828;
+  --orange-wheel: #f77f00;
+  --xanthous: #fcbf49;
+  --vanilla: #eae2b7;
+
+  /* Color Variations - Prussian Blue */
+  --prussian-blue-light: #004d73;
+  --prussian-blue-dark: #002333;
+  --prussian-blue-bg: rgba(0, 48, 73, 0.1);
+
+  /* Color Variations - Fire Engine Red */
+  --fire-engine-red-light: #e85d5d;
+  --fire-engine-red-dark: #a61f1f;
+  --fire-engine-red-bg: rgba(214, 40, 40, 0.1);
+
+  /* Color Variations - Orange Wheel */
+  --orange-wheel-light: #ff9533;
+  --orange-wheel-dark: #c66200;
+  --orange-wheel-bg: rgba(247, 127, 0, 0.1);
+
+  /* Color Variations - Xanthous */
+  --xanthous-light: #ffd56f;
+  --xanthous-dark: #d9a03a;
+  --xanthous-bg: rgba(252, 191, 73, 0.1);
+
+  /* Color Variations - Vanilla */
+  --vanilla-light: #f5f0e0;
+  --vanilla-dark: #d4cba5;
+
+  /* ========================================
+     SEMANTIC COLOR MAPPINGS
+     ======================================== */
+
+  --color-primary: var(--prussian-blue);
+  --color-primary-dark: var(--prussian-blue-dark);
+  --color-secondary: var(--orange-wheel);
+  --color-accent: var(--xanthous);
+  --color-danger: var(--fire-engine-red);
+  --color-success: #047857;
+  --color-warning: var(--xanthous-dark);
+  --color-info: var(--prussian-blue-light);
+
+  /* ========================================
+     NEUTRAL COLORS
+     ======================================== */
+
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1f2937;
+  --color-gray-900: #111827;
+
+  /* ========================================
+     TEXT COLORS
+     ======================================== */
+
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #4a4a4a;
+  --color-text-muted: #6b6b6b;
+  --color-text-disabled: #9ca3af;
+  --color-text-inverse: #ffffff;
+
+  /* ========================================
+     BACKGROUND COLORS
+     ======================================== */
+
+  --color-background-primary: #ffffff;
+  --color-background-secondary: var(--vanilla);
+  --color-background-tertiary: #f5f5f5;
+  --color-background-dark: #1a1a1a;
+
+  /* ========================================
+     BORDER COLORS
+     ======================================== */
+
+  --color-border: #d4d4d4;
+  --color-border-light: #e5e7eb;
+  --color-border-dark: #9ca3af;
+  --color-border-focus: var(--prussian-blue);
+
+  /* ========================================
+     TYPOGRAPHY
+     ======================================== */
+
+  /* Font Families */
+  --font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
+    'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  --font-family-mono: 'Monaco', 'Courier New', monospace;
+
+  /* Font Weights */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Font Sizes */
+  --font-size-h1: 2.5rem;      /* 40px */
+  --font-size-h2: 2rem;        /* 32px */
+  --font-size-h3: 1.75rem;     /* 28px */
+  --font-size-h4: 1.5rem;      /* 24px */
+  --font-size-h5: 1.25rem;     /* 20px */
+  --font-size-h6: 1rem;        /* 16px */
+  --font-size-base: 1rem;      /* 16px */
+  --font-size-small: 0.875rem; /* 14px */
+  --font-size-tiny: 0.75rem;   /* 12px */
+
+  /* Line Heights */
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* ========================================
+     SPACING
+     ======================================== */
+
+  --spacing-xs: 0.25rem;   /* 4px */
+  --spacing-sm: 0.5rem;    /* 8px */
+  --spacing-md: 1rem;      /* 16px */
+  --spacing-lg: 1.5rem;    /* 24px */
+  --spacing-xl: 2rem;      /* 32px */
+  --spacing-2xl: 3rem;     /* 48px */
+  --spacing-3xl: 4rem;     /* 64px */
+  --spacing-4xl: 6rem;     /* 96px */
+
+  /* ========================================
+     BORDER RADIUS
+     ======================================== */
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  /* ========================================
+     SHADOWS
+     ======================================== */
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+  --shadow-2xl: 0 25px 50px rgba(0, 0, 0, 0.25);
+  --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+
+  /* ========================================
+     Z-INDEX
+     ======================================== */
+
+  --z-index-base: 0;
+  --z-index-dropdown: 100;
+  --z-index-sticky: 200;
+  --z-index-fixed: 300;
+  --z-index-modal-backdrop: 400;
+  --z-index-modal: 500;
+  --z-index-popover: 600;
+  --z-index-tooltip: 700;
+
+  /* ========================================
+     TRANSITIONS
+     ======================================== */
+
+  --transition-fast: 150ms ease-in-out;
+  --transition-base: 250ms ease-in-out;
+  --transition-slow: 350ms ease-in-out;
+  --transition-slower: 500ms ease-in-out;
+
+  /* ========================================
+     COMPONENT-SPECIFIC
+     ======================================== */
+
+  /* Buttons */
+  --button-padding-y: var(--spacing-sm);
+  --button-padding-x: var(--spacing-md);
+  --button-border-radius: var(--radius-sm);
+  --button-font-weight: var(--font-weight-medium);
+
+  /* Inputs */
+  --input-padding-y: var(--spacing-sm);
+  --input-padding-x: var(--spacing-md);
+  --input-border-radius: var(--radius-sm);
+  --input-border-color: var(--color-border);
+  --input-focus-border-color: var(--prussian-blue);
+  --input-focus-shadow: 0 0 0 3px var(--prussian-blue-bg);
+
+  /* Cards */
+  --card-padding: var(--spacing-lg);
+  --card-border-radius: var(--radius-md);
+  --card-shadow: var(--shadow-sm);
+  --card-border-color: var(--color-border);
+
+  /* Navbar */
+  --navbar-height: 64px;
+  --navbar-padding: var(--spacing-md);
+  --navbar-background: var(--prussian-blue);
+
+  /* ========================================
+     GRADIENTS (Optional - for future use)
+     ======================================== */
+
+  --gradient-primary: linear-gradient(135deg, var(--prussian-blue), var(--prussian-blue-light));
+  --gradient-secondary: linear-gradient(135deg, var(--orange-wheel), var(--xanthous));
+  --gradient-danger: linear-gradient(135deg, var(--fire-engine-red), var(--fire-engine-red-dark));
+}

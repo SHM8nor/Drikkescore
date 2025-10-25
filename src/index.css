@@ -1,12 +1,17 @@
-/* Base reset - App.css handles all styling */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+/**
+ * Drikkescore Main Stylesheet
+ *
+ * Import order matters! Variables must be imported first.
+ */
 
-body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
-}
+/* Design System Variables */
+@import './styles/variables.css';
+
+/* Global Styles & Reset */
+@import './styles/global.css';
+
+/* Reusable Components */
+@import './styles/components.css';
+
+/* Page-Specific Styles */
+@import './styles/pages.css';
