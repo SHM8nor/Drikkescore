@@ -8,7 +8,7 @@ import type { Gender } from '../types/database';
 
 export function SettingsPage() {
   const navigate = useNavigate();
-  const { profile, user } = useAuth();
+  const { profile, user, retryFetchProfile } = useAuth();
   const { updateProfile, loading: updateLoading } = useUpdateProfile();
 
   const [fullName, setFullName] = useState('');
@@ -87,10 +87,10 @@ export function SettingsPage() {
     setUploadError(null);
 
     try {
-      // Create a unique file name
+      // Create a unique file name with user ID folder
       const fileExt = selectedFile.name.split('.').pop();
-      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-      const filePath = `${fileName}`;
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `${user.id}/${fileName}`;
 
       // Upload to Supabase Storage
       const { error: uploadError } = await supabase.storage
@@ -111,8 +111,11 @@ export function SettingsPage() {
 
       // Delete old avatar if exists
       if (avatarUrl) {
-        const oldFilePath = avatarUrl.split('/').pop();
-        if (oldFilePath) {
+        // Extract the file path from the public URL
+        // URL format: .../storage/v1/object/public/avatars/{user_id}/{filename}
+        const urlParts = avatarUrl.split('/avatars/');
+        if (urlParts.length > 1) {
+          const oldFilePath = urlParts[1];
           await supabase.storage
             .from('avatars')
             .remove([oldFilePath]);
@@ -121,6 +124,9 @@ export function SettingsPage() {
 
       // Update profile with new avatar URL
       await updateProfile({ avatar_url: publicUrl });
+
+      // Force refresh profile to get the updated avatar
+      await retryFetchProfile();
 
       setAvatarUrl(publicUrl);
       setSelectedFile(null);
