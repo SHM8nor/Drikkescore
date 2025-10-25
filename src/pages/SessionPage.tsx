@@ -4,6 +4,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useSession } from '../hooks/useSession';
 import { useAuth } from '../context/AuthContext';
 import { formatBAC, getBACDescription } from '../utils/bacCalculator';
+import BACLineChart from '../components/charts/BACLineChart';
+import AlcoholConsumptionChart from '../components/charts/AlcoholConsumptionChart';
+import ChartContainer from '../components/charts/ChartContainer';
 
 // Helper function to format countdown timer
 function formatTime(seconds: number): string {
@@ -24,6 +27,8 @@ export function SessionPage() {
   const {
     session,
     leaderboard,
+    participants,
+    drinks,
     loading,
     error,
     addDrink,
@@ -37,6 +42,11 @@ export function SessionPage() {
   const [addError, setAddError] = useState<string | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<number>(0); // seconds remaining
   const [sessionEnded, setSessionEnded] = useState(false);
+
+  // Chart view toggles
+  const [bacView, setBacView] = useState<'all' | 'self'>('all');
+  const [consumptionView, setConsumptionView] = useState<'per-participant' | 'session-total'>('per-participant');
+  const [consumptionUnit, setConsumptionUnit] = useState<'grams' | 'beers'>('beers');
 
   // Calculate time remaining and check if session ended
   useEffect(() => {
@@ -268,6 +278,83 @@ export function SessionPage() {
             </div>
           )}
         </div>
+
+        {/* BAC Evolution Chart */}
+        {participants.length > 0 && user?.id && (
+          <ChartContainer
+            title="BAC Evolution Over Time"
+            controls={
+              <div className="chart-controls">
+                <button
+                  className={`preset-btn ${bacView === 'all' ? 'active' : ''}`}
+                  onClick={() => setBacView('all')}
+                >
+                  All Participants
+                </button>
+                <button
+                  className={`preset-btn ${bacView === 'self' ? 'active' : ''}`}
+                  onClick={() => setBacView('self')}
+                >
+                  My BAC
+                </button>
+              </div>
+            }
+          >
+            <BACLineChart
+              participants={participants}
+              drinks={drinks}
+              sessionStartTime={new Date(session.start_time)}
+              currentUserId={user.id}
+              view={bacView}
+            />
+          </ChartContainer>
+        )}
+
+        {/* Alcohol Consumption Chart */}
+        {participants.length > 0 && (
+          <ChartContainer
+            title="Alcohol Consumption"
+            controls={
+              <div className="chart-controls">
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    className={`preset-btn ${consumptionView === 'per-participant' ? 'active' : ''}`}
+                    onClick={() => setConsumptionView('per-participant')}
+                  >
+                    Per Participant
+                  </button>
+                  <button
+                    className={`preset-btn ${consumptionView === 'session-total' ? 'active' : ''}`}
+                    onClick={() => setConsumptionView('session-total')}
+                  >
+                    Session Total
+                  </button>
+                </div>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    className={`preset-btn ${consumptionUnit === 'beers' ? 'active' : ''}`}
+                    onClick={() => setConsumptionUnit('beers')}
+                  >
+                    Beer Units
+                  </button>
+                  <button
+                    className={`preset-btn ${consumptionUnit === 'grams' ? 'active' : ''}`}
+                    onClick={() => setConsumptionUnit('grams')}
+                  >
+                    Grams
+                  </button>
+                </div>
+              </div>
+            }
+          >
+            <AlcoholConsumptionChart
+              participants={participants}
+              drinks={drinks}
+              view={consumptionView}
+              unit={consumptionUnit}
+            />
+          </ChartContainer>
+        )}
       </div>
     </div>
   );

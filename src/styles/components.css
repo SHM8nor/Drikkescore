@@ -204,6 +204,13 @@
   box-shadow: 0 4px 12px rgba(247, 127, 0, 0.3);
 }
 
+.preset-btn.active {
+  background: var(--prussian-blue);
+  color: var(--color-white);
+  border-color: var(--prussian-blue);
+  font-weight: var(--font-weight-semibold);
+}
+
 .drink-presets {
   display: grid;
   grid-template-columns: 1fr 1fr;
