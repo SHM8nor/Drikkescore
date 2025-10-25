@@ -1,0 +1,98 @@
+/**
+ * Chart Container Component Styles
+ *
+ * Matches the card styling from SessionPage components
+ * (user-bac-card, leaderboard-card, add-drink-card)
+ */
+
+.chart-container {
+  background: var(--color-background-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border-light);
+  transition: all var(--transition-base);
+  /* Make chart containers take full width */
+  grid-column: 1 / -1;
+  /* Allow container to grow vertically */
+  display: flex;
+  flex-direction: column;
+  min-height: 450px;
+}
+
+.chart-container:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Header Section */
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.chart-title {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-h5);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Controls Section (optional toggle buttons) */
+.chart-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+/* Content Section */
+.chart-content {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 350px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .chart-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .chart-controls {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .chart-container {
+    padding: var(--spacing-md);
+    min-height: 400px;
+  }
+
+  .chart-content {
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart-title {
+    font-size: var(--font-size-h6);
+  }
+
+  .chart-container {
+    min-height: 350px;
+  }
+
+  .chart-content {
+    min-height: 250px;
+  }
+}

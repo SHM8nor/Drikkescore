@@ -13,5 +13,8 @@
 /* Reusable Components */
 @import './styles/components.css';
 
+/* Chart Components */
+@import './styles/components/chart-container.css';
+
 /* Page-Specific Styles */
 @import './styles/pages.css';
