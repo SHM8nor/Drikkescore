@@ -105,6 +105,7 @@ export default function MonthlyStatsChart({ monthlyData }: MonthlyStatsChartProp
       {/* Chart */}
       <Box sx={{ flex: 1, minHeight: 0 }}>
         <BarChart
+          height={350}
           xAxis={[
             {
               scaleType: 'band',
