@@ -78,6 +78,7 @@ export default function BACTrendsChart({ bacTrend }: BACTrendsChartProps) {
       }}
     >
       <LineChart
+        height={350}
         xAxis={[
           {
             data: xAxisData,
