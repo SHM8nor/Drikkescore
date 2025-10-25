@@ -151,8 +151,16 @@ export default function BACLineChart({
         margin={{ top: 50, right: 20, bottom: 60, left: 80 }}
         grid={{ vertical: false, horizontal: true }}
         axisHighlight={{ x: 'none', y: 'none' }}
-        slots={{
-          legend: () => null,
+        slotProps={{
+          legend: {
+            direction: 'row',
+            position: { vertical: 'top', horizontal: 'middle' },
+            padding: 0,
+            itemMarkWidth: 10,
+            itemMarkHeight: 10,
+            markGap: 5,
+            itemGap: 15,
+          },
         }}
         sx={{
           width: '100%',
@@ -172,8 +180,15 @@ export default function BACLineChart({
           '& .MuiChartsAxis-tickLabel': {
             fontSize: '12px',
           },
+          '& .MuiChartsLegend-root': {
+            marginBottom: '8px',
+          },
           '& .MuiChartsLegend-series text': {
-            fontSize: '12px !important',
+            fontSize: '13px !important',
+            fontWeight: 500,
+          },
+          '& .MuiChartsLegend-mark': {
+            rx: 2,
           },
         }}
       />
