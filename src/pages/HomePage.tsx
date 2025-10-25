@@ -15,6 +15,7 @@ export function HomePage() {
 
   // Create session form state
   const [duration, setDuration] = useState(60); // default 1 hour in minutes
+  const [sessionName, setSessionName] = useState('');
 
   // Join session form state
   const [sessionCode, setSessionCode] = useState('');
@@ -33,7 +34,7 @@ export function HomePage() {
     const end = new Date(start.getTime() + duration * 60 * 1000); // duration in ms
 
     try {
-      const session = await createSession(start, end);
+      const session = await createSession(sessionName.trim(), start, end);
       navigate(`/session/${session.id}`);
     } catch (err: any) {
       setError(err.message || 'Kunne ikke opprette økt');
@@ -105,6 +106,18 @@ export function HomePage() {
               <p className="form-description">
                 Velg hvor lenge drikkeøkten skal vare
               </p>
+
+              <div className="form-group">
+                <label htmlFor="session_name">Øktnavn</label>
+                <input
+                  id="session_name"
+                  type="text"
+                  value={sessionName}
+                  onChange={(e) => setSessionName(e.target.value)}
+                  placeholder="F.eks. Fredagspils"
+                  required
+                />
+              </div>
 
               <div className="form-group">
                 <label htmlFor="duration">Øktvarighet</label>

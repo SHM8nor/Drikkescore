@@ -246,7 +246,7 @@ export function useCreateSession() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const createSession = async (sessionName: string, startTime: Date, endTime: Date) => {
+  const createSession = async (startTime: Date, endTime: Date) => {
     if (!user) {
       throw new Error('User not authenticated');
     }
@@ -271,7 +271,6 @@ export function useCreateSession() {
         .from('sessions')
         .insert({
           session_code: sessionCode,
-          session_name: sessionName,
           created_by: user.id,
           start_time: startTime.toISOString(),
           end_time: endTime.toISOString(),

@@ -143,7 +143,7 @@ export function SessionPage() {
     <div className="session-page">
       <header className="session-header">
         <div>
-          <h1>Økt: {session.session_code}</h1>
+          <h1>{session.session_name || 'Økt'}: {session.session_code}</h1>
           <p className="session-time">
             {sessionEnded ? (
               <strong style={{ color: 'var(--danger-color)' }}>Økten er avsluttet!</strong>
