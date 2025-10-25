@@ -7,6 +7,7 @@ interface BACLineChartProps {
   participants: Profile[];
   drinks: DrinkEntry[];
   sessionStartTime: Date;
+  sessionEndTime: Date;
   currentUserId: string;
   view: 'all' | 'self';
 }
@@ -33,10 +34,13 @@ const CHART_COLORS = [
  *
  * Displays BAC evolution over time for session participants using MUI LineChart.
  * Shows one colored line per participant with their BAC progression from session start.
+ * The x-axis is fixed from session start (0 minutes) to session end, preventing
+ * the chart from expanding and providing a clear view of progress toward the finish line.
  *
  * @param participants - Array of participant profiles
  * @param drinks - Array of all drink entries in the session
  * @param sessionStartTime - Session start timestamp
+ * @param sessionEndTime - Session end timestamp (defines the fixed x-axis range)
  * @param currentUserId - ID of the current user (to highlight their line)
  * @param view - Display mode: 'all' shows all participants, 'self' shows only current user
  */
@@ -44,12 +48,18 @@ export default function BACLineChart({
   participants,
   drinks,
   sessionStartTime,
+  sessionEndTime,
   currentUserId,
   view,
 }: BACLineChartProps) {
   // Prepare chart data using memoization for performance
   const chartData = useMemo(() => {
     const currentTime = new Date();
+
+    // Calculate total session duration in minutes
+    const sessionDurationMinutes = Math.ceil(
+      (sessionEndTime.getTime() - sessionStartTime.getTime()) / (1000 * 60)
+    );
 
     // Filter participants based on view mode
     const displayParticipants =
@@ -65,20 +75,6 @@ export default function BACLineChart({
       currentTime
     );
 
-    // If no data, return empty structure
-    if (series.length === 0 || series.every((s) => s.data.length === 0)) {
-      return { series: [], xAxisData: [], colors: [] };
-    }
-
-    // Extract all unique x values (time points in minutes)
-    const xValuesSet = new Set<number>();
-    series.forEach((s) => {
-      s.data.forEach((point) => {
-        xValuesSet.add(point.x);
-      });
-    });
-    const xAxisData = Array.from(xValuesSet).sort((a, b) => a - b);
-
     // Assign colors to participants
     const colors = displayParticipants.map((participant, index) => {
       // Highlight current user's line with a bolder color
@@ -88,8 +84,8 @@ export default function BACLineChart({
       return CHART_COLORS[index % CHART_COLORS.length];
     });
 
-    return { series, xAxisData, colors };
-  }, [participants, drinks, sessionStartTime, currentUserId, view]);
+    return { series, colors, sessionDurationMinutes };
+  }, [participants, drinks, sessionStartTime, sessionEndTime, currentUserId, view]);
 
   // Handle empty state
   if (chartData.series.length === 0) {
@@ -109,12 +105,28 @@ export default function BACLineChart({
     );
   }
 
-  // Simple series config - use only the data points that exist
-  const seriesConfig = chartData.series.map((s, index) => ({
-    data: s.data.map(point => point.y),
-    label: s.label,
-    color: chartData.colors[index],
-  }));
+  // Create x-axis data from all unique x values across all series
+  const allXValues = new Set<number>();
+  chartData.series.forEach(s => {
+    s.data.forEach(point => allXValues.add(point.x));
+  });
+  const xAxisData = Array.from(allXValues).sort((a, b) => a - b);
+
+  // Align each series data to the x-axis
+  const seriesConfig = chartData.series.map((s, index) => {
+    // Create a map of x -> y for this series
+    const dataMap = new Map(s.data.map(point => [point.x, point.y]));
+
+    // For each x value in the axis, get the corresponding y value or null
+    const alignedData = xAxisData.map(x => dataMap.get(x) ?? null);
+
+    return {
+      data: alignedData,
+      label: s.label,
+      color: chartData.colors[index],
+      connectNulls: true, // Connect the line even if there are null values
+    };
+  });
 
   return (
     <div style={{
@@ -126,11 +138,14 @@ export default function BACLineChart({
     }}>
       <LineChart
         xAxis={[{
-          data: chartData.xAxisData,
+          data: xAxisData,
           label: 'Time (minutes)',
+          min: 0,
+          max: chartData.sessionDurationMinutes,
         }]}
         yAxis={[{
           label: 'BAC %',
+          min: 0,
         }]}
         series={seriesConfig}
         margin={{ top: 50, right: 20, bottom: 60, left: 80 }}
@@ -147,7 +162,8 @@ export default function BACLineChart({
             strokeWidth: 2,
           },
           '& .MuiMarkElement-root': {
-            scale: '0.6',
+            scale: '0.8',
+            strokeWidth: 2,
           },
           '& .MuiChartsAxis-label': {
             fontSize: '14px',

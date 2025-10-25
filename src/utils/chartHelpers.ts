@@ -127,6 +127,7 @@ export function convertGramsToBeers(grams: number): number {
 /**
  * Prepare data format for MUI LineChart
  * Creates one series per participant showing BAC over time
+ * Shows points at drink consumption times and current time
  *
  * @param participants Array of participant profiles
  * @param drinks Array of all drink entries
@@ -151,22 +152,41 @@ export function prepareLineChartData(
       (drink) => drink.user_id === participant.id
     );
 
-    // Calculate BAC time series for this participant
-    const timeSeries = calculateBACTimeSeries(
-      participantDrinks,
-      participant,
-      sessionStartTime,
-      currentTime
-    );
+    const data: LineChartPoint[] = [];
 
-    // Convert to MUI chart format
-    const data: LineChartPoint[] = timeSeries.map((point) => {
-      const minutesSinceStart = (point.time.getTime() - sessionStartMs) / (1000 * 60);
-      return {
-        x: Math.round(minutesSinceStart * 10) / 10, // Round to 1 decimal
-        y: point.bac,
-      };
+    // Always start at 0 BAC at session start
+    data.push({
+      x: 0,
+      y: 0,
     });
+
+    // Add a point for each drink consumed
+    for (const drink of participantDrinks) {
+      const drinkTime = new Date(drink.consumed_at);
+      const minutesSinceStart = (drinkTime.getTime() - sessionStartMs) / (1000 * 60);
+
+      // Calculate BAC at the time this drink was consumed
+      const bac = calculateBAC(participantDrinks, participant, drinkTime);
+
+      data.push({
+        x: Math.round(minutesSinceStart * 10) / 10,
+        y: bac,
+      });
+    }
+
+    // Add current time point to show current BAC
+    if (participantDrinks.length > 0) {
+      const minutesSinceStart = (currentTime.getTime() - sessionStartMs) / (1000 * 60);
+      const currentBAC = calculateBAC(participantDrinks, participant, currentTime);
+
+      data.push({
+        x: Math.round(minutesSinceStart * 10) / 10,
+        y: currentBAC,
+      });
+    }
+
+    // Sort by x value (time) to ensure proper line drawing
+    data.sort((a, b) => a.x - b.x);
 
     series.push({
       id: participant.id,
