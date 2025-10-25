@@ -5,7 +5,17 @@
       "Bash(npm run dev:*)",
       "Bash(git checkout:*)",
       "Bash(git add:*)",
-      "Bash(npx vite:*)"
+      "Bash(npx vite:*)",
+      "mcp__mui-mcp__useMuiDocs",
+      "mcp__mui-mcp__fetchDocs",
+      "Bash(npm install:*)",
+      "Bash(dir \"C:\\Users\\Felles\\Documents\\Projects\\Drikkescore\\src\")",
+      "Bash(dir:*)",
+      "Bash(npm run build:*)",
+      "Bash(npx tsc:*)",
+      "Bash(timeout:*)",
+      "WebSearch",
+      "Bash(npm view:*)"
     ],
     "deny": [],
     "ask": []
