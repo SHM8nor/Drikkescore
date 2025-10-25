@@ -15,6 +15,7 @@ import {
 import MenuIcon from '@mui/icons-material/Menu';
 import HomeIcon from '@mui/icons-material/Home';
 import HistoryIcon from '@mui/icons-material/History';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useAuth } from '../../context/AuthContext';
@@ -47,6 +48,7 @@ export function NavigationDrawer() {
   const menuItems = [
     { text: 'Hjem', icon: <HomeIcon />, path: '/' },
     { text: 'Historikk', icon: <HistoryIcon />, path: '/history' },
+    { text: 'Analyse', icon: <AnalyticsIcon />, path: '/analytics' },
     { text: 'Innstillinger', icon: <SettingsIcon />, path: '/settings' },
   ];
 
