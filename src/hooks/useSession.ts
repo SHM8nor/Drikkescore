@@ -219,6 +219,31 @@ export function useSession(sessionId: string | null) {
     // Note: Polling will update the drinks list automatically
   };
 
+  // Delete a drink
+  const deleteDrink = async (drinkId: string) => {
+    console.log('deleteDrink called with:', { drinkId, user, sessionId });
+
+    if (!user || !sessionId) {
+      console.error('Validation failed:', { user, sessionId });
+      throw new Error('User not authenticated or no session');
+    }
+
+    console.log('Attempting to delete drink from database...');
+    const { error } = await supabase
+      .from('drink_entries')
+      .delete()
+      .eq('id', drinkId)
+      .eq('user_id', user.id); // Ensure user can only delete their own drinks
+
+    if (error) {
+      console.error('Database error:', error);
+      throw error;
+    }
+
+    console.log('Drink deleted successfully!');
+    // Note: Real-time subscription will update the drinks list automatically
+  };
+
   // Get current user's BAC
   const getCurrentUserBAC = () => {
     if (!profile || !user) return 0;
@@ -234,6 +259,7 @@ export function useSession(sessionId: string | null) {
     loading,
     error,
     addDrink,
+    deleteDrink,
     getCurrentUserBAC,
   };
 }
