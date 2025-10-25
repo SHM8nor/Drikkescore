@@ -52,6 +52,7 @@ export function BACLineChartExample() {
         participants={participants}
         drinks={drinks}
         sessionStartTime={new Date(session.start_time)}
+        sessionEndTime={new Date(session.end_time)}
         currentUserId={user.id}
         view={view}
       />
@@ -93,6 +94,7 @@ export function BACLineChartExample() {
  *       participants={participants}
  *       drinks={drinks}
  *       sessionStartTime={new Date(session.start_time)}
+ *       sessionEndTime={new Date(session.end_time)}
  *       currentUserId={user.id}
  *       view={chartView}
  *     />
