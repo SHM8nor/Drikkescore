@@ -9,6 +9,7 @@ export interface Profile {
   height_cm: number;
   gender: Gender;
   age: number;
+  avatar_url?: string;
   created_at: string;
   updated_at: string;
 }
@@ -16,6 +17,7 @@ export interface Profile {
 export interface Session {
   id: string;
   session_code: string;
+  session_name: string;
   created_by: string;
   start_time: string;
   end_time: string;
@@ -67,6 +69,7 @@ export interface LoginFormData {
 }
 
 export interface CreateSessionFormData {
+  session_name: string;
   start_time: string;
   end_time: string;
 }
@@ -78,4 +81,13 @@ export interface JoinSessionFormData {
 export interface AddDrinkFormData {
   volume_ml: number;
   alcohol_percentage: number;
+}
+
+export interface UpdateProfileFormData {
+  full_name?: string;
+  weight_kg?: number;
+  height_cm?: number;
+  gender?: Gender;
+  age?: number;
+  avatar_url?: string;
 }

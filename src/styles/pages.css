@@ -260,12 +260,141 @@
 }
 
 /* ========================================
+   SETTINGS PAGE
+   ======================================== */
+
+.settings-page {
+  min-height: 100vh;
+  padding-bottom: var(--spacing-2xl);
+}
+
+.page-header {
+  background: var(--color-background-primary);
+  padding: var(--spacing-lg) var(--spacing-2xl);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-2xl);
+}
+
+.page-header h1 {
+  color: var(--prussian-blue);
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+}
+
+.settings-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+.settings-card {
+  background: var(--color-background-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border-light);
+}
+
+.settings-card h2 {
+  margin-bottom: var(--spacing-lg);
+  color: var(--prussian-blue);
+  font-size: var(--font-size-h4);
+}
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* ========================================
+   AVATAR UPLOAD SECTION
+   ======================================== */
+
+.avatar-section {
+  margin-bottom: var(--spacing-xl);
+  padding-bottom: var(--spacing-xl);
+  border-bottom: 2px solid var(--color-border-light);
+}
+
+.avatar-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.avatar-preview {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid var(--vanilla-dark);
+  box-shadow: var(--shadow-md);
+  background: var(--vanilla-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-placeholder {
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-controls {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.avatar-file-input {
+  display: none;
+}
+
+.avatar-select-btn {
+  cursor: pointer;
+  display: inline-flex;
+}
+
+.avatar-error {
+  margin-top: var(--spacing-sm);
+  max-width: 400px;
+  text-align: center;
+}
+
+.avatar-file-info {
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+  text-align: center;
+  max-width: 300px;
+  word-break: break-word;
+}
+
+/* ========================================
    RESPONSIVE DESIGN
    ======================================== */
 
 @media (max-width: 768px) {
   .home-header,
-  .session-header {
+  .session-header,
+  .page-header {
     flex-direction: column;
     gap: var(--spacing-md);
     text-align: center;
@@ -281,7 +410,24 @@
   }
 
   .home-content,
-  .session-content {
+  .session-content,
+  .settings-content {
     padding: 0 var(--spacing-md);
+  }
+
+  .avatar-preview {
+    width: 120px;
+    height: 120px;
+  }
+
+  .avatar-controls {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .avatar-controls button,
+  .avatar-controls label {
+    width: 100%;
+    max-width: 250px;
   }
 }
