@@ -4,7 +4,6 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { HomePage } from './pages/HomePage';
 import { SessionPage } from './pages/SessionPage';
-import './App.css';
 
 // Protected route component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {

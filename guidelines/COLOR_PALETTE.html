@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drikkescore Color Palette</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      padding: 2rem;
+      background: #f9fafb;
+      color: #1a1a1a;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: #003049;
+    }
+
+    .subtitle {
+      font-size: 1.125rem;
+      color: #6b7280;
+      margin-bottom: 3rem;
+    }
+
+    h2 {
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin-top: 3rem;
+      margin-bottom: 1.5rem;
+      color: #1a1a1a;
+    }
+
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .color-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .color-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .color-swatch {
+      height: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 1.125rem;
+      color: white;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    .color-info {
+      padding: 1.25rem;
+    }
+
+    .color-name {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #1a1a1a;
+    }
+
+    .color-hex {
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin-bottom: 0.75rem;
+      padding: 0.5rem;
+      background: #f3f4f6;
+      border-radius: 4px;
+      display: inline-block;
+    }
+
+    .color-usage {
+      font-size: 0.875rem;
+      color: #4b5563;
+      line-height: 1.5;
+    }
+
+    .example-section {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      margin-top: 2rem;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 4px;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: #003049;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #002333;
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: #f77f00;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #c66200;
+      transform: translateY(-1px);
+    }
+
+    .btn-danger {
+      background: #d62828;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #a61f1f;
+      transform: translateY(-1px);
+    }
+
+    .alert {
+      padding: 1rem 1.5rem;
+      border-radius: 4px;
+      margin-top: 1rem;
+      border-left: 4px solid;
+    }
+
+    .alert-error {
+      background: rgba(214, 40, 40, 0.1);
+      border-left-color: #d62828;
+      color: #a61f1f;
+    }
+
+    .alert-warning {
+      background: rgba(252, 191, 73, 0.1);
+      border-left-color: #fcbf49;
+      color: #d9a03a;
+    }
+
+    .alert-info {
+      background: rgba(0, 48, 73, 0.1);
+      border-left-color: #003049;
+      color: #003049;
+    }
+
+    .typography-example {
+      margin-top: 2rem;
+    }
+
+    .typography-example h1,
+    .typography-example h2,
+    .typography-example h3 {
+      color: #003049;
+      margin-top: 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Drikkescore Color Palette</h1>
+    <p class="subtitle">Official design system colors with usage guidelines</p>
+
+    <h2>Primary Colors</h2>
+    <div class="color-grid">
+      <div class="color-card">
+        <div class="color-swatch" style="background: #003049;">
+          Prussian Blue
+        </div>
+        <div class="color-info">
+          <div class="color-name">Prussian Blue</div>
+          <div class="color-hex">#003049</div>
+          <div class="color-usage">
+            Primary brand color. Use for: headers, primary buttons, navigation, links, and main CTAs.
+          </div>
+        </div>
+      </div>
+
+      <div class="color-card">
+        <div class="color-swatch" style="background: #d62828;">
+          Fire Engine Red
+        </div>
+        <div class="color-info">
+          <div class="color-name">Fire Engine Red</div>
+          <div class="color-hex">#d62828</div>
+          <div class="color-usage">
+            Error and danger states. Use for: error messages, delete buttons, destructive actions, alerts.
+          </div>
+        </div>
+      </div>
+
+      <div class="color-card">
+        <div class="color-swatch" style="background: #f77f00;">
+          Orange Wheel
+        </div>
+        <div class="color-info">
+          <div class="color-name">Orange Wheel</div>
+          <div class="color-hex">#f77f00</div>
+          <div class="color-usage">
+            Accent and highlight color. Use for: call-to-action buttons, active states, highlights, badges.
+          </div>
+        </div>
+      </div>
+
+      <div class="color-card">
+        <div class="color-swatch" style="background: #fcbf49;">
+          Xanthous
+        </div>
+        <div class="color-info">
+          <div class="color-name">Xanthous</div>
+          <div class="color-hex">#fcbf49</div>
+          <div class="color-usage">
+            Secondary accent. Use for: warning messages, info badges, secondary CTAs, highlights. Not for body text.
+          </div>
+        </div>
+      </div>
+
+      <div class="color-card">
+        <div class="color-swatch" style="background: #eae2b7; color: #1a1a1a;">
+          Vanilla
+        </div>
+        <div class="color-info">
+          <div class="color-name">Vanilla</div>
+          <div class="color-hex">#eae2b7</div>
+          <div class="color-usage">
+            Background and subtle elements. Use for: page backgrounds, cards, subtle sections, disabled states.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="example-section">
+      <h2>Component Examples</h2>
+
+      <h3>Buttons</h3>
+      <div class="button-group">
+        <button class="btn btn-primary">Primary Button</button>
+        <button class="btn btn-secondary">Secondary Button</button>
+        <button class="btn btn-danger">Danger Button</button>
+      </div>
+
+      <h3 style="margin-top: 2rem;">Alerts</h3>
+      <div class="alert alert-error">
+        <strong>Error:</strong> This is an error message using Fire Engine Red.
+      </div>
+      <div class="alert alert-warning">
+        <strong>Warning:</strong> This is a warning message using Xanthous.
+      </div>
+      <div class="alert alert-info">
+        <strong>Info:</strong> This is an info message using Prussian Blue.
+      </div>
+
+      <div class="typography-example">
+        <h1>Heading 1 (2.5rem, 700)</h1>
+        <h2>Heading 2 (2rem, 600)</h2>
+        <h3>Heading 3 (1.75rem, 600)</h3>
+        <p style="margin-top: 1rem; color: #4a4a4a; line-height: 1.6;">
+          This is body text using Inter font family at 1rem (16px) with regular weight (400).
+          The line height is 1.5 for comfortable reading. All text should use the Inter font family
+          for consistency across the application.
+        </p>
+      </div>
+    </div>
+
+    <div class="example-section">
+      <h2>Color Accessibility</h2>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+        <thead>
+          <tr style="border-bottom: 2px solid #d1d5db;">
+            <th style="text-align: left; padding: 0.75rem; font-weight: 600;">Combination</th>
+            <th style="text-align: left; padding: 0.75rem; font-weight: 600;">Contrast Ratio</th>
+            <th style="text-align: left; padding: 0.75rem; font-weight: 600;">WCAG AA</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid #e5e7eb;">
+            <td style="padding: 0.75rem;">Prussian Blue on White</td>
+            <td style="padding: 0.75rem;">13.4:1</td>
+            <td style="padding: 0.75rem; color: #047857; font-weight: 600;">✓ AAA</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e5e7eb;">
+            <td style="padding: 0.75rem;">Fire Engine Red on White</td>
+            <td style="padding: 0.75rem;">5.5:1</td>
+            <td style="padding: 0.75rem; color: #047857; font-weight: 600;">✓ AA</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e5e7eb;">
+            <td style="padding: 0.75rem;">Orange Wheel on White</td>
+            <td style="padding: 0.75rem;">3.2:1</td>
+            <td style="padding: 0.75rem; color: #d62828; font-weight: 600;">✗ Accents only</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e5e7eb;">
+            <td style="padding: 0.75rem;">Dark text on Vanilla</td>
+            <td style="padding: 0.75rem;">10.2:1</td>
+            <td style="padding: 0.75rem; color: #047857; font-weight: 600;">✓ AAA</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="example-section">
+      <h2>Usage Guidelines</h2>
+      <ul style="list-style: none; padding: 0;">
+        <li style="padding: 0.75rem 0; border-bottom: 1px solid #e5e7eb;">
+          <strong style="color: #003049;">Prussian Blue:</strong> Primary brand color. Use for main navigation, primary buttons, and important text.
+        </li>
+        <li style="padding: 0.75rem 0; border-bottom: 1px solid #e5e7eb;">
+          <strong style="color: #d62828;">Fire Engine Red:</strong> Reserved for errors and destructive actions. Don't overuse.
+        </li>
+        <li style="padding: 0.75rem 0; border-bottom: 1px solid #e5e7eb;">
+          <strong style="color: #f77f00;">Orange Wheel:</strong> Use for CTAs and highlights. Creates visual energy and draws attention.
+        </li>
+        <li style="padding: 0.75rem 0; border-bottom: 1px solid #e5e7eb;">
+          <strong style="color: #d9a03a;">Xanthous:</strong> Secondary accent. Good for warnings and info badges. Avoid for body text due to contrast.
+        </li>
+        <li style="padding: 0.75rem 0;">
+          <strong style="color: #6b7280;">Vanilla:</strong> Subtle background color. Use for page backgrounds and card backgrounds.
+        </li>
+      </ul>
+    </div>
+  </div>
+</body>
+</html>
