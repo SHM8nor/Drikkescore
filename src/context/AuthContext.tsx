@@ -260,32 +260,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: authError };
       }
 
-      if (!authData.user || !authData.session) {
+      if (!authData.user) {
         return { error: { message: 'User creation failed', name: 'SignUpError', status: 500 } as AuthError };
       }
 
-      // Wait a moment for the session to be fully established
+      // Note: session might be null if email confirmation is required
+      // That's okay - the user was still created successfully
+      console.log('signUp: User created:', authData.user.id, 'Session:', authData.session ? 'exists' : 'null (email confirmation required)');
+
+      // Wait a moment for the auth to be fully established
       await new Promise(resolve => setTimeout(resolve, 500));
 
       // Manually create profile in the database
-      // The user is now authenticated, so RLS should allow the insert
-      console.log('signUp: Creating profile for user:', authData.user.id);
-      const { error: profileError } = await supabase.from('profiles').insert({
-        id: authData.user.id,
-        full_name,
-        weight_kg,
-        height_cm,
-        gender,
-        age,
-      });
+      // If there's a session, the user is authenticated and RLS will allow insert
+      // If no session (email confirmation required), we'll create it on first login
+      if (authData.session) {
+        console.log('signUp: Creating profile for user:', authData.user.id);
+        const { error: profileError } = await supabase.from('profiles').insert({
+          id: authData.user.id,
+          full_name,
+          weight_kg,
+          height_cm,
+          gender,
+          age,
+        });
 
-      if (profileError) {
-        console.error('signUp: Error creating profile:', profileError);
-        // Profile creation failed - the metadata is stored, so it can be recovered later
-        // Don't fail signup - let them continue and recover via retry button
-        console.log('signUp: Profile creation failed, but user can recover it later from metadata');
+        if (profileError) {
+          console.error('signUp: Error creating profile:', profileError);
+          // Profile creation failed - the metadata is stored, so it can be recovered later
+          // Don't fail signup - let them continue and recover via retry button
+          console.log('signUp: Profile creation failed, but user can recover it later from metadata');
+        } else {
+          console.log('signUp: Profile created successfully');
+        }
       } else {
-        console.log('signUp: Profile created successfully');
+        console.log('signUp: No session (email confirmation required), profile will be created on first login');
       }
 
       return { error: null };
