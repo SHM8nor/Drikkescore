@@ -1,17 +1,18 @@
-import { useMemo } from 'react';
-import { BarChart } from '@mui/x-charts/BarChart';
-import type { Profile, DrinkEntry } from '../../types/database';
+import { useMemo } from "react";
+import { BarChart } from "@mui/x-charts/BarChart";
+import { axisClasses } from "@mui/x-charts/ChartsAxis";
+import type { Profile, DrinkEntry } from "../../types/database";
 import {
   prepareBarChartData,
   calculateTotalAlcoholGrams,
   convertGramsToBeers,
-} from '../../utils/chartHelpers';
+} from "../../utils/chartHelpers";
 
 interface AlcoholConsumptionChartProps {
   participants: Profile[];
   drinks: DrinkEntry[];
-  view: 'per-participant' | 'session-total';
-  unit: 'grams' | 'beers';
+  view: "per-participant" | "session-total";
+  unit: "grams" | "beers";
   currentUserId?: string; // Optional: to match colors with BAC chart
 }
 
@@ -19,16 +20,16 @@ interface AlcoholConsumptionChartProps {
  * Color palette matching BACLineChart for consistency
  */
 const CHART_COLORS = [
-  '#1976d2', // Blue
-  '#d32f2f', // Red
-  '#388e3c', // Green
-  '#f57c00', // Orange
-  '#7b1fa2', // Purple
-  '#0097a7', // Cyan
-  '#c2185b', // Pink
-  '#fbc02d', // Yellow
-  '#5d4037', // Brown
-  '#455a64', // Blue Grey
+  "#1976d2", // Blue
+  "#d32f2f", // Red
+  "#388e3c", // Green
+  "#f57c00", // Orange
+  "#7b1fa2", // Purple
+  "#0097a7", // Cyan
+  "#c2185b", // Pink
+  "#fbc02d", // Yellow
+  "#5d4037", // Brown
+  "#455a64", // Blue Grey
 ];
 
 /**
@@ -51,17 +52,19 @@ export default function AlcoholConsumptionChart({
 }: AlcoholConsumptionChartProps) {
   // Prepare chart data based on view mode
   const chartData = useMemo(() => {
-    if (view === 'per-participant') {
+    if (view === "per-participant") {
       // Use helper function to calculate per-participant data
       const data = prepareBarChartData(participants, drinks, unit);
 
       // Assign colors to match BAC chart
       return data.map((item, index) => {
-        const participant = participants.find(p => p.full_name === item.participant);
+        const participant = participants.find(
+          (p) => p.full_name === item.participant
+        );
         let color: string;
 
         if (currentUserId && participant?.id === currentUserId) {
-          color = '#1976d2'; // Primary blue for current user
+          color = "#1976d2"; // Primary blue for current user
         } else {
           color = CHART_COLORS[index % CHART_COLORS.length];
         }
@@ -71,13 +74,14 @@ export default function AlcoholConsumptionChart({
     } else {
       // Calculate total session consumption
       const totalGrams = calculateTotalAlcoholGrams(drinks);
-      const value = unit === 'beers' ? convertGramsToBeers(totalGrams) : totalGrams;
+      const value =
+        unit === "beers" ? convertGramsToBeers(totalGrams) : totalGrams;
 
       return [
         {
-          participant: 'Total',
+          participant: "Total",
           value: Math.round(value * 100) / 100,
-          color: '#1976d2',
+          color: "#1976d2",
         },
       ];
     }
@@ -85,26 +89,28 @@ export default function AlcoholConsumptionChart({
 
   // Format value for display based on unit
   const formatValue = (value: number): string => {
-    if (unit === 'beers') {
+    if (unit === "beers") {
       return value.toFixed(1);
     }
     return value.toFixed(0);
   };
 
   // Get axis label based on unit
-  const yAxisLabel = unit === 'beers' ? 'Antall enheter' : 'Rent alkohol (g)';
+  const yAxisLabel = unit === "beers" ? "Antall enheter" : "Rent alkohol (g)";
 
   // Handle edge cases
   if (participants.length === 0) {
     return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: 300,
-        color: 'var(--color-text-secondary)',
-        fontSize: '14px',
-      }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: 300,
+          color: "var(--color-text-secondary)",
+          fontSize: "14px",
+        }}
+      >
         Ingen deltakere i denne økten
       </div>
     );
@@ -112,14 +118,16 @@ export default function AlcoholConsumptionChart({
 
   if (drinks.length === 0) {
     return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: 300,
-        color: 'var(--color-text-secondary)',
-        fontSize: '14px',
-      }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: 300,
+          color: "var(--color-text-secondary)",
+          fontSize: "14px",
+        }}
+      >
         Ingen enheter registrert ennå
       </div>
     );
@@ -137,53 +145,55 @@ export default function AlcoholConsumptionChart({
       data: data,
       label: item.participant,
       color: item.color,
-      stack: 'total', // Stack them so they appear in same position
+      stack: "total", // Stack them so they appear in same position
       valueFormatter: (value: number | null) => {
-        if (value === null || value === 0) return '';
+        if (value === null || value === 0) return "";
         const formatted = formatValue(value);
-        return unit === 'beers'
-          ? `${formatted} units`
-          : `${formatted}g`;
+        return unit === "beers" ? `${formatted} units` : `${formatted}g`;
       },
     };
   });
 
   return (
-    <div style={{
-      width: '100%',
-      height: '100%',
-      minHeight: '350px',
-      display: 'flex',
-      flexDirection: 'column',
-    }}>
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        minHeight: "350px",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       {/* Custom legend for per-participant view */}
-      {view === 'per-participant' && (
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '15px',
-          padding: '8px 0 12px 0',
-        }}>
+      {view === "per-participant" && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: "15px",
+            padding: "8px 0 12px 0",
+          }}
+        >
           {chartData.map((item) => (
             <div
               key={item.participant}
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
               }}
             >
               <div
                 style={{
-                  width: '10px',
-                  height: '10px',
+                  width: "10px",
+                  height: "10px",
                   backgroundColor: item.color,
-                  borderRadius: '2px',
+                  borderRadius: "2px",
                 }}
               />
-              <span style={{ fontSize: '13px', fontWeight: 500 }}>
+              <span style={{ fontSize: "13px", fontWeight: 500 }}>
                 {item.participant}
               </span>
             </div>
@@ -191,30 +201,32 @@ export default function AlcoholConsumptionChart({
         </div>
       )}
       {/* Display total value prominently when in session-total view */}
-      {view === 'session-total' && chartData.length > 0 && (
-        <div style={{
-          textAlign: 'center',
-          padding: '16px 0 8px 0',
-          fontSize: '24px',
-          fontWeight: 'bold',
-          color: 'var(--primary-color)',
-        }}>
-          {formatValue(chartData[0].value)} {unit === 'beers' ? 'enheter' : 'g'}
+      {view === "session-total" && chartData.length > 0 && (
+        <div
+          style={{
+            textAlign: "center",
+            padding: "16px 0 8px 0",
+            fontSize: "24px",
+            fontWeight: "bold",
+            color: "var(--primary-color)",
+          }}
+        >
+          {formatValue(chartData[0].value)} {unit === "beers" ? "enheter" : "g"}
         </div>
       )}
       <BarChart
         xAxis={[
           {
-            scaleType: 'band',
+            scaleType: "band",
             data: xAxisData,
-            label: view === 'per-participant' ? 'Participant' : '',
+            label: view === "per-participant" ? "Deltaker" : "",
           },
         ]}
         yAxis={[
           {
             label: yAxisLabel,
             valueFormatter: (value: number | null) => {
-              if (value === null) return '';
+              if (value === null) return "";
               return formatValue(value);
             },
           },
@@ -222,14 +234,14 @@ export default function AlcoholConsumptionChart({
         series={series}
         margin={{ top: 20, right: 20, bottom: 60, left: 80 }}
         grid={{ vertical: false, horizontal: true }}
-        axisHighlight={{ x: 'none', y: 'none' }}
+        axisHighlight={{ x: "none", y: "none" }}
         barLabel="value"
         slotProps={{
           barLabel: {
             style: {
-              fontSize: '12px',
+              fontSize: "12px",
               fontWeight: 600,
-              fill: '#fff',
+              fill: "#fff",
             },
           },
         }}
@@ -237,9 +249,12 @@ export default function AlcoholConsumptionChart({
           legend: () => null,
         }}
         sx={{
-          width: '100%',
-          height: '100%',
+          width: "100%",
+          height: "100%",
           flex: 1,
+          [`& .${axisClasses.left} .${axisClasses.label}`]: {
+            transform: "translateX(-10px)",
+          },
         }}
       />
     </div>

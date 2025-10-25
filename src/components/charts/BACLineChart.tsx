@@ -1,7 +1,8 @@
-import { useMemo } from 'react';
-import { LineChart } from '@mui/x-charts/LineChart';
-import type { Profile, DrinkEntry } from '../../types/database';
-import { prepareLineChartData } from '../../utils/chartHelpers';
+import { useMemo } from "react";
+import { LineChart } from "@mui/x-charts/LineChart";
+import { axisClasses } from "@mui/x-charts/ChartsAxis";
+import type { Profile, DrinkEntry } from "../../types/database";
+import { prepareLineChartData } from "../../utils/chartHelpers";
 
 interface BACLineChartProps {
   participants: Profile[];
@@ -9,7 +10,7 @@ interface BACLineChartProps {
   sessionStartTime: Date;
   sessionEndTime: Date;
   currentUserId: string;
-  view: 'all' | 'self';
+  view: "all" | "self";
 }
 
 /**
@@ -17,16 +18,16 @@ interface BACLineChartProps {
  * Colors chosen for good contrast and accessibility
  */
 const CHART_COLORS = [
-  '#1976d2', // Blue
-  '#d32f2f', // Red
-  '#388e3c', // Green
-  '#f57c00', // Orange
-  '#7b1fa2', // Purple
-  '#0097a7', // Cyan
-  '#c2185b', // Pink
-  '#fbc02d', // Yellow
-  '#5d4037', // Brown
-  '#455a64', // Blue Grey
+  "#1976d2", // Blue
+  "#d32f2f", // Red
+  "#388e3c", // Green
+  "#f57c00", // Orange
+  "#7b1fa2", // Purple
+  "#0097a7", // Cyan
+  "#c2185b", // Pink
+  "#fbc02d", // Yellow
+  "#5d4037", // Brown
+  "#455a64", // Blue Grey
 ];
 
 /**
@@ -63,7 +64,7 @@ export default function BACLineChart({
 
     // Filter participants based on view mode
     const displayParticipants =
-      view === 'self'
+      view === "self"
         ? participants.filter((p) => p.id === currentUserId)
         : participants;
 
@@ -79,46 +80,54 @@ export default function BACLineChart({
     const colors = displayParticipants.map((participant, index) => {
       // Highlight current user's line with a bolder color
       if (participant.id === currentUserId) {
-        return '#1976d2'; // Primary blue for current user
+        return "#1976d2"; // Primary blue for current user
       }
       return CHART_COLORS[index % CHART_COLORS.length];
     });
 
     return { series, colors, sessionDurationMinutes };
-  }, [participants, drinks, sessionStartTime, sessionEndTime, currentUserId, view]);
+  }, [
+    participants,
+    drinks,
+    sessionStartTime,
+    sessionEndTime,
+    currentUserId,
+    view,
+  ]);
 
   // Handle empty state
   if (chartData.series.length === 0) {
     return (
       <div
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
           height: 300,
-          color: '#666',
-          fontSize: '14px',
+          color: "#666",
+          fontSize: "14px",
         }}
       >
-        Ingen promilledata tilgjengelig ennå. Legg til noen enheter for å se grafen!
+        Ingen promilledata tilgjengelig ennå. Legg til noen enheter for å se
+        grafen!
       </div>
     );
   }
 
   // Create x-axis data from all unique x values across all series
   const allXValues = new Set<number>();
-  chartData.series.forEach(s => {
-    s.data.forEach(point => allXValues.add(point.x));
+  chartData.series.forEach((s) => {
+    s.data.forEach((point) => allXValues.add(point.x));
   });
   const xAxisData = Array.from(allXValues).sort((a, b) => a - b);
 
   // Align each series data to the x-axis
   const seriesConfig = chartData.series.map((s, index) => {
     // Create a map of x -> y for this series
-    const dataMap = new Map(s.data.map(point => [point.x, point.y]));
+    const dataMap = new Map(s.data.map((point) => [point.x, point.y]));
 
     // For each x value in the axis, get the corresponding y value or null
-    const alignedData = xAxisData.map(x => dataMap.get(x) ?? null);
+    const alignedData = xAxisData.map((x) => dataMap.get(x) ?? null);
 
     return {
       data: alignedData,
@@ -129,32 +138,47 @@ export default function BACLineChart({
   });
 
   return (
-    <div style={{
-      width: '100%',
-      height: '100%',
-      minHeight: '350px',
-      display: 'flex',
-      flexDirection: 'column',
-    }}>
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        minHeight: "350px",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       <LineChart
-        xAxis={[{
-          data: xAxisData,
-          label: 'Tid (minutter)',
-          min: 0,
-          max: chartData.sessionDurationMinutes,
-        }]}
-        yAxis={[{
-          label: 'Promille %',
-          min: 0,
-        }]}
+        xAxis={[
+          {
+            data: xAxisData,
+            label: "Tid",
+            min: 0,
+            max: chartData.sessionDurationMinutes,
+            valueFormatter: (value) => {
+              // Convert minutes offset to actual time (HH:MM format)
+              const timeInMs =
+                sessionStartTime.getTime() + (value as number) * 60 * 1000;
+              const date = new Date(timeInMs);
+              const hours = date.getHours().toString().padStart(2, "0");
+              const minutes = date.getMinutes().toString().padStart(2, "0");
+              return `${hours}:${minutes}`;
+            },
+          },
+        ]}
+        yAxis={[
+          {
+            label: "Promille %",
+            min: 0,
+          },
+        ]}
         series={seriesConfig}
         margin={{ top: 50, right: 20, bottom: 60, left: 80 }}
         grid={{ vertical: false, horizontal: true }}
-        axisHighlight={{ x: 'none', y: 'none' }}
+        axisHighlight={{ x: "none", y: "none" }}
         slotProps={{
           legend: {
-            direction: 'row',
-            position: { vertical: 'top', horizontal: 'middle' },
+            direction: "row",
+            position: { vertical: "top", horizontal: "middle" },
             padding: 0,
             itemMarkWidth: 10,
             itemMarkHeight: 10,
@@ -163,31 +187,34 @@ export default function BACLineChart({
           },
         }}
         sx={{
-          width: '100%',
-          height: '100%',
+          width: "100%",
+          height: "100%",
           flex: 1,
-          '& .MuiLineElement-root': {
+          [`& .${axisClasses.left} .${axisClasses.label}`]: {
+            transform: "translateX(-10px)",
+          },
+          "& .MuiLineElement-root": {
             strokeWidth: 2,
           },
-          '& .MuiMarkElement-root': {
-            scale: '0.8',
+          "& .MuiMarkElement-root": {
+            scale: "0.8",
             strokeWidth: 2,
           },
-          '& .MuiChartsAxis-label': {
-            fontSize: '14px',
+          "& .MuiChartsAxis-label": {
+            fontSize: "14px",
             fontWeight: 500,
           },
-          '& .MuiChartsAxis-tickLabel': {
-            fontSize: '12px',
+          "& .MuiChartsAxis-tickLabel": {
+            fontSize: "12px",
           },
-          '& .MuiChartsLegend-root': {
-            marginBottom: '8px',
+          "& .MuiChartsLegend-root": {
+            marginBottom: "8px",
           },
-          '& .MuiChartsLegend-series text': {
-            fontSize: '13px !important',
+          "& .MuiChartsLegend-series text": {
+            fontSize: "13px !important",
             fontWeight: 500,
           },
-          '& .MuiChartsLegend-mark': {
+          "& .MuiChartsLegend-mark": {
             rx: 2,
           },
         }}
