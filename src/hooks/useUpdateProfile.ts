@@ -31,6 +31,10 @@ export function useUpdateProfile() {
         throw profileError;
       }
 
+      // Clear profile cache to force fresh fetch
+      const PROFILE_CACHE_KEY = 'drikkescore_profile_cache';
+      sessionStorage.removeItem(`${PROFILE_CACHE_KEY}_${user.id}`);
+
       // Update auth user metadata to keep it in sync
       const { error: metadataError } = await supabase.auth.updateUser({
         data: data,
