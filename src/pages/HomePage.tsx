@@ -3,12 +3,14 @@ import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCreateSession, useJoinSession } from '../hooks/useSession';
+import { useActiveSession } from '../hooks/useActiveSession';
 
 export function HomePage() {
   const navigate = useNavigate();
   const { profile, signOut } = useAuth();
   const { createSession, loading: createLoading } = useCreateSession();
   const { joinSession, loading: joinLoading } = useJoinSession();
+  const { activeSessions, loading: activeSessionsLoading } = useActiveSession();
 
   const [activeTab, setActiveTab] = useState<'create' | 'join'>('create');
   const [error, setError] = useState<string | null>(null);
@@ -63,6 +65,26 @@ export function HomePage() {
     navigate('/login');
   };
 
+  const handleRejoinSession = (sessionId: string) => {
+    navigate(`/session/${sessionId}`);
+  };
+
+  const formatTimeRemaining = (endTime: string): string => {
+    const end = new Date(endTime);
+    const now = new Date();
+    const diffMs = end.getTime() - now.getTime();
+
+    if (diffMs <= 0) return 'Utløpt';
+
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+
+    if (diffHours > 0) {
+      return `${diffHours}t ${diffMinutes}m igjen`;
+    }
+    return `${diffMinutes}m igjen`;
+  };
+
   return (
     <div className="home-page">
       <header className="home-header">
@@ -76,6 +98,86 @@ export function HomePage() {
       </header>
 
       <div className="home-content">
+        {/* Active Sessions Section */}
+        {!activeSessionsLoading && activeSessions.length > 0 && (
+          <div className="active-sessions-container" style={{ marginBottom: 'var(--spacing-xl)' }}>
+            <h2 style={{
+              color: 'var(--prussian-blue)',
+              marginBottom: 'var(--spacing-md)',
+              fontSize: 'var(--font-size-h5)'
+            }}>
+              Aktive økter
+            </h2>
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 'var(--spacing-md)'
+            }}>
+              {activeSessions.map((session) => (
+                <div
+                  key={session.id}
+                  className="active-session-card"
+                  style={{
+                    background: 'var(--color-background-primary)',
+                    border: '2px solid var(--prussian-blue)',
+                    borderRadius: 'var(--radius-lg)',
+                    padding: 'var(--spacing-md)',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    boxShadow: 'var(--shadow-md)',
+                    transition: 'all var(--transition-base)',
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => handleRejoinSession(session.id)}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+                  }}
+                >
+                  <div>
+                    <h3 style={{
+                      color: 'var(--color-text-primary)',
+                      marginBottom: 'var(--spacing-xs)',
+                      fontSize: 'var(--font-size-base)',
+                      fontWeight: 'var(--font-weight-medium)'
+                    }}>
+                      {session.session_name}
+                    </h3>
+                    <p style={{
+                      color: 'var(--color-text-secondary)',
+                      fontSize: 'var(--font-size-small)',
+                      marginBottom: 'var(--spacing-xs)'
+                    }}>
+                      Kode: <strong>{session.session_code}</strong>
+                    </p>
+                    <p style={{
+                      color: 'var(--color-text-muted)',
+                      fontSize: 'var(--font-size-small)'
+                    }}>
+                      {formatTimeRemaining(session.end_time)}
+                    </p>
+                  </div>
+                  <button
+                    className="btn-primary"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRejoinSession(session.id);
+                    }}
+                    style={{ minWidth: '120px' }}
+                  >
+                    Bli med
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="session-container">
           <div className="tabs">
             <button
