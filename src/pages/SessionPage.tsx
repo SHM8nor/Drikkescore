@@ -191,23 +191,34 @@ export function SessionPage() {
 
   return (
     <div className="session-page">
-      <header className="session-header">
-        <div>
-          <h1>{session.session_name || 'Økt'}: {session.session_code}</h1>
-          <p className="session-time">
+      {/* Session info banner - spans full width */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '16px 24px',
+        backgroundColor: 'rgba(0, 48, 73, 0.08)',
+        borderRadius: '8px',
+        marginBottom: '24px',
+        flexWrap: 'wrap',
+        gap: '16px'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '24px', flexWrap: 'wrap' }}>
+          <span style={{ fontWeight: 600, fontSize: '16px', color: 'var(--prussian-blue)' }}>
+            {session.session_name || 'Økt'}: <strong>{session.session_code}</strong>
+          </span>
+          <span style={{ fontSize: '15px', color: sessionEnded ? 'var(--fire-engine-red)' : 'var(--prussian-blue)' }}>
             {sessionEnded ? (
-              <strong style={{ color: 'var(--danger-color)' }}>Økten er avsluttet!</strong>
+              <strong>Økten er avsluttet!</strong>
             ) : (
-              <>
-                <strong>Tid gjenstående:</strong> {formatTime(timeRemaining)}
-              </>
+              <>⏱ {formatTime(timeRemaining)} igjen</>
             )}
-          </p>
+          </span>
         </div>
         <button onClick={() => navigate('/')} className="btn-secondary">
           Forlat økt
         </button>
-      </header>
+      </div>
 
       <div className="session-content">
         {/* User's current BAC */}

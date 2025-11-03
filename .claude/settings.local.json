@@ -15,7 +15,8 @@
       "Bash(npx tsc:*)",
       "Bash(timeout:*)",
       "WebSearch",
-      "Bash(npm view:*)"
+      "Bash(npm view:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

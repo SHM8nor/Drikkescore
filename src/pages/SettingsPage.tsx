@@ -225,13 +225,6 @@ export function SettingsPage() {
 
   return (
     <div className="settings-page">
-      <header className="page-header">
-        <h1>Innstillinger</h1>
-        <button onClick={() => navigate('/')} className="btn-secondary">
-          Tilbake
-        </button>
-      </header>
-
       <div className="settings-content">
         <div className="settings-card">
           <h2>Profilinnstillinger</h2>
