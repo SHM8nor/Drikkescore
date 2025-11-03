@@ -7,8 +7,11 @@ import { SessionPage } from './pages/SessionPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { HistoryPage } from './pages/HistoryPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
+import AdminPage from './pages/AdminPage';
 import ProtectedLayout from './layouts/ProtectedLayout';
 import PublicLayout from './layouts/PublicLayout';
+import AdminGuard from './guards/AdminGuard';
+import AdminLayout from './layouts/AdminLayout';
 
 function App() {
   return (
@@ -29,6 +32,18 @@ function App() {
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
           </Route>
+
+          {/* Admin routes - protected by AdminGuard */}
+          <Route
+            path="/admin"
+            element={
+              <AdminGuard>
+                <AdminLayout>
+                  <AdminPage />
+                </AdminLayout>
+              </AdminGuard>
+            }
+          />
 
           {/* Catch all - redirect to home */}
           <Route path="*" element={<Navigate to="/" replace />} />

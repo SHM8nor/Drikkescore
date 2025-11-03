@@ -1,6 +1,7 @@
 // Database types matching the Supabase schema
 
 export type Gender = 'male' | 'female';
+export type UserRole = 'user' | 'admin';
 
 export interface Profile {
   id: string;
@@ -9,6 +10,7 @@ export interface Profile {
   height_cm: number;
   gender: Gender;
   age: number;
+  role: UserRole;
   avatar_url?: string;
   created_at: string;
   updated_at: string;
