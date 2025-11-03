@@ -158,9 +158,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     initializeAuth();
 
     // Listen for auth changes
+    // IMPORTANT: This callback must be synchronous to avoid Supabase deadlock bug
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       console.log('AuthContext: Auth state changed:', _event, session?.user?.id);
 
       // Skip INITIAL_SESSION event to avoid duplicate fetch
@@ -177,25 +178,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (!mounted) return;
 
+      // Update user state synchronously
       setUser(session?.user ?? null);
 
-      // Only fetch profile on SIGNED_IN event (user just logged in)
-      if (session?.user && _event === 'SIGNED_IN') {
-        console.log('AuthContext: User signed in, fetching profile for user:', session.user.id);
-
-        // Wait a moment for the session to be fully established
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        const userProfile = await fetchProfile(session.user.id);
-        console.log('AuthContext: Profile fetched from sign in:', userProfile);
-        if (mounted) setProfile(userProfile);
-      } else if (_event === 'SIGNED_OUT') {
+      // Handle sign out - clear profile and cache
+      if (_event === 'SIGNED_OUT') {
         console.log('AuthContext: User signed out, clearing profile and cache');
         if (mounted) {
           setProfile(null);
           setProfileError(null);
           // Clear profile cache on sign out
-          sessionStorage.removeItem(`${PROFILE_CACHE_KEY}_${session?.user?.id}`);
+          if (session?.user?.id) {
+            sessionStorage.removeItem(`${PROFILE_CACHE_KEY}_${session.user.id}`);
+          }
         }
       }
     });
@@ -206,6 +201,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       subscription.unsubscribe();
     };
   }, [fetchProfile]);
+
+  // Separate effect to fetch profile when user signs in
+  // This avoids the Supabase deadlock bug by not making async calls in onAuthStateChange
+  useEffect(() => {
+    let mounted = true;
+
+    const fetchProfileForUser = async () => {
+      if (!user) {
+        console.log('AuthContext: No user, skipping profile fetch');
+        return;
+      }
+
+      // If we already have a profile for this user, skip
+      if (profile && profile.id === user.id) {
+        console.log('AuthContext: Profile already loaded for user:', user.id);
+        return;
+      }
+
+      console.log('AuthContext: Fetching profile for newly signed in user:', user.id);
+
+      // Wait a moment for the session to be fully established
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      const userProfile = await fetchProfile(user.id);
+      console.log('AuthContext: Profile fetched:', userProfile);
+
+      if (mounted) {
+        setProfile(userProfile);
+      }
+    };
+
+    fetchProfileForUser();
+
+    return () => {
+      mounted = false;
+    };
+  }, [user, profile, fetchProfile]);
 
   // Sign up with email and create profile
   const signUp = async (data: RegisterFormData) => {
