@@ -1,13 +1,11 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import { useCreateSession, useJoinSession } from '../hooks/useSession';
 import { useActiveSession } from '../hooks/useActiveSession';
 
 export function HomePage() {
   const navigate = useNavigate();
-  const { profile } = useAuth();
   const { createSession, loading: createLoading } = useCreateSession();
   const { joinSession, loading: joinLoading } = useJoinSession();
   const { activeSessions, loading: activeSessionsLoading } = useActiveSession();
