@@ -149,8 +149,8 @@ export function RegisterPage() {
               <input
                 id="age"
                 type="number"
-                value={formData.age}
-                onChange={(e) => setFormData({ ...formData, age: parseInt(e.target.value) || 18 })}
+                value={formData.age || ''}
+                onChange={(e) => setFormData({ ...formData, age: parseInt(e.target.value) || 0 })}
                 min={18}
                 max={120}
                 required
