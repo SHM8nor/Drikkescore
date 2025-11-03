@@ -1,13 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import type { FormEvent, ChangeEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useUpdateProfile } from '../hooks/useUpdateProfile';
 import { supabase } from '../lib/supabase';
 import type { Gender } from '../types/database';
 
 export function SettingsPage() {
-  const navigate = useNavigate();
   const { profile, user, retryFetchProfile } = useAuth();
   const { updateProfile, loading: updateLoading } = useUpdateProfile();
 
@@ -225,13 +223,6 @@ export function SettingsPage() {
 
   return (
     <div className="settings-page">
-      <header className="page-header">
-        <h1>Innstillinger</h1>
-        <button onClick={() => navigate('/')} className="btn-secondary">
-          Tilbake
-        </button>
-      </header>
-
       <div className="settings-content">
         <div className="settings-card">
           <h2>Profilinnstillinger</h2>

@@ -41,13 +41,6 @@ export function HistoryPage() {
 
   return (
     <div className="history-page">
-      <header className="page-header">
-        <h1>Økthistorikk</h1>
-        <button onClick={() => navigate('/')} className="btn-secondary">
-          Tilbake
-        </button>
-      </header>
-
       <div className="history-content">
         {sessions.length === 0 ? (
           <div className="no-sessions">

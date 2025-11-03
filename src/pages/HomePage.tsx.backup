@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { useCreateSession, useJoinSession } from '../hooks/useSession';
 import { useActiveSession } from '../hooks/useActiveSession';
 
 export function HomePage() {
   const navigate = useNavigate();
+  const { profile, signOut } = useAuth();
   const { createSession, loading: createLoading } = useCreateSession();
   const { joinSession, loading: joinLoading } = useJoinSession();
   const { activeSessions, loading: activeSessionsLoading } = useActiveSession();
@@ -58,6 +60,11 @@ export function HomePage() {
     }
   };
 
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/login');
+  };
+
   const handleRejoinSession = (sessionId: string) => {
     navigate(`/session/${sessionId}`);
   };
@@ -80,6 +87,16 @@ export function HomePage() {
 
   return (
     <div className="home-page">
+      <header className="home-header">
+        <h1>Drikkescore</h1>
+        <div className="user-info">
+          {profile && <span>Velkommen, {profile.full_name}</span>}
+          <button onClick={handleSignOut} className="btn-secondary">
+            Logg ut
+          </button>
+        </div>
+      </header>
+
       <div className="home-content">
         {/* Active Sessions Section */}
         {!activeSessionsLoading && activeSessions.length > 0 && (

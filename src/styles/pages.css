@@ -61,7 +61,6 @@
 
 .home-page {
   min-height: 100vh;
-  padding-bottom: var(--spacing-2xl);
 }
 
 .home-header {
@@ -83,7 +82,6 @@
 .home-content {
   max-width: 600px;
   margin: 0 auto;
-  padding: 0 var(--spacing-xl);
 }
 
 .session-container {
@@ -115,7 +113,6 @@
 
 .session-page {
   min-height: 100vh;
-  padding-bottom: var(--spacing-2xl);
 }
 
 .session-header {
@@ -140,9 +137,6 @@
 }
 
 .session-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 var(--spacing-xl);
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: var(--spacing-lg);
@@ -265,7 +259,6 @@
 
 .settings-page {
   min-height: 100vh;
-  padding-bottom: var(--spacing-2xl);
 }
 
 .page-header {
@@ -287,7 +280,6 @@
 .settings-content {
   max-width: 800px;
   margin: 0 auto;
-  padding: 0 var(--spacing-xl);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xl);
@@ -409,11 +401,6 @@
     padding: var(--spacing-lg);
   }
 
-  .home-content,
-  .session-content,
-  .settings-content {
-    padding: 0 var(--spacing-md);
-  }
 
   .avatar-preview {
     width: 120px;
