@@ -38,8 +38,14 @@ export function SessionPage() {
   } = useSession(sessionId || null);
 
   const [currentUserBAC, setCurrentUserBAC] = useState(0);
-  const [volumeMl, setVolumeMl] = useState(330); // Default beer can size
-  const [alcoholPercentage, setAlcoholPercentage] = useState(4.5);
+  const [volumeMl, setVolumeMl] = useState(() => {
+    const saved = localStorage.getItem('lastDrinkVolume');
+    return saved ? parseFloat(saved) : 330;
+  });
+  const [alcoholPercentage, setAlcoholPercentage] = useState(() => {
+    const saved = localStorage.getItem('lastDrinkAlcoholPercentage');
+    return saved ? parseFloat(saved) : 4.5;
+  });
   const [submitting, setSubmitting] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<number>(0); // seconds remaining
@@ -49,6 +55,15 @@ export function SessionPage() {
   const [bacView, setBacView] = useState<'all' | 'self'>('all');
   const [consumptionView, setConsumptionView] = useState<'per-participant' | 'session-total'>('per-participant');
   const [consumptionUnit, setConsumptionUnit] = useState<'grams' | 'beers'>('beers');
+
+  // Save drink values to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('lastDrinkVolume', volumeMl.toString());
+  }, [volumeMl]);
+
+  useEffect(() => {
+    localStorage.setItem('lastDrinkAlcoholPercentage', alcoholPercentage.toString());
+  }, [alcoholPercentage]);
 
   // Calculate time remaining and check if session ended
   useEffect(() => {
@@ -143,9 +158,7 @@ export function SessionPage() {
       await addDrink(volumeMl, alcoholPercentage);
       console.log('Drink added successfully!');
       setSubmitting(false);
-      // Reset to defaults
-      setVolumeMl(330);
-      setAlcoholPercentage(4.5);
+      // Keep the last entered values so users can quickly add the same drink again
     } catch (err: any) {
       console.error('Error adding drink:', err);
       setAddError(err.message || 'Failed to add drink');
@@ -257,7 +270,7 @@ export function SessionPage() {
                 id="volume"
                 type="number"
                 step="1"
-                value={volumeMl}
+                value={volumeMl || ''}
                 onChange={(e) => setVolumeMl(parseFloat(e.target.value) || 0)}
                 required
               />
@@ -269,7 +282,7 @@ export function SessionPage() {
                 id="alcohol"
                 type="number"
                 step="0.1"
-                value={alcoholPercentage}
+                value={alcoholPercentage || ''}
                 onChange={(e) => setAlcoholPercentage(parseFloat(e.target.value) || 0)}
                 required
               />
