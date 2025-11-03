@@ -1,0 +1,44 @@
+.burger-icon {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 1400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  padding: 12px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--color-primary);
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.burger-icon:hover {
+  background-color: rgba(0, 48, 73, 0.08);
+}
+
+.burger-icon:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.burger-icon:active {
+  background-color: rgba(0, 48, 73, 0.12);
+}
+
+.burger-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Ensure touch-friendly size on mobile */
+@media (max-width: 768px) {
+  .burger-icon {
+    width: 48px;
+    height: 48px;
+  }
+}

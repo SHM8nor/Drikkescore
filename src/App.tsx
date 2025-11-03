@@ -4,7 +4,7 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { HomePage } from './pages/HomePage';
 import { SessionPage } from './pages/SessionPage';
-import { NavigationDrawer } from './components/navigation/NavigationDrawer';
+import BurgerMenu from './components/navigation/BurgerMenu';
 import { SettingsPage } from './pages/SettingsPage';
 import { HistoryPage } from './pages/HistoryPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
@@ -56,7 +56,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <NavigationDrawer />
+      <BurgerMenu />
       {children}
     </>
   );
