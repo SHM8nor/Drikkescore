@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import type { User, AuthError } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
@@ -58,8 +58,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Fetch user profile from database with retry logic
-  const fetchProfile = async (userId: string, retryCount = 0): Promise<Profile | null> => {
+  // Fetch user profile from database
+  const fetchProfile = useCallback(async (userId: string): Promise<Profile | null> => {
     try {
       // Check cache first
       const cachedProfile = getCachedProfile(userId);
@@ -70,92 +70,58 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       console.log('fetchProfile: Starting fetch for user:', userId);
 
-      // Reduced timeout to 3 seconds for faster failure detection
-      const timeoutPromise = new Promise<null>((resolve) => {
-        setTimeout(() => {
-          console.log('fetchProfile: Timeout after 3 seconds');
-          resolve(null);
-        }, 3000);
-      });
-
-      const fetchPromise = supabase
+      // Direct fetch without aggressive timeout
+      const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single()
-        .then(({ data, error }) => {
-          console.log('fetchProfile: Query completed', { data, error });
-          if (error) {
-            console.error('fetchProfile: Error fetching profile:', error);
+        .single();
 
-            // Check if profile doesn't exist
-            if (error.code === 'PGRST116') {
-              setProfileError('Profile not found. Please contact support or recreate your profile.');
-              return null;
-            }
+      console.log('fetchProfile: Query completed', { data, error });
 
-            throw error;
-          }
-          return data as Profile;
-        });
+      if (error) {
+        console.error('fetchProfile: Error fetching profile:', error);
 
-      const result = await Promise.race([fetchPromise, timeoutPromise]);
+        // Check if profile doesn't exist
+        if (error.code === 'PGRST116') {
+          console.log('fetchProfile: Profile not found for user:', userId);
+          setProfileError('Profile not found. Click the button below to restore your profile.');
+          return null;
+        }
 
-      // Don't retry if profile doesn't exist (PGRST116 error already set error message)
-      if (result === null && retryCount < 2 && !profileError) {
-        // Retry up to 2 times with exponential backoff (only for timeouts/network errors)
-        console.log(`fetchProfile: Retry attempt ${retryCount + 1}`);
-        await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)));
-        return fetchProfile(userId, retryCount + 1);
+        // For other errors, set appropriate message
+        setProfileError('Failed to load profile. Please try again.');
+        return null;
       }
 
-      if (result) {
+      if (data) {
         // Cache successful result
-        setCachedProfile(userId, result);
+        setCachedProfile(userId, data);
         setProfileError(null);
-      } else if (retryCount >= 2 && !profileError) {
-        setProfileError('Failed to load profile after multiple attempts. Please try again.');
+        console.log('fetchProfile: Successfully fetched profile');
+        return data as Profile;
       }
 
-      console.log('fetchProfile: Returning result:', result);
-      return result;
+      console.log('fetchProfile: No data returned');
+      return null;
     } catch (err) {
       console.error('fetchProfile: Exception fetching profile:', err);
-
-      // Retry on exception
-      if (retryCount < 2) {
-        console.log(`fetchProfile: Retry attempt ${retryCount + 1} after exception`);
-        await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)));
-        return fetchProfile(userId, retryCount + 1);
-      }
-
       setProfileError('An error occurred while loading your profile. Please try again.');
       return null;
     }
-  };
+  }, []);
 
   // Initialize auth state
   useEffect(() => {
     let mounted = true;
-    let initialLoadComplete = false;
 
     console.log('AuthContext: Initializing...');
 
-    // Fallback timeout in case getSession hangs
-    const timeout = setTimeout(() => {
-      if (mounted && !initialLoadComplete) {
-        console.log('AuthContext: getSession timed out, setting loading to false');
-        setLoading(false);
-        initialLoadComplete = true;
-      }
-    }, 3000);
-
     // Get initial session using getUser for better security validation
-    supabase.auth.getUser()
-      .then(async ({ data: { user }, error }) => {
+    const initializeAuth = async () => {
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
         console.log('AuthContext: Got user:', user?.id);
-        initialLoadComplete = true;
-        clearTimeout(timeout);
 
         if (!mounted) return;
 
@@ -168,6 +134,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(user);
 
         if (user) {
+          // Wait a moment for the session to be fully established
+          await new Promise(resolve => setTimeout(resolve, 500));
+
           console.log('AuthContext: Fetching profile for user:', user.id);
           const userProfile = await fetchProfile(user.id);
           console.log('AuthContext: Profile fetched:', userProfile);
@@ -178,15 +147,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           console.log('AuthContext: Setting loading to false');
           setLoading(false);
         }
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error('AuthContext: Exception getting user:', err);
-        initialLoadComplete = true;
-        clearTimeout(timeout);
         if (mounted) {
           setLoading(false);
         }
-      });
+      }
+    };
+
+    initializeAuth();
 
     // Listen for auth changes
     const {
@@ -196,7 +165,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Skip INITIAL_SESSION event to avoid duplicate fetch
       if (_event === 'INITIAL_SESSION') {
-        console.log('AuthContext: Skipping INITIAL_SESSION event (already handled by getUser)');
+        console.log('AuthContext: Skipping INITIAL_SESSION event (already handled by initializeAuth)');
         return;
       }
 
@@ -210,11 +179,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       setUser(session?.user ?? null);
 
-      // Only fetch profile on SIGNED_IN or USER_UPDATED events
-      if (session?.user && (_event === 'SIGNED_IN' || _event === 'USER_UPDATED')) {
-        console.log('AuthContext: Fetching profile from auth state change for user:', session.user.id);
+      // Only fetch profile on SIGNED_IN event (user just logged in)
+      if (session?.user && _event === 'SIGNED_IN') {
+        console.log('AuthContext: User signed in, fetching profile for user:', session.user.id);
+
+        // Wait a moment for the session to be fully established
+        await new Promise(resolve => setTimeout(resolve, 500));
+
         const userProfile = await fetchProfile(session.user.id);
-        console.log('AuthContext: Profile fetched from auth state change:', userProfile);
+        console.log('AuthContext: Profile fetched from sign in:', userProfile);
         if (mounted) setProfile(userProfile);
       } else if (_event === 'SIGNED_OUT') {
         console.log('AuthContext: User signed out, clearing profile and cache');
@@ -230,10 +203,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       console.log('AuthContext: Cleaning up');
       mounted = false;
-      clearTimeout(timeout);
       subscription.unsubscribe();
     };
-  }, []);
+  }, [fetchProfile]);
 
   // Sign up with email and create profile
   const signUp = async (data: RegisterFormData) => {
