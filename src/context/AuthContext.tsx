@@ -9,6 +9,7 @@ interface AuthContextType {
   profile: Profile | null;
   loading: boolean;
   profileError: string | null;
+  isAdmin: boolean;
   signUp: (data: RegisterFormData) => Promise<{ error: AuthError | null }>;
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
@@ -22,6 +23,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [profileError, setProfileError] = useState<string | null>(null);
+
+  // Compute isAdmin based on profile role
+  const isAdmin = profile?.role === 'admin';
 
   // Profile cache helper functions
   const PROFILE_CACHE_KEY = 'drikkescore_profile_cache';
@@ -385,6 +389,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     profile,
     loading,
     profileError,
+    isAdmin,
     signUp,
     signIn,
     signOut,
