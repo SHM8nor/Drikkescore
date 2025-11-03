@@ -30,13 +30,14 @@
 }
 
 .menu-item--active {
-  background-color: rgba(247, 127, 0, 0.08);
-  border-left-color: var(--color-accent);
-  color: var(--color-accent);
+  background-color: rgba(247, 127, 0, 0.15);
+  border-left-color: var(--orange-wheel);
+  color: var(--orange-wheel);
+  font-weight: 600;
 }
 
 .menu-item--active:hover {
-  background-color: rgba(247, 127, 0, 0.12);
+  background-color: rgba(247, 127, 0, 0.2);
 }
 
 .menu-item__icon {
@@ -59,7 +60,7 @@
   right: 16px;
   width: 4px;
   height: 24px;
-  background-color: var(--color-accent);
+  background-color: var(--orange-wheel);
   border-radius: 2px;
 }
 
