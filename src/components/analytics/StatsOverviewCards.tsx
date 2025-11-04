@@ -7,6 +7,7 @@ import ShowChartIcon from '@mui/icons-material/ShowChart';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import ScienceIcon from '@mui/icons-material/Science';
 import type { PeriodStats } from '../../types/analytics';
+import { formatBAC } from '../../utils/bacCalculator';
 
 interface StatsOverviewCardsProps {
   stats: PeriodStats;
@@ -173,7 +174,7 @@ export default function StatsOverviewCards({ stats, loading = false }: StatsOver
       <Grid size={{ xs: 12, sm: 6, md: 4 }}>
         <StatCard
           title="Gjennomsnittlig promille"
-          value={`${(stats.averageBAC * 100).toFixed(2)}%`}
+          value={formatBAC(stats.averageBAC)}
           subtitle="På tvers av alle økter"
           icon={<ShowChartIcon />}
           color="#047857"
@@ -184,7 +185,7 @@ export default function StatsOverviewCards({ stats, loading = false }: StatsOver
       <Grid size={{ xs: 12, sm: 6, md: 4 }}>
         <StatCard
           title="Høyeste promille"
-          value={`${(stats.peakBAC * 100).toFixed(2)}%`}
+          value={formatBAC(stats.peakBAC)}
           subtitle="Høyeste måling"
           icon={<TrendingUpIcon />}
           color="var(--fire-engine-red)"

@@ -10,9 +10,9 @@ const WIDMARK_CONSTANT: Record<Gender, number> = {
 };
 
 /**
- * Average alcohol elimination rate (% per hour)
+ * Average alcohol elimination rate (promille per hour)
  */
-const ELIMINATION_RATE = 0.015;
+const ELIMINATION_RATE = 0.15;
 
 /**
  * Density of ethanol in g/ml
@@ -91,16 +91,16 @@ export function calculateAlcoholGrams(
  * BAC = Σ (A_i × absorption_i - elimination_i)
  *
  * Where for each drink i:
- * - A_i = Alcohol from drink i / (W × r) × 100 (peak BAC from that drink)
+ * - A_i = Alcohol from drink i / (W × r) × 1000 (peak BAC from that drink in promille)
  * - absorption_i = Sigmoid curve percentage based on time since consumption
- * - elimination_i = 0.015 × time_since_absorption_started (in hours)
+ * - elimination_i = 0.15 × time_since_absorption_started (in hours)
  * - W = Body weight in kilograms
  * - r = Widmark constant (0.68 for males, 0.55 for females)
  *
  * @param drinks Array of drink entries
  * @param profile User profile with weight and gender
  * @param currentTime Current time for calculation (defaults to now)
- * @returns BAC as a percentage (e.g., 0.08 for 0.08%)
+ * @returns BAC in promille (e.g., 0.8 for 0.8‰)
  */
 export function calculateBAC(
   drinks: DrinkEntry[],
@@ -142,7 +142,7 @@ export function calculateBAC(
     );
 
     // Calculate peak BAC this drink would produce (if fully absorbed)
-    const peakBACFromDrink = (alcoholGrams / (weightInGrams * widmarkR)) * 100;
+    const peakBACFromDrink = (alcoholGrams / (weightInGrams * widmarkR)) * 1000;
 
     // Calculate absorption percentage using sigmoid curve
     const absorptionPercentage = calculateAbsorptionPercentage(
@@ -172,7 +172,7 @@ export function calculateBAC(
 
 /**
  * Calculate time until BAC reaches zero
- * @param currentBAC Current BAC level
+ * @param currentBAC Current BAC level in promille
  * @returns Hours until BAC reaches zero
  */
 export function calculateTimeToSober(currentBAC: number): number {
@@ -184,33 +184,33 @@ export function calculateTimeToSober(currentBAC: number): number {
 
 /**
  * Format BAC for display
- * @param bac BAC value
- * @returns Formatted string (e.g., "0.08%")
+ * @param bac BAC value in promille
+ * @returns Formatted string (e.g., "0.80‰")
  */
 export function formatBAC(bac: number): string {
-  return `${bac.toFixed(2)}%`;
+  return `${bac.toFixed(2)}‰`;
 }
 
 /**
  * Get BAC level description
- * @param bac BAC value
+ * @param bac BAC value in promille
  * @returns Description of impairment level
  */
 export function getBACDescription(bac: number): string {
   if (bac === 0) return 'Edru';
-  if (bac < 0.02) return 'Minimale effekter';
-  if (bac < 0.05) return 'Lett påvirket';
-  if (bac < 0.08) return 'Redusert koordinasjon';
-  if (bac < 0.15) return 'Tydelig påvirket';
-  if (bac < 0.30) return 'Kraftig påvirket';
+  if (bac < 0.2) return 'Minimale effekter';
+  if (bac < 0.5) return 'Lett påvirket';
+  if (bac < 0.8) return 'Redusert koordinasjon';
+  if (bac < 1.5) return 'Tydelig påvirket';
+  if (bac < 3.0) return 'Kraftig påvirket';
   return 'Livstruende';
 }
 
 /**
- * Check if user is over legal driving limit (0.08% in most places)
- * @param bac BAC value
+ * Check if user is over legal driving limit (0.8‰ in most places)
+ * @param bac BAC value in promille
  * @returns True if over limit
  */
 export function isOverDrivingLimit(bac: number): boolean {
-  return bac >= 0.08;
+  return bac >= 0.8;
 }

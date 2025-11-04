@@ -178,7 +178,7 @@ export default function BACLineChart({
         ]}
         yAxis={[
           {
-            label: "Promille %",
+            label: "Promille (‰)",
             min: 0,
           },
         ]}
