@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCreateSession, useJoinSession } from '../hooks/useSession';
 import { useActiveSession } from '../hooks/useActiveSession';
 import { QRScanner } from '../components/session/QRScanner';
+import { ActiveSessions } from '../components/friends/ActiveSessions';
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -97,7 +98,7 @@ export function HomePage() {
   return (
     <div className="home-page">
       <div className="home-content">
-        {/* Active Sessions Section */}
+        {/* Active User Sessions Section */}
         {!activeSessionsLoading && activeSessions.length > 0 && (
           <div className="active-sessions-container" style={{ marginBottom: 'var(--spacing-xl)' }}>
             <h2 style={{
@@ -105,7 +106,7 @@ export function HomePage() {
               marginBottom: 'var(--spacing-md)',
               fontSize: 'var(--font-size-h5)'
             }}>
-              Aktive økter
+              Dine aktive økter
             </h2>
             <div style={{
               display: 'flex',
@@ -176,6 +177,18 @@ export function HomePage() {
             </div>
           </div>
         )}
+
+        {/* Friends' Active Sessions Section */}
+        <div className="friends-sessions-container" style={{ marginBottom: 'var(--spacing-xl)' }}>
+          <h2 style={{
+            color: 'var(--prussian-blue)',
+            marginBottom: 'var(--spacing-md)',
+            fontSize: 'var(--font-size-h5)'
+          }}>
+            Venner spiller nå
+          </h2>
+          <ActiveSessions maxDisplay={5} />
+        </div>
 
         <div className="session-container">
           <div className="tabs">

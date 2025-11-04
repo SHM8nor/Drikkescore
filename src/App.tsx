@@ -8,6 +8,7 @@ import { JoinSession } from './pages/JoinSession';
 import { SettingsPage } from './pages/SettingsPage';
 import { HistoryPage } from './pages/HistoryPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
+import FriendsPage from './pages/FriendsPage';
 import AdminPage from './pages/AdminPage';
 import ProtectedLayout from './layouts/ProtectedLayout';
 import PublicLayout from './layouts/PublicLayout';
@@ -32,6 +33,7 @@ function App() {
           <Route element={<ProtectedLayout />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/session/:sessionId" element={<SessionPage />} />
+            <Route path="/friends" element={<FriendsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
