@@ -35,13 +35,13 @@ const CHART_COLORS = [
  *
  * Displays BAC evolution over time for session participants using MUI LineChart.
  * Shows one colored line per participant with their BAC progression from session start.
- * The x-axis is fixed from session start (0 minutes) to session end, preventing
- * the chart from expanding and providing a clear view of progress toward the finish line.
+ * The x-axis dynamically adjusts: for active sessions, it shows from start to current time
+ * (+ 5 min buffer); for completed sessions, it shows the full duration.
  *
  * @param participants - Array of participant profiles
  * @param drinks - Array of all drink entries in the session
  * @param sessionStartTime - Session start timestamp
- * @param sessionEndTime - Session end timestamp (defines the fixed x-axis range)
+ * @param sessionEndTime - Session end timestamp (used to determine if session is active)
  * @param currentUserId - ID of the current user (to highlight their line)
  * @param view - Display mode: 'all' shows all participants, 'self' shows only current user
  */
@@ -61,6 +61,17 @@ export default function BACLineChart({
     const sessionDurationMinutes = Math.ceil(
       (sessionEndTime.getTime() - sessionStartTime.getTime()) / (1000 * 60)
     );
+
+    // Calculate x-axis max based on session status
+    // For active sessions: show only up to current time + 5 min buffer
+    // For completed sessions: show full duration
+    const isSessionActive = currentTime < sessionEndTime;
+    const minutesSinceStart = Math.ceil(
+      (currentTime.getTime() - sessionStartTime.getTime()) / (1000 * 60)
+    );
+    const xAxisMax = isSessionActive
+      ? Math.min(minutesSinceStart + 5, sessionDurationMinutes)
+      : sessionDurationMinutes;
 
     // Filter participants based on view mode
     const displayParticipants =
@@ -85,7 +96,7 @@ export default function BACLineChart({
       return CHART_COLORS[index % CHART_COLORS.length];
     });
 
-    return { series, colors, sessionDurationMinutes };
+    return { series, colors, xAxisMax };
   }, [
     participants,
     drinks,
@@ -153,7 +164,7 @@ export default function BACLineChart({
             data: xAxisData,
             label: "Tid",
             min: 0,
-            max: chartData.sessionDurationMinutes,
+            max: chartData.xAxisMax,
             valueFormatter: (value) => {
               // Convert minutes offset to actual time (HH:MM format)
               const timeInMs =
@@ -167,7 +178,7 @@ export default function BACLineChart({
         ]}
         yAxis={[
           {
-            label: "Promille %",
+            label: "Promille (‰)",
             min: 0,
           },
         ]}

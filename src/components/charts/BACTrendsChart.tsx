@@ -89,7 +89,7 @@ export default function BACTrendsChart({ bacTrend }: BACTrendsChartProps) {
         ]}
         yAxis={[
           {
-            label: 'Promille %',
+            label: 'Promille (‰)',
             min: 0,
           },
         ]}

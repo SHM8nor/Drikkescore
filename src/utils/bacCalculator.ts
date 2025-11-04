@@ -10,14 +10,68 @@ const WIDMARK_CONSTANT: Record<Gender, number> = {
 };
 
 /**
- * Average alcohol elimination rate (% per hour)
+ * Average alcohol elimination rate (promille per hour)
  */
-const ELIMINATION_RATE = 0.015;
+const ELIMINATION_RATE = 0.15;
 
 /**
  * Density of ethanol in g/ml
  */
 const ETHANOL_DENSITY = 0.789;
+
+/**
+ * Drink types inferred from alcohol percentage
+ */
+export type DrinkType = 'beer' | 'wine' | 'spirits';
+
+/**
+ * Absorption time in minutes for each drink type
+ * Beer absorbs slower due to carbonation and volume
+ * Wine and spirits absorb faster
+ */
+const ABSORPTION_TIME_MINUTES: Record<DrinkType, number> = {
+  beer: 20,
+  wine: 15,
+  spirits: 15,
+};
+
+/**
+ * Infer drink type from alcohol percentage
+ * <8% = Beer, 8-20% = Wine, >20% = Spirits
+ */
+export function inferDrinkType(alcoholPercentage: number): DrinkType {
+  if (alcoholPercentage < 8) {
+    return 'beer';
+  } else if (alcoholPercentage <= 20) {
+    return 'wine';
+  } else {
+    return 'spirits';
+  }
+}
+
+/**
+ * Calculate absorption percentage using sigmoid curve (S-curve)
+ * This creates a realistic absorption pattern: slow start, rapid middle, slow finish
+ *
+ * @param minutesSinceConsumption Time elapsed since drink was consumed
+ * @param absorptionTimeMinutes Total time for full absorption
+ * @returns Percentage absorbed (0 to 1)
+ */
+function calculateAbsorptionPercentage(
+  minutesSinceConsumption: number,
+  absorptionTimeMinutes: number
+): number {
+  // Sigmoid function: 1 / (1 + e^(-k*(t - midpoint)))
+  // k controls steepness, midpoint is center of absorption period
+  const midpoint = absorptionTimeMinutes / 2;
+  const k = 8 / absorptionTimeMinutes; // Steepness factor
+
+  const exponent = -k * (minutesSinceConsumption - midpoint);
+  const absorption = 1 / (1 + Math.exp(exponent));
+
+  // Clamp between 0 and 1
+  return Math.max(0, Math.min(1, absorption));
+}
 
 /**
  * Calculate the amount of pure alcohol in grams from a drink
@@ -31,21 +85,22 @@ export function calculateAlcoholGrams(
 }
 
 /**
- * Calculate Blood Alcohol Content using the Widmark formula
+ * Calculate Blood Alcohol Content using the Widmark formula with gradual absorption
  *
- * Formula: BAC = (A / (W × r)) × 100 - (0.015 × t)
+ * Modified formula with per-drink absorption and elimination:
+ * BAC = Σ (A_i × absorption_i - elimination_i)
  *
- * Where:
- * - A = Total alcohol consumed in grams
+ * Where for each drink i:
+ * - A_i = Alcohol from drink i / (W × r) × 1000 (peak BAC from that drink in promille)
+ * - absorption_i = Sigmoid curve percentage based on time since consumption
+ * - elimination_i = 0.15 × time_since_absorption_started (in hours)
  * - W = Body weight in kilograms
  * - r = Widmark constant (0.68 for males, 0.55 for females)
- * - t = Time elapsed since first drink (in hours)
- * - 0.015 = Average alcohol elimination rate per hour
  *
  * @param drinks Array of drink entries
  * @param profile User profile with weight and gender
  * @param currentTime Current time for calculation (defaults to now)
- * @returns BAC as a percentage (e.g., 0.08 for 0.08%)
+ * @returns BAC in promille (e.g., 0.8 for 0.8‰)
  */
 export function calculateBAC(
   drinks: DrinkEntry[],
@@ -57,50 +112,67 @@ export function calculateBAC(
     return 0;
   }
 
-  // Sort drinks by consumption time
-  const sortedDrinks = [...drinks].sort(
-    (a, b) => new Date(a.consumed_at).getTime() - new Date(b.consumed_at).getTime()
-  );
+  // Get Widmark constant for gender and body weight
+  const widmarkR = WIDMARK_CONSTANT[profile.gender];
+  const weightInGrams = profile.weight_kg * 1000;
 
-  // Get first drink time
-  const firstDrinkTime = new Date(sortedDrinks[0].consumed_at);
+  let totalBAC = 0;
 
-  // Calculate total alcohol consumed in grams
-  let totalAlcoholGrams = 0;
-  for (const drink of sortedDrinks) {
+  // Calculate BAC contribution from each drink individually
+  for (const drink of drinks) {
     const drinkTime = new Date(drink.consumed_at);
-    // Only count drinks consumed before current time
-    if (drinkTime <= currentTime) {
-      totalAlcoholGrams += calculateAlcoholGrams(
-        drink.volume_ml,
-        drink.alcohol_percentage
-      );
+
+    // Skip drinks consumed after current time
+    if (drinkTime > currentTime) {
+      continue;
     }
+
+    // Calculate time elapsed since consumption
+    const timeElapsedMs = currentTime.getTime() - drinkTime.getTime();
+    const minutesSinceConsumption = timeElapsedMs / (1000 * 60);
+
+    // Infer drink type and get absorption time
+    const drinkType = inferDrinkType(drink.alcohol_percentage);
+    const absorptionTimeMinutes = ABSORPTION_TIME_MINUTES[drinkType];
+
+    // Calculate alcohol grams from this drink
+    const alcoholGrams = calculateAlcoholGrams(
+      drink.volume_ml,
+      drink.alcohol_percentage
+    );
+
+    // Calculate peak BAC this drink would produce (if fully absorbed)
+    const peakBACFromDrink = (alcoholGrams / (weightInGrams * widmarkR)) * 1000;
+
+    // Calculate absorption percentage using sigmoid curve
+    const absorptionPercentage = calculateAbsorptionPercentage(
+      minutesSinceConsumption,
+      absorptionTimeMinutes
+    );
+
+    // Calculate BAC from absorbed portion
+    let bacFromDrink = peakBACFromDrink * absorptionPercentage;
+
+    // Apply elimination based on time elapsed since consumption started
+    // Elimination happens gradually as absorption occurs
+    const hoursElapsed = minutesSinceConsumption / 60;
+    const eliminatedBAC = ELIMINATION_RATE * hoursElapsed;
+    bacFromDrink = Math.max(0, bacFromDrink - eliminatedBAC);
+
+    // Add this drink's contribution to total BAC
+    totalBAC += bacFromDrink;
   }
 
-  // Get Widmark constant for gender
-  const widmarkR = WIDMARK_CONSTANT[profile.gender];
-
-  // Calculate BAC using Widmark formula
-  // BAC = (alcohol in grams / (body weight in kg × widmark constant)) × 100
-  const weightInGrams = profile.weight_kg * 1000;
-  let bac = (totalAlcoholGrams / (weightInGrams * widmarkR)) * 100;
-
-  // Apply elimination rate based on time elapsed since first drink
-  const timeElapsedMs = currentTime.getTime() - firstDrinkTime.getTime();
-  const timeElapsedHours = timeElapsedMs / (1000 * 60 * 60);
-  bac = bac - (ELIMINATION_RATE * timeElapsedHours);
-
   // BAC cannot be negative
-  bac = Math.max(bac, 0);
+  totalBAC = Math.max(0, totalBAC);
 
   // Round to 4 decimal places
-  return Math.round(bac * 10000) / 10000;
+  return Math.round(totalBAC * 10000) / 10000;
 }
 
 /**
  * Calculate time until BAC reaches zero
- * @param currentBAC Current BAC level
+ * @param currentBAC Current BAC level in promille
  * @returns Hours until BAC reaches zero
  */
 export function calculateTimeToSober(currentBAC: number): number {
@@ -112,33 +184,33 @@ export function calculateTimeToSober(currentBAC: number): number {
 
 /**
  * Format BAC for display
- * @param bac BAC value
- * @returns Formatted string (e.g., "0.08%")
+ * @param bac BAC value in promille
+ * @returns Formatted string (e.g., "0.80‰")
  */
 export function formatBAC(bac: number): string {
-  return `${bac.toFixed(2)}%`;
+  return `${bac.toFixed(2)}‰`;
 }
 
 /**
  * Get BAC level description
- * @param bac BAC value
+ * @param bac BAC value in promille
  * @returns Description of impairment level
  */
 export function getBACDescription(bac: number): string {
   if (bac === 0) return 'Edru';
-  if (bac < 0.02) return 'Minimale effekter';
-  if (bac < 0.05) return 'Lett påvirket';
-  if (bac < 0.08) return 'Redusert koordinasjon';
-  if (bac < 0.15) return 'Tydelig påvirket';
-  if (bac < 0.30) return 'Kraftig påvirket';
+  if (bac < 0.2) return 'Minimale effekter';
+  if (bac < 0.5) return 'Lett påvirket';
+  if (bac < 0.8) return 'Redusert koordinasjon';
+  if (bac < 1.5) return 'Tydelig påvirket';
+  if (bac < 3.0) return 'Kraftig påvirket';
   return 'Livstruende';
 }
 
 /**
- * Check if user is over legal driving limit (0.08% in most places)
- * @param bac BAC value
+ * Check if user is over legal driving limit (0.8‰ in most places)
+ * @param bac BAC value in promille
  * @returns True if over limit
  */
 export function isOverDrivingLimit(bac: number): boolean {
-  return bac >= 0.08;
+  return bac >= 0.8;
 }
