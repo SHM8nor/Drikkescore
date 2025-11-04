@@ -280,7 +280,7 @@ export default function FriendsExample() {
           />
           <Tab label={`Sendt (${sentRequests.length})`} />
           <Tab
-            label={`Spiller nå (${activeFriends.length})`}
+            label={`Drikker seg dritings (${activeFriends.length})`}
             icon={activeFriends.length > 0 ? <CircleIcon color="success" sx={{ fontSize: 12 }} /> : undefined}
           />
         </Tabs>
@@ -409,7 +409,7 @@ export default function FriendsExample() {
         <TabPanel value={activeTab} index={3}>
           {activeFriends.length === 0 ? (
             <Box textAlign="center" py={4}>
-              <Typography color="text.secondary">Ingen venner spiller akkurat nå</Typography>
+              <Typography color="text.secondary">Ingen venner drikker seg dritings akkurat nå</Typography>
             </Box>
           ) : (
             <List>

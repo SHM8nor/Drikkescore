@@ -87,7 +87,7 @@ export default function FriendsPage() {
           Venner
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          Administrer venner, se forespørsler og finn hvem som spiller nå
+          Administrer venner, se forespørsler og finn hvem som drikker seg dritings
         </Typography>
       </Box>
 
@@ -171,7 +171,7 @@ export default function FriendsPage() {
           />
           <Tab
             icon={<ActiveIcon />}
-            label="Spiller nå"
+            label="Drikker seg dritings"
             iconPosition="start"
             {...a11yProps(4)}
           />
@@ -221,7 +221,7 @@ export default function FriendsPage() {
           <TabPanel value={activeTab} index={4}>
             <Box sx={{ px: 2 }}>
               <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
-                Venner som spiller nå
+                Venner som drikker seg dritings
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
                 Se hvilke venner som er aktive i økter akkurat nå

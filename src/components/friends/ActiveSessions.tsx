@@ -184,7 +184,7 @@ export function ActiveSessions({
               }}
             />
             <Typography variant="h6" color="text.secondary" gutterBottom>
-              Ingen venner spiller akkurat nå
+              Ingen venner drikker seg dritings akkurat nå
             </Typography>
             <Typography variant="body2" color="text.disabled">
               Når vennene dine starter en økt, vises de her

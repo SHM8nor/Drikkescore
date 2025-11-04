@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import type { FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useCreateSession, useJoinSession } from '../hooks/useSession';
-import { useActiveSession } from '../hooks/useActiveSession';
-import { QRScanner } from '../components/session/QRScanner';
-import { ActiveSessions } from '../components/friends/ActiveSessions';
+import { useState } from "react";
+import type { FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
+import { useCreateSession, useJoinSession } from "../hooks/useSession";
+import { useActiveSession } from "../hooks/useActiveSession";
+import { QRScanner } from "../components/session/QRScanner";
+import { ActiveSessions } from "../components/friends/ActiveSessions";
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -12,23 +12,23 @@ export function HomePage() {
   const { joinSession, loading: joinLoading } = useJoinSession();
   const { activeSessions, loading: activeSessionsLoading } = useActiveSession();
 
-  const [activeTab, setActiveTab] = useState<'create' | 'join'>('create');
+  const [activeTab, setActiveTab] = useState<"create" | "join">("create");
   const [error, setError] = useState<string | null>(null);
   const [showQRScanner, setShowQRScanner] = useState(false);
 
   // Create session form state
   const [duration, setDuration] = useState(60); // default 1 hour in minutes
-  const [sessionName, setSessionName] = useState('');
+  const [sessionName, setSessionName] = useState("");
 
   // Join session form state
-  const [sessionCode, setSessionCode] = useState('');
+  const [sessionCode, setSessionCode] = useState("");
 
   const handleCreateSession = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
 
     if (!duration || duration <= 0) {
-      setError('Vennligst velg en øktvarighet');
+      setError("Vennligst velg en øktvarighet");
       return;
     }
 
@@ -40,7 +40,7 @@ export function HomePage() {
       const session = await createSession(sessionName.trim(), start, end);
       navigate(`/session/${session.id}`);
     } catch (err: any) {
-      setError(err.message || 'Kunne ikke opprette økt');
+      setError(err.message || "Kunne ikke opprette økt");
     }
   };
 
@@ -49,7 +49,7 @@ export function HomePage() {
     setError(null);
 
     if (!sessionCode.trim()) {
-      setError('Vennligst skriv inn en øktkode');
+      setError("Vennligst skriv inn en øktkode");
       return;
     }
 
@@ -57,7 +57,7 @@ export function HomePage() {
       const session = await joinSession(sessionCode.toUpperCase().trim());
       navigate(`/session/${session.id}`);
     } catch (err: any) {
-      setError(err.message || 'Kunne ikke bli med i økt');
+      setError(err.message || "Kunne ikke bli med i økt");
     }
   };
 
@@ -69,9 +69,9 @@ export function HomePage() {
       const session = await joinSession(scannedCode.toUpperCase().trim());
       navigate(`/session/${session.id}`);
     } catch (err: any) {
-      setError(err.message || 'Kunne ikke bli med i økt');
+      setError(err.message || "Kunne ikke bli med i økt");
       // Switch to join tab to show error
-      setActiveTab('join');
+      setActiveTab("join");
     }
   };
 
@@ -84,7 +84,7 @@ export function HomePage() {
     const now = new Date();
     const diffMs = end.getTime() - now.getTime();
 
-    if (diffMs <= 0) return 'Utløpt';
+    if (diffMs <= 0) return "Utløpt";
 
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
@@ -100,65 +100,78 @@ export function HomePage() {
       <div className="home-content">
         {/* Active User Sessions Section */}
         {!activeSessionsLoading && activeSessions.length > 0 && (
-          <div className="active-sessions-container" style={{ marginBottom: 'var(--spacing-xl)' }}>
-            <h2 style={{
-              color: 'var(--prussian-blue)',
-              marginBottom: 'var(--spacing-md)',
-              fontSize: 'var(--font-size-h5)'
-            }}>
+          <div
+            className="active-sessions-container"
+            style={{ marginBottom: "var(--spacing-xl)" }}
+          >
+            <h2
+              style={{
+                color: "var(--prussian-blue)",
+                marginBottom: "var(--spacing-md)",
+                fontSize: "var(--font-size-h5)",
+              }}
+            >
               Dine aktive økter
             </h2>
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 'var(--spacing-md)'
-            }}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "var(--spacing-md)",
+              }}
+            >
               {activeSessions.map((session) => (
                 <div
                   key={session.id}
                   className="active-session-card"
                   style={{
-                    background: 'var(--color-background-primary)',
-                    border: '2px solid var(--prussian-blue)',
-                    borderRadius: 'var(--radius-lg)',
-                    padding: 'var(--spacing-md)',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    boxShadow: 'var(--shadow-md)',
-                    transition: 'all var(--transition-base)',
-                    cursor: 'pointer',
+                    background: "var(--color-background-primary)",
+                    border: "2px solid var(--prussian-blue)",
+                    borderRadius: "var(--radius-lg)",
+                    padding: "var(--spacing-md)",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    boxShadow: "var(--shadow-md)",
+                    transition: "all var(--transition-base)",
+                    cursor: "pointer",
                   }}
                   onClick={() => handleRejoinSession(session.id)}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
+                    e.currentTarget.style.transform = "translateY(-2px)";
+                    e.currentTarget.style.boxShadow = "var(--shadow-lg)";
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.boxShadow = "var(--shadow-md)";
                   }}
                 >
                   <div>
-                    <h3 style={{
-                      color: 'var(--color-text-primary)',
-                      marginBottom: 'var(--spacing-xs)',
-                      fontSize: 'var(--font-size-base)',
-                      fontWeight: 'var(--font-weight-medium)'
-                    }}>
+                    <h3
+                      style={{
+                        color: "var(--color-text-primary)",
+                        marginBottom: "var(--spacing-xs)",
+                        fontSize: "var(--font-size-base)",
+                        fontWeight: "var(--font-weight-medium)",
+                      }}
+                    >
                       {session.session_name}
                     </h3>
-                    <p style={{
-                      color: 'var(--color-text-secondary)',
-                      fontSize: 'var(--font-size-small)',
-                      marginBottom: 'var(--spacing-xs)'
-                    }}>
+                    <p
+                      style={{
+                        color: "var(--color-text-secondary)",
+                        fontSize: "var(--font-size-small)",
+                        marginBottom: "var(--spacing-xs)",
+                      }}
+                    >
                       Kode: <strong>{session.session_code}</strong>
                     </p>
-                    <p style={{
-                      color: 'var(--color-text-muted)',
-                      fontSize: 'var(--font-size-small)'
-                    }}>
+                    <p
+                      style={{
+                        color: "var(--color-text-muted)",
+                        fontSize: "var(--font-size-small)",
+                      }}
+                    >
                       {formatTimeRemaining(session.end_time)}
                     </p>
                   </div>
@@ -168,7 +181,7 @@ export function HomePage() {
                       e.stopPropagation();
                       handleRejoinSession(session.id);
                     }}
-                    style={{ minWidth: '120px' }}
+                    style={{ minWidth: "120px" }}
                   >
                     Bli med
                   </button>
@@ -179,32 +192,28 @@ export function HomePage() {
         )}
 
         {/* Friends' Active Sessions Section */}
-        <div className="friends-sessions-container" style={{ marginBottom: 'var(--spacing-xl)' }}>
-          <h2 style={{
-            color: 'var(--prussian-blue)',
-            marginBottom: 'var(--spacing-md)',
-            fontSize: 'var(--font-size-h5)'
-          }}>
-            Venner spiller nå
-          </h2>
+        <div
+          className="friends-sessions-container"
+          style={{ marginBottom: "var(--spacing-xl)" }}
+        >
           <ActiveSessions maxDisplay={5} />
         </div>
 
         <div className="session-container">
           <div className="tabs">
             <button
-              className={`tab ${activeTab === 'create' ? 'active' : ''}`}
+              className={`tab ${activeTab === "create" ? "active" : ""}`}
               onClick={() => {
-                setActiveTab('create');
+                setActiveTab("create");
                 setError(null);
               }}
             >
               Opprett økt
             </button>
             <button
-              className={`tab ${activeTab === 'join' ? 'active' : ''}`}
+              className={`tab ${activeTab === "join" ? "active" : ""}`}
               onClick={() => {
-                setActiveTab('join');
+                setActiveTab("join");
                 setError(null);
               }}
             >
@@ -214,7 +223,7 @@ export function HomePage() {
 
           {error && <div className="error-message">{error}</div>}
 
-          {activeTab === 'create' ? (
+          {activeTab === "create" ? (
             <form onSubmit={handleCreateSession} className="session-form">
               <h2>Opprett ny økt</h2>
               <p className="form-description">
@@ -254,8 +263,12 @@ export function HomePage() {
                 </select>
               </div>
 
-              <button type="submit" className="btn-primary" disabled={createLoading}>
-                {createLoading ? 'Oppretter...' : 'Opprett økt'}
+              <button
+                type="submit"
+                className="btn-primary"
+                disabled={createLoading}
+              >
+                {createLoading ? "Oppretter..." : "Opprett økt"}
               </button>
             </form>
           ) : (
@@ -275,26 +288,34 @@ export function HomePage() {
                   placeholder="ABC123"
                   maxLength={6}
                   required
-                  style={{ textTransform: 'uppercase', letterSpacing: '0.1em' }}
+                  style={{ textTransform: "uppercase", letterSpacing: "0.1em" }}
                 />
               </div>
 
-              <button type="submit" className="btn-primary" disabled={joinLoading}>
-                {joinLoading ? 'Blir med...' : 'Bli med i økt'}
+              <button
+                type="submit"
+                className="btn-primary"
+                disabled={joinLoading}
+              >
+                {joinLoading ? "Blir med..." : "Bli med i økt"}
               </button>
 
               {/* QR Scanner Button */}
-              <div style={{
-                marginTop: 'var(--spacing-md)',
-                textAlign: 'center',
-                padding: 'var(--spacing-md) 0',
-                borderTop: '1px solid var(--color-border)',
-              }}>
-                <p style={{
-                  color: 'var(--color-text-secondary)',
-                  fontSize: 'var(--font-size-small)',
-                  marginBottom: 'var(--spacing-sm)'
-                }}>
+              <div
+                style={{
+                  marginTop: "var(--spacing-md)",
+                  textAlign: "center",
+                  padding: "var(--spacing-md) 0",
+                  borderTop: "1px solid var(--color-border)",
+                }}
+              >
+                <p
+                  style={{
+                    color: "var(--color-text-secondary)",
+                    fontSize: "var(--font-size-small)",
+                    marginBottom: "var(--spacing-sm)",
+                  }}
+                >
                   eller
                 </p>
                 <button
@@ -302,11 +323,11 @@ export function HomePage() {
                   className="btn-secondary"
                   onClick={() => setShowQRScanner(true)}
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 'var(--spacing-sm)',
-                    width: '100%',
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "var(--spacing-sm)",
+                    width: "100%",
                   }}
                 >
                   <svg
