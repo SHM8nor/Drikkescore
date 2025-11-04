@@ -2,12 +2,15 @@ import { useState, useEffect, useMemo } from 'react';
 import type { FormEvent } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSession } from '../hooks/useSession';
+import { useSessionPresence } from '../hooks/useSessionPresence';
 import { useAuth } from '../context/AuthContext';
 import { formatBAC, getBACDescription } from '../utils/bacCalculator';
 import { calculateTotalAlcoholGrams, convertGramsToBeers } from '../utils/chartHelpers';
 import BACLineChart from '../components/charts/BACLineChart';
 import AlcoholConsumptionChart from '../components/charts/AlcoholConsumptionChart';
 import ChartContainer from '../components/charts/ChartContainer';
+import { ShareSessionModal } from '../components/session/ShareSessionModal';
+import { ActiveUsersIndicator } from '../components/session/ActiveUsersIndicator';
 
 // Helper function to format countdown timer
 function formatTime(seconds: number): string {
@@ -64,6 +67,19 @@ export function SessionPage() {
     getCurrentUserBAC,
   } = useSession(sessionId || null);
 
+  // FIX #6: Check if user is session participant before enabling presence
+  const isParticipant = useMemo(() => {
+    if (!user || !participants.length) return false;
+    return participants.some((p) => p.id === user.id);
+  }, [user, participants]);
+
+  // FIX #2: Enable presence only if !!sessionId && !!user
+  // FIX #6: Also verify user is session participant before enabling presence
+  useSessionPresence({
+    sessionId: sessionId || null,
+    enabled: !!sessionId && !!user && isParticipant,
+  });
+
   const [currentUserBAC, setCurrentUserBAC] = useState(0);
   const [volumeMl, setVolumeMl] = useState(() => {
     const saved = localStorage.getItem('lastDrinkVolume');
@@ -77,6 +93,7 @@ export function SessionPage() {
   const [addError, setAddError] = useState<string | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<number>(0); // seconds remaining
   const [sessionEnded, setSessionEnded] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
   const [timeSinceLastDrink, setTimeSinceLastDrink] = useState<string>('');
 
   // Chart view toggles
@@ -275,10 +292,17 @@ export function SessionPage() {
               <>⏱ {formatTime(timeRemaining)} igjen</>
             )}
           </span>
+          {/* Active users indicator */}
+          {sessionId && <ActiveUsersIndicator sessionId={sessionId} />}
         </div>
-        <button onClick={() => navigate('/')} className="btn-secondary">
-          Forlat økt
-        </button>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          <button onClick={() => setShareModalOpen(true)} className="btn-primary">
+            Del økt
+          </button>
+          <button onClick={() => navigate('/')} className="btn-secondary">
+            Forlat økt
+          </button>
+        </div>
       </div>
 
       <div className="session-content">
@@ -516,6 +540,17 @@ export function SessionPage() {
           </ChartContainer>
         )}
       </div>
+
+      {/* SECURITY FIX #4: Only render ShareSessionModal if session_code exists */}
+      {session.session_code && (
+        <ShareSessionModal
+          open={shareModalOpen}
+          onClose={() => setShareModalOpen(false)}
+          sessionId={session.id}
+          sessionCode={session.session_code}
+          sessionName={session.session_name}
+        />
+      )}
     </div>
   );
 }

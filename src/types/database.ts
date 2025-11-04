@@ -2,6 +2,8 @@
 
 export type Gender = 'male' | 'female';
 export type UserRole = 'user' | 'admin';
+export type FriendshipStatus = 'pending' | 'accepted' | 'declined' | 'blocked';
+export type SessionStatus = 'active' | 'idle' | 'offline';
 
 export interface Profile {
   id: string;
@@ -54,6 +56,76 @@ export interface LeaderboardEntry {
 export interface SessionWithParticipants extends Session {
   participants: Profile[];
 }
+
+// =============================================================================
+// Friend System Types
+// =============================================================================
+
+export interface Friendship {
+  id: string;
+  user_id: string;
+  friend_id: string;
+  status: FriendshipStatus;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Friend {
+  friend_id: string;
+  full_name: string;
+  avatar_url: string | null;
+  created_at: string;
+}
+
+export interface FriendRequest {
+  friendship_id: string;
+  requester_id: string;
+  full_name: string;
+  avatar_url: string | null;
+  created_at: string;
+}
+
+export interface SentFriendRequest {
+  friendship_id: string;
+  recipient_id: string;
+  full_name: string;
+  avatar_url: string | null;
+  created_at: string;
+}
+
+export interface ActiveSession {
+  id: string;
+  user_id: string;
+  session_id: string;
+  status: SessionStatus;
+  last_seen: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ActiveFriendSession {
+  friend_id: string;
+  friend_name: string;
+  friend_avatar_url: string | null;
+  session_id: string;
+  session_name: string;
+  session_code: string;
+  status: SessionStatus;
+  last_seen: string;
+  participant_count: number;
+}
+
+export interface SessionActiveUser {
+  user_id: string;
+  full_name: string;
+  avatar_url: string | null;
+  status: SessionStatus;
+  last_seen: string;
+}
+
+// =============================================================================
+// Form Data Types
+// =============================================================================
 
 export interface RegisterFormData {
   email: string;

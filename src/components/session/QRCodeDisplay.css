@@ -1,0 +1,117 @@
+/* QR Code Display Container */
+.qr-code-display {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+.qr-code-container {
+  background: var(--color-background-primary, #ffffff);
+  border-radius: var(--radius-lg, 12px);
+  padding: 24px;
+  box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.1));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 400px;
+  width: 100%;
+}
+
+/* QR Canvas */
+.qr-canvas {
+  width: 300px;
+  height: 300px;
+  border-radius: var(--radius-md, 8px);
+  background-color: white;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* QR Info Section */
+.qr-info {
+  margin-top: 24px;
+  text-align: center;
+  width: 100%;
+}
+
+.session-name {
+  font-size: var(--font-size-h5, 20px);
+  font-weight: var(--font-weight-semibold, 600);
+  color: var(--prussian-blue, #003049);
+  margin: 0 0 16px 0;
+}
+
+.session-code-label {
+  font-size: var(--font-size-small, 14px);
+  color: var(--color-text-secondary, #666);
+  margin: 0 0 4px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.session-code {
+  font-size: var(--font-size-h3, 32px);
+  font-weight: var(--font-weight-bold, 700);
+  color: var(--prussian-blue, #003049);
+  margin: 0 0 16px 0;
+  letter-spacing: 0.1em;
+  font-family: 'Courier New', monospace;
+}
+
+.qr-instructions {
+  font-size: var(--font-size-small, 14px);
+  color: var(--color-text-muted, #999);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* QR Error */
+.qr-error {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.qr-error p {
+  color: var(--fire-engine-red, #d62828);
+  font-size: var(--font-size-base, 16px);
+  margin: 0;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 600px) {
+  .qr-code-display {
+    padding: 16px;
+  }
+
+  .qr-code-container {
+    padding: 20px;
+  }
+
+  .qr-canvas {
+    width: 250px;
+    height: 250px;
+    padding: 12px;
+  }
+
+  .session-name {
+    font-size: var(--font-size-h6, 18px);
+  }
+
+  .session-code {
+    font-size: var(--font-size-h4, 28px);
+  }
+}
+
+/* Small screens */
+@media (max-width: 400px) {
+  .qr-canvas {
+    width: 200px;
+    height: 200px;
+    padding: 8px;
+  }
+
+  .session-code {
+    font-size: var(--font-size-h5, 24px);
+  }
+}
