@@ -18,7 +18,9 @@
       "Bash(npm view:*)",
       "Bash(cat:*)",
       "Bash(git commit -m \"$(cat <<''EOF''\nFix AuthContext profile fetching deadlock caused by Supabase async call\n\nResolved issue where fetchProfile would hang indefinitely at \"Starting fetch for user\" by removing async database calls from the onAuthStateChange callback, which was causing a known Supabase JS deadlock bug.\n\nChanges:\n- Made onAuthStateChange callback synchronous (no async/await)\n- Added separate useEffect to handle profile fetching based on user state changes\n- Profile now loads reliably after authentication without hanging\n\nThis fixes the deadlock bug documented in Supabase issues where async API calls inside onAuthStateChange cause the next Supabase call to hang forever.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
-      "Bash(npm run lint:*)"
+      "Bash(npm run lint:*)",
+      "Bash(npm run lint)",
+      "Bash(npx eslint:*)"
     ],
     "deny": [],
     "ask": []

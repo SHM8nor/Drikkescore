@@ -8,6 +8,7 @@ import { calculateTotalAlcoholGrams, convertGramsToBeers } from '../utils/chartH
 import BACLineChart from '../components/charts/BACLineChart';
 import AlcoholConsumptionChart from '../components/charts/AlcoholConsumptionChart';
 import ChartContainer from '../components/charts/ChartContainer';
+import { ShareSessionModal } from '../components/session/ShareSessionModal';
 
 // Helper function to format countdown timer
 function formatTime(seconds: number): string {
@@ -50,6 +51,7 @@ export function SessionPage() {
   const [addError, setAddError] = useState<string | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<number>(0); // seconds remaining
   const [sessionEnded, setSessionEnded] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
 
   // Chart view toggles
   const [bacView, setBacView] = useState<'all' | 'self'>('all');
@@ -228,9 +230,14 @@ export function SessionPage() {
             )}
           </span>
         </div>
-        <button onClick={() => navigate('/')} className="btn-secondary">
-          Forlat økt
-        </button>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          <button onClick={() => setShareModalOpen(true)} className="btn-primary">
+            Del økt
+          </button>
+          <button onClick={() => navigate('/')} className="btn-secondary">
+            Forlat økt
+          </button>
+        </div>
       </div>
 
       <div className="session-content">
@@ -463,6 +470,17 @@ export function SessionPage() {
           </ChartContainer>
         )}
       </div>
+
+      {/* SECURITY FIX #4: Only render ShareSessionModal if session_code exists */}
+      {session.session_code && (
+        <ShareSessionModal
+          open={shareModalOpen}
+          onClose={() => setShareModalOpen(false)}
+          sessionId={session.id}
+          sessionCode={session.session_code}
+          sessionName={session.session_name}
+        />
+      )}
     </div>
   );
 }

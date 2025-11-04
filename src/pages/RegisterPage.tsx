@@ -1,8 +1,39 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import type { RegisterFormData, Gender } from '../types/database';
+
+/**
+ * Validates if a redirect path is safe to navigate to
+ * SECURITY: Prevents open redirect vulnerabilities by ensuring path is internal
+ */
+function isValidRedirectPath(redirectPath: string): boolean {
+  try {
+    // Path must start with /
+    if (!redirectPath.startsWith('/')) {
+      return false;
+    }
+
+    // Construct URL using window.location.origin as base
+    const url = new URL(redirectPath, window.location.origin);
+
+    // Verify the origin matches our application
+    if (url.origin !== window.location.origin) {
+      return false;
+    }
+
+    // Additional check: reject paths that try to escape via .. or @
+    if (redirectPath.includes('..') || redirectPath.includes('@')) {
+      return false;
+    }
+
+    return true;
+  } catch {
+    // If URL construction fails, path is invalid
+    return false;
+  }
+}
 
 export function RegisterPage() {
   const navigate = useNavigate();
@@ -19,6 +50,17 @@ export function RegisterPage() {
     gender: 'male',
     age: 18,
   });
+
+  // Check for redirect parameter
+  const [redirectPath, setRedirectPath] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Check sessionStorage for redirect path
+    const storedRedirect = sessionStorage.getItem('redirect_after_login');
+    if (storedRedirect) {
+      setRedirectPath(storedRedirect);
+    }
+  }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -53,8 +95,21 @@ export function RegisterPage() {
         return;
       }
 
-      // Success - redirect to home
-      navigate('/');
+      // Clear redirect path from storage
+      sessionStorage.removeItem('redirect_after_login');
+
+      // SECURITY FIX #3: Validate redirect path before navigating
+      // Prevents open redirect vulnerabilities
+      if (redirectPath) {
+        if (isValidRedirectPath(redirectPath)) {
+          navigate(redirectPath);
+        } else {
+          console.warn('Invalid redirect path detected, redirecting to home:', redirectPath);
+          navigate('/');
+        }
+      } else {
+        navigate('/');
+      }
     } catch (err: any) {
       setError(err.message || 'Kunne ikke registrere');
       setLoading(false);
@@ -66,6 +121,20 @@ export function RegisterPage() {
       <div className="auth-container">
         <h1>Opprett konto</h1>
         <p className="auth-subtitle">Registrer deg for å begynne å spore promillen din</p>
+
+        {redirectPath && (
+          <div style={{
+            background: 'var(--vanilla-light)',
+            padding: 'var(--spacing-md)',
+            borderRadius: 'var(--radius-md)',
+            marginBottom: 'var(--spacing-md)',
+            color: 'var(--color-text-secondary)',
+            fontSize: 'var(--font-size-small)',
+            textAlign: 'center'
+          }}>
+            Opprett konto for å bli med i økten
+          </div>
+        )}
 
         {error && <div className="error-message">{error}</div>}
 

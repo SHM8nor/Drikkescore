@@ -3,6 +3,7 @@ import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCreateSession, useJoinSession } from '../hooks/useSession';
 import { useActiveSession } from '../hooks/useActiveSession';
+import { QRScanner } from '../components/session/QRScanner';
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ export function HomePage() {
 
   const [activeTab, setActiveTab] = useState<'create' | 'join'>('create');
   const [error, setError] = useState<string | null>(null);
+  const [showQRScanner, setShowQRScanner] = useState(false);
 
   // Create session form state
   const [duration, setDuration] = useState(60); // default 1 hour in minutes
@@ -55,6 +57,20 @@ export function HomePage() {
       navigate(`/session/${session.id}`);
     } catch (err: any) {
       setError(err.message || 'Kunne ikke bli med i økt');
+    }
+  };
+
+  const handleQRScanSuccess = async (scannedCode: string) => {
+    setShowQRScanner(false);
+    setError(null);
+
+    try {
+      const session = await joinSession(scannedCode.toUpperCase().trim());
+      navigate(`/session/${session.id}`);
+    } catch (err: any) {
+      setError(err.message || 'Kunne ikke bli med i økt');
+      // Switch to join tab to show error
+      setActiveTab('join');
     }
   };
 
@@ -253,10 +269,61 @@ export function HomePage() {
               <button type="submit" className="btn-primary" disabled={joinLoading}>
                 {joinLoading ? 'Blir med...' : 'Bli med i økt'}
               </button>
+
+              {/* QR Scanner Button */}
+              <div style={{
+                marginTop: 'var(--spacing-md)',
+                textAlign: 'center',
+                padding: 'var(--spacing-md) 0',
+                borderTop: '1px solid var(--color-border)',
+              }}>
+                <p style={{
+                  color: 'var(--color-text-secondary)',
+                  fontSize: 'var(--font-size-small)',
+                  marginBottom: 'var(--spacing-sm)'
+                }}>
+                  eller
+                </p>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => setShowQRScanner(true)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 'var(--spacing-sm)',
+                    width: '100%',
+                  }}
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <rect x="3" y="3" width="8" height="8" />
+                    <rect x="13" y="3" width="8" height="8" />
+                    <rect x="3" y="13" width="8" height="8" />
+                    <rect x="13" y="13" width="8" height="8" />
+                  </svg>
+                  Skann QR-kode
+                </button>
+              </div>
             </form>
           )}
         </div>
       </div>
+
+      {/* QR Scanner Modal */}
+      {showQRScanner && (
+        <QRScanner
+          onScanSuccess={handleQRScanSuccess}
+          onClose={() => setShowQRScanner(false)}
+        />
+      )}
     </div>
   );
 }
