@@ -24,6 +24,33 @@ function formatTime(seconds: number): string {
   return `${minutes}:${secs.toString().padStart(2, '0')}`;
 }
 
+// Helper function to format time since last drink in Norwegian
+function formatTimeSinceLastDrink(milliseconds: number): string {
+  const totalSeconds = Math.floor(milliseconds / 1000);
+  const totalMinutes = Math.floor(totalSeconds / 60);
+  const totalHours = Math.floor(totalMinutes / 60);
+
+  if (totalHours > 0) {
+    const remainingMinutes = totalMinutes % 60;
+    if (totalHours === 1 && remainingMinutes === 0) {
+      return '1 time';
+    } else if (totalHours === 1) {
+      return `1 time og ${remainingMinutes} min`;
+    } else if (remainingMinutes === 0) {
+      return `${totalHours} timer`;
+    } else {
+      return `${totalHours} timer og ${remainingMinutes} min`;
+    }
+  } else if (totalMinutes > 0) {
+    if (totalMinutes === 1) {
+      return '1 minutt';
+    }
+    return `${totalMinutes} minutter`;
+  } else {
+    return 'akkurat nå';
+  }
+}
+
 export function SessionPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
@@ -67,6 +94,7 @@ export function SessionPage() {
   const [timeRemaining, setTimeRemaining] = useState<number>(0); // seconds remaining
   const [sessionEnded, setSessionEnded] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [timeSinceLastDrink, setTimeSinceLastDrink] = useState<string>('');
 
   // Chart view toggles
   const [bacView, setBacView] = useState<'all' | 'self'>('all');
@@ -153,6 +181,26 @@ export function SessionPage() {
     checkUndoAvailability(); // Initial check
 
     const interval = setInterval(checkUndoAvailability, 10000); // Check every 10 seconds
+
+    return () => clearInterval(interval);
+  }, [lastUserDrink]);
+
+  // Update time since last drink every second
+  useEffect(() => {
+    const updateTimeSinceLastDrink = () => {
+      if (!lastUserDrink) {
+        setTimeSinceLastDrink('');
+        return;
+      }
+      const drinkTime = new Date(lastUserDrink.consumed_at).getTime();
+      const now = new Date().getTime();
+      const timeDiff = now - drinkTime;
+      setTimeSinceLastDrink(formatTimeSinceLastDrink(timeDiff));
+    };
+
+    updateTimeSinceLastDrink(); // Initial update
+
+    const interval = setInterval(updateTimeSinceLastDrink, 1000); // Update every second
 
     return () => clearInterval(interval);
   }, [lastUserDrink]);
@@ -270,6 +318,11 @@ export function SessionPage() {
               <strong>{userBeerUnits.toFixed(1)}</strong> enheter konsumert
             </span>
           </p>
+          {timeSinceLastDrink && (
+            <p className="user-stats" style={{ fontSize: '14px', marginTop: '4px', opacity: 0.8 }}>
+              {timeSinceLastDrink} siden forrige enhet
+            </p>
+          )}
           {userLeaderboardEntry && (
             <p className="user-rank">
               Nåværende plassering: #{userLeaderboardEntry.rank}

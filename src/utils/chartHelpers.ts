@@ -40,9 +40,9 @@ export interface BarChartPoint {
 const ETHANOL_DENSITY = 0.789;
 
 /**
- * Standard beer unit in grams (330ml @ 5% ABV × 0.789)
+ * Standard beer unit in grams (500ml @ 4.7% ABV × 0.789)
  */
-const BEER_UNIT_GRAMS = 330 * 0.05 * ETHANOL_DENSITY; // 13.035 grams
+const BEER_UNIT_GRAMS = 500 * 0.047 * ETHANOL_DENSITY; // 18.5415 grams
 
 /**
  * Calculate BAC at multiple time points from session start to current time
