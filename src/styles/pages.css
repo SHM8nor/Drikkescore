@@ -22,7 +22,11 @@
 .auth-container {
   width: 100%;
   max-width: 440px;
-  /* No background, shadow, or border - minimal design */
+  background: var(--color-background-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-2xl);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border-light);
 }
 
 .auth-container h1 {
