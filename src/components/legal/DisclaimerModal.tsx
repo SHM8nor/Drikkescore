@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useRef } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -47,61 +47,13 @@ export default function DisclaimerModal({
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const contentRef = useRef<HTMLDivElement>(null);
 
-  const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
-
-  // Check if user has scrolled to bottom
-  const handleScroll = useCallback(() => {
-    const element = contentRef.current;
-    if (!element) return;
-
-    const scrollPosition = element.scrollTop + element.clientHeight;
-    const scrollHeight = element.scrollHeight;
-
-    // Consider "bottom" reached if within 50px of actual bottom
-    const isAtBottom = scrollHeight - scrollPosition <= 50;
-
-    if (isAtBottom) {
-      setHasScrolledToBottom(true);
-    }
-  }, []);
-
-  // Reset scroll state when modal opens/closes
-  useEffect(() => {
-    if (!open) {
-      setHasScrolledToBottom(false);
-    }
-  }, [open]);
-
-  // Attach scroll listener
-  useEffect(() => {
-    const element = contentRef.current;
-    if (!element) return;
-
-    element.addEventListener('scroll', handleScroll);
-
-    // Check initial scroll position (in case content is short enough)
-    handleScroll();
-
-    // Re-check on window resize (handles orientation changes)
-    const handleResize = () => {
-      handleScroll();
-    };
-
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      element.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleResize);
-    };
-  }, [handleScroll]);
-
   const handleAccept = () => {
-    if (!loading && hasScrolledToBottom) {
+    if (!loading) {
       onAccept();
     }
   };
 
-  const isAcceptDisabled = !hasScrolledToBottom || loading;
+  const isAcceptDisabled = loading;
 
   return (
     <Dialog
@@ -184,30 +136,6 @@ export default function DisclaimerModal({
 
         {/* Privacy Policy Section */}
         <PrivacyPolicyText variant="full" />
-
-        {/* Scroll hint for users who haven't scrolled */}
-        {!hasScrolledToBottom && (
-          <Box
-            sx={{
-              marginTop: 3,
-              padding: 2,
-              backgroundColor: 'rgba(0, 48, 73, 0.1)',
-              borderRadius: 1,
-              border: '1px solid rgba(0, 48, 73, 0.2)',
-            }}
-          >
-            <Typography
-              variant="body2"
-              sx={{
-                textAlign: 'center',
-                color: 'var(--prussian-blue)',
-                fontWeight: 500,
-              }}
-            >
-              Vennligst rull ned for å lese hele avtalen
-            </Typography>
-          </Box>
-        )}
       </DialogContent>
 
       {/* Dialog Actions */}
