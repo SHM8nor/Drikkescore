@@ -29,6 +29,9 @@ export default function AlcoholConsumptionChartExample() {
       privacy_policy_version: 1,
       created_at: '2025-01-01T00:00:00Z',
       updated_at: '2025-01-01T00:00:00Z',
+      last_session_recap_viewed: null,
+      last_recap_dismissed_at: null,
+      session_recaps_enabled: true,
     },
     {
       id: '2',
@@ -43,6 +46,9 @@ export default function AlcoholConsumptionChartExample() {
       privacy_policy_version: 1,
       created_at: '2025-01-01T00:00:00Z',
       updated_at: '2025-01-01T00:00:00Z',
+      last_session_recap_viewed: null,
+      last_recap_dismissed_at: null,
+      session_recaps_enabled: true,
     },
     {
       id: '3',
@@ -57,6 +63,9 @@ export default function AlcoholConsumptionChartExample() {
       privacy_policy_version: 1,
       created_at: '2025-01-01T00:00:00Z',
       updated_at: '2025-01-01T00:00:00Z',
+      last_session_recap_viewed: null,
+      last_recap_dismissed_at: null,
+      session_recaps_enabled: true,
     },
   ];
 

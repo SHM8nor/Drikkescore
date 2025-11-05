@@ -14,6 +14,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
   retryFetchProfile: () => Promise<void>;
+  updateRecapPreference: (enabled: boolean) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -306,9 +307,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       return { error: null };
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('signUp: Exception during signup:', err);
-      return { error: { message: err.message || 'Failed to create account', name: 'SignUpError', status: 500 } as AuthError };
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create account';
+      return { error: { message: errorMessage, name: 'SignUpError', status: 500 } as AuthError };
     }
   };
 
@@ -384,6 +386,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Update recap preference
+  const updateRecapPreference = async (enabled: boolean) => {
+    if (!user) {
+      throw new Error('No user logged in');
+    }
+
+    try {
+      console.log('updateRecapPreference: Updating recap preference for user:', user.id, 'to:', enabled);
+
+      // Update session_recaps_enabled in database
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ session_recaps_enabled: enabled })
+        .eq('id', user.id);
+
+      if (updateError) {
+        console.error('updateRecapPreference: Error updating preference:', updateError);
+        throw new Error('Failed to update recap preference. Please try again.');
+      }
+
+      console.log('updateRecapPreference: Preference updated successfully');
+
+      // Clear sessionStorage cache for profile to force fresh fetch
+      sessionStorage.removeItem(`${PROFILE_CACHE_KEY}_${user.id}`);
+
+      // Refetch profile to update context
+      const updatedProfile = await fetchProfile(user.id);
+      if (updatedProfile) {
+        setProfile(updatedProfile);
+        console.log('updateRecapPreference: Profile refetched successfully');
+      } else {
+        console.warn('updateRecapPreference: Failed to refetch profile after update');
+      }
+    } catch (err: unknown) {
+      console.error('updateRecapPreference: Exception updating preference:', err);
+      throw err;
+    }
+  };
+
   const value = {
     user,
     profile,
@@ -394,12 +435,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signIn,
     signOut,
     retryFetchProfile,
+    updateRecapPreference,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 // Custom hook to use auth context
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {

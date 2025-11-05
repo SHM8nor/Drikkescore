@@ -17,6 +17,9 @@ export interface Profile {
   has_accepted_terms: boolean;
   terms_accepted_at: string | null;
   privacy_policy_version: number;
+  last_session_recap_viewed: string | null;
+  last_recap_dismissed_at: string | null;
+  session_recaps_enabled: boolean;
   created_at: string;
   updated_at: string;
 }

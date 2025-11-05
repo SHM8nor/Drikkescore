@@ -10,6 +10,14 @@ import { PageContainer } from '../components/layout/PageContainer';
 import PrivacySection from '../components/settings/PrivacySection';
 import DeleteDataDialog from '../components/settings/DeleteDataDialog';
 import DeleteAccountDialog from '../components/settings/DeleteAccountDialog';
+import {
+  FormControlLabel,
+  Switch,
+  Typography,
+  Box,
+  CircularProgress,
+} from '@mui/material';
+import { Insights as InsightsIcon } from '@mui/icons-material';
 
 export function SettingsPage() {
   const { profile, user, retryFetchProfile, signOut } = useAuth();
@@ -44,6 +52,10 @@ export function SettingsPage() {
   const [deleteAccountDialogOpen, setDeleteAccountDialogOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
+  // Session recaps state
+  const [sessionRecapsEnabled, setSessionRecapsEnabled] = useState(false);
+  const [recapsLoading, setRecapsLoading] = useState(false);
+
   useEffect(() => {
     if (profile) {
       setFullName(profile.full_name);
@@ -52,6 +64,7 @@ export function SettingsPage() {
       setGender(profile.gender);
       setAge(profile.age);
       setAvatarUrl(profile.avatar_url || null);
+      setSessionRecapsEnabled(profile.session_recaps_enabled);
     }
   }, [profile]);
 
@@ -149,9 +162,10 @@ export function SettingsPage() {
       }
 
       setTimeout(() => setProfileSuccess(null), 3000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error uploading avatar:', err);
-      setUploadError(err.message || 'Kunne ikke laste opp profilbilde');
+      const errorMessage = err instanceof Error ? err.message : 'Kunne ikke laste opp profilbilde';
+      setUploadError(errorMessage);
     } finally {
       setUploadLoading(false);
     }
@@ -173,8 +187,9 @@ export function SettingsPage() {
 
       setProfileSuccess('Profilen ble oppdatert!');
       setTimeout(() => window.location.reload(), 1500);
-    } catch (err: any) {
-      setProfileError(err.message || 'Kunne ikke oppdatere profilen');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Kunne ikke oppdatere profilen';
+      setProfileError(errorMessage);
     }
   };
 
@@ -189,8 +204,9 @@ export function SettingsPage() {
       if (error) throw error;
       setAuthSuccess('E-post oppdatert! Sjekk innboksen din.');
       setAuthLoading(false);
-    } catch (err: any) {
-      setAuthError(err.message || 'Kunne ikke oppdatere e-post');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Kunne ikke oppdatere e-post';
+      setAuthError(errorMessage);
       setAuthLoading(false);
     }
   };
@@ -219,9 +235,51 @@ export function SettingsPage() {
       setNewPassword('');
       setConfirmPassword('');
       setAuthLoading(false);
-    } catch (err: any) {
-      setAuthError(err.message || 'Kunne ikke oppdatere passord');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Kunne ikke oppdatere passord';
+      setAuthError(errorMessage);
       setAuthLoading(false);
+    }
+  };
+
+  // Handle session recaps toggle
+  const handleSessionRecapsToggle = async (event: ChangeEvent<HTMLInputElement>) => {
+    const newValue = event.target.checked;
+    setRecapsLoading(true);
+    setProfileError(null);
+    setProfileSuccess(null);
+
+    try {
+      // Update the database
+      const { error } = await supabase
+        .from('profiles')
+        .update({ session_recaps_enabled: newValue })
+        .eq('id', user?.id);
+
+      if (error) throw error;
+
+      // Update local state
+      setSessionRecapsEnabled(newValue);
+
+      // Refresh profile to ensure sync
+      await retryFetchProfile();
+
+      setProfileSuccess(
+        newValue
+          ? 'Øktoversikter er aktivert!'
+          : 'Øktoversikter er deaktivert.'
+      );
+
+      setTimeout(() => setProfileSuccess(null), 3000);
+    } catch (err: unknown) {
+      console.error('Error updating session recaps setting:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Kunne ikke oppdatere innstilling';
+      setProfileError(errorMessage);
+      // Revert the toggle on error
+      setSessionRecapsEnabled(!newValue);
+      setTimeout(() => setProfileError(null), 5000);
+    } finally {
+      setRecapsLoading(false);
     }
   };
 
@@ -239,9 +297,10 @@ export function SettingsPage() {
       await retryFetchProfile();
 
       setTimeout(() => setProfileSuccess(null), 5000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error deleting drinking data:', err);
-      setProfileError(err.message || 'Kunne ikke slette drikkeopplysninger');
+      const errorMessage = err instanceof Error ? err.message : 'Kunne ikke slette drikkeopplysninger';
+      setProfileError(errorMessage);
       setTimeout(() => setProfileError(null), 5000);
     } finally {
       setDeleteLoading(false);
@@ -258,9 +317,10 @@ export function SettingsPage() {
       // Sign out and redirect to account deleted page
       await signOut();
       navigate('/konto-slettet');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error deleting account:', err);
-      setProfileError(err.message || 'Kunne ikke slette kontoen. Prøv igjen eller kontakt support.');
+      const errorMessage = err instanceof Error ? err.message : 'Kunne ikke slette kontoen. Prøv igjen eller kontakt support.';
+      setProfileError(errorMessage);
       setDeleteAccountDialogOpen(false);
       setTimeout(() => setProfileError(null), 8000);
     } finally {
@@ -361,6 +421,62 @@ export function SettingsPage() {
                 {updateLoading ? 'Lagrer...' : 'Lagre endringer'}
               </button>
             </form>
+          </div>
+
+          {/* Health & Insights Section */}
+          <div className="settings-card">
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+              <InsightsIcon sx={{ color: '#003049' }} />
+              <Typography
+                variant="h5"
+                component="h2"
+                sx={{ color: '#003049', fontWeight: 600 }}
+              >
+                Helse & Innsikt
+              </Typography>
+            </Box>
+
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={sessionRecapsEnabled}
+                    onChange={handleSessionRecapsToggle}
+                    disabled={recapsLoading}
+                    sx={{
+                      '& .MuiSwitch-switchBase.Mui-checked': {
+                        color: '#003049',
+                      },
+                      '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                        backgroundColor: '#003049',
+                      },
+                    }}
+                  />
+                }
+                label={
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                      Vis øktoversikter
+                    </Typography>
+                    {recapsLoading && (
+                      <CircularProgress size={16} sx={{ color: '#003049' }} />
+                    )}
+                  </Box>
+                }
+                sx={{ m: 0 }}
+              />
+              <Typography
+                variant="body2"
+                sx={{
+                  color: '#666',
+                  ml: 0,
+                  fontSize: '0.875rem',
+                  lineHeight: 1.5,
+                }}
+              >
+                Få morsomme statistikker etter drikkesesjonene dine
+              </Typography>
+            </Box>
           </div>
 
           <div className="settings-card">
