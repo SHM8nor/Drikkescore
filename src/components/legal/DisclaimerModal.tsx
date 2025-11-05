@@ -5,7 +5,6 @@ import {
   DialogContent,
   DialogActions,
   Button,
-  Box,
   Typography,
   Divider,
   CircularProgress,

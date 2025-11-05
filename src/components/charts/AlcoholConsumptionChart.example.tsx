@@ -176,6 +176,7 @@ export default function AlcoholConsumptionChartExample() {
  *
  * This shows how to use the chart with real session data from the useSession hook
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function AlcoholConsumptionChartWithSession({ sessionId: _sessionId }: { sessionId: string }) {
   const [view, setView] = useState<'per-participant' | 'session-total'>('per-participant');
   const [unit, setUnit] = useState<'grams' | 'beers'>('beers');
