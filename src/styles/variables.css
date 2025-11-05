@@ -49,7 +49,10 @@
   --color-secondary: var(--orange-wheel);
   --color-accent: var(--xanthous);
   --color-danger: var(--fire-engine-red);
+  --color-error: #d32f2f;
+  --color-error-dark: #c62828;
   --color-success: #047857;
+  --color-success-dark: #065f46;
   --color-warning: var(--xanthous-dark);
   --color-info: var(--prussian-blue-light);
 

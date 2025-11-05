@@ -5,6 +5,7 @@ import BurgerMenu from '../components/navigation/BurgerMenu/BurgerMenu';
 import AnimatedHeader from '../components/header/AnimatedHeader';
 import DisclaimerModal from '../components/legal/DisclaimerModal';
 import SessionRecapModal from '../components/recap/SessionRecapModal';
+import { FriendRequestNotificationManager } from '../components/notifications/FriendRequestNotificationManager';
 import { useSessionRecap } from '../hooks/useSessionRecap';
 import { supabase } from '../lib/supabase';
 import '../styles/layouts.css';
@@ -164,6 +165,12 @@ export default function ProtectedLayout() {
       <div className="protected-layout">
         <BurgerMenu />
         <AnimatedHeader />
+
+        {/* Friend Request Notifications - only shown after terms are accepted */}
+        {profile && profile.has_accepted_terms && (
+          <FriendRequestNotificationManager />
+        )}
+
         <main className="protected-layout__content">
           <Outlet />
         </main>

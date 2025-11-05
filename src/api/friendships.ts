@@ -156,35 +156,29 @@ export async function acceptFriendRequest(friendshipId: string): Promise<Friends
 /**
  * Decline a friend request
  * @param friendshipId - The friendship record ID to decline
- * @returns The updated friendship record
  * @throws {FriendshipError} If the request fails
+ *
+ * Note: Declined requests are deleted rather than marked as 'declined' to allow
+ * the sender to send a new request in the future if desired.
  */
-export async function declineFriendRequest(friendshipId: string): Promise<Friendship> {
+export async function declineFriendRequest(friendshipId: string): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
     throw new FriendshipError('Du må være logget inn');
   }
 
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from('friendships')
-    .update({ status: 'declined' as FriendshipStatus })
+    .delete()
     .eq('id', friendshipId)
     .eq('friend_id', user.id) // Ensure user is the recipient
-    .eq('status', 'pending')
-    .select()
-    .single();
+    .eq('status', 'pending');
 
   if (error) {
     console.error('Error declining friend request:', error);
     throw new FriendshipError('Kunne ikke avslå venneforespørsel');
   }
-
-  if (!data) {
-    throw new FriendshipError('Venneforespørsel ikke funnet');
-  }
-
-  return data;
 }
 
 /**
