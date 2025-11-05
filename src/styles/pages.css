@@ -2,6 +2,7 @@
  * Page-Specific Styles
  *
  * Styles for individual pages and layouts
+ * Phase 5: Minimal Apple/BCG-inspired design with reduced shadows and borders
  */
 
 /* ========================================
@@ -13,31 +14,31 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: var(--spacing-xl);
+  padding: var(--page-padding-mobile);
+  background: var(--color-background-primary);
 }
 
 .auth-container {
-  background: var(--color-background-primary);
-  padding: var(--spacing-2xl);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
   width: 100%;
-  max-width: 500px;
-  border: 2px solid var(--vanilla-dark);
+  max-width: 440px;
+  /* No background, shadow, or border - minimal design */
 }
 
 .auth-container h1 {
   margin-bottom: var(--spacing-sm);
   color: var(--prussian-blue);
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
 }
 
 .auth-subtitle {
   color: var(--color-text-secondary);
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: var(--spacing-2xl);
+  font-size: var(--font-size-base);
 }
 
 .auth-form {
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
 }
 
 .auth-footer {
@@ -66,7 +67,8 @@
 .home-header {
   background: var(--color-background-primary);
   padding: var(--spacing-lg) var(--spacing-2xl);
-  box-shadow: var(--shadow-sm);
+  /* Minimal shadow - subtle separation */
+  box-shadow: var(--shadow-xs);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -87,8 +89,10 @@
 .session-container {
   background: var(--color-background-primary);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
+  /* Reduced shadow for minimal feel */
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
+  /* Subtle border */
   border: 1px solid var(--color-border-light);
 }
 
@@ -118,7 +122,8 @@
 .session-header {
   background: var(--color-background-primary);
   padding: var(--spacing-lg) var(--spacing-2xl);
-  box-shadow: var(--shadow-sm);
+  /* Minimal shadow */
+  box-shadow: var(--shadow-xs);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -143,7 +148,7 @@
 }
 
 /* ========================================
-   SESSION CARDS
+   SESSION CARDS - MINIMAL DESIGN
    ======================================== */
 
 .user-bac-card,
@@ -152,7 +157,9 @@
   background: var(--color-background-primary);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
-  box-shadow: var(--shadow-md);
+  /* Reduced shadow - minimal look */
+  box-shadow: var(--shadow-xs);
+  /* Subtle border */
   border: 1px solid var(--color-border-light);
   transition: all var(--transition-base);
 }
@@ -160,8 +167,9 @@
 .user-bac-card:hover,
 .add-drink-card:hover,
 .leaderboard-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  /* Subtle lift on hover */
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 
 .user-bac-card h2,
@@ -172,7 +180,7 @@
   font-size: var(--font-size-h5);
 }
 
-/* BAC Display */
+/* BAC Display - Keep gradient but reduce shadow */
 .bac-display {
   text-align: center;
   padding: var(--spacing-lg);
@@ -180,7 +188,8 @@
   border-radius: var(--radius-md);
   color: var(--color-white);
   margin-bottom: var(--spacing-md);
-  box-shadow: 0 4px 12px rgba(0, 48, 73, 0.3);
+  /* Reduced shadow */
+  box-shadow: 0 2px 8px rgba(0, 48, 73, 0.2);
 }
 
 .bac-value {
@@ -210,7 +219,7 @@
 }
 
 /* ========================================
-   LEADERBOARD
+   LEADERBOARD - MINIMAL DESIGN
    ======================================== */
 
 .leaderboard {
@@ -228,12 +237,15 @@
   background: var(--vanilla-light);
   border-radius: var(--radius-md);
   transition: all var(--transition-base);
+  /* No shadow for entries */
 }
 
 .leaderboard-entry.current-user {
   background: var(--prussian-blue-bg);
-  border: 2px solid var(--prussian-blue);
-  box-shadow: 0 2px 8px rgba(0, 48, 73, 0.2);
+  /* Reduced border thickness */
+  border: 1px solid var(--prussian-blue);
+  /* Subtle shadow instead of heavy one */
+  box-shadow: 0 1px 4px rgba(0, 48, 73, 0.15);
 }
 
 .leaderboard-entry .rank {
@@ -264,7 +276,8 @@
 .page-header {
   background: var(--color-background-primary);
   padding: var(--spacing-lg) var(--spacing-2xl);
-  box-shadow: var(--shadow-sm);
+  /* Minimal shadow */
+  box-shadow: var(--shadow-xs);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -289,7 +302,9 @@
   background: var(--color-background-primary);
   border-radius: var(--radius-lg);
   padding: var(--spacing-xl);
-  box-shadow: var(--shadow-md);
+  /* Reduced shadow */
+  box-shadow: var(--shadow-xs);
+  /* Subtle border */
   border: 1px solid var(--color-border-light);
 }
 
@@ -312,7 +327,8 @@
 .avatar-section {
   margin-bottom: var(--spacing-xl);
   padding-bottom: var(--spacing-xl);
-  border-bottom: 2px solid var(--color-border-light);
+  /* Thinner divider */
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 .avatar-container {
@@ -327,8 +343,10 @@
   height: 150px;
   border-radius: 50%;
   overflow: hidden;
-  border: 3px solid var(--vanilla-dark);
-  box-shadow: var(--shadow-md);
+  /* Subtle border */
+  border: 2px solid var(--color-border-light);
+  /* Reduced shadow */
+  box-shadow: var(--shadow-xs);
   background: var(--vanilla-light);
   display: flex;
   align-items: center;
@@ -402,8 +420,10 @@
   background: var(--color-background-primary);
   border-radius: var(--radius-lg);
   padding: var(--spacing-2xl);
-  box-shadow: var(--shadow-lg);
-  border: 2px solid var(--vanilla-dark);
+  /* Reduced shadow */
+  box-shadow: var(--shadow-sm);
+  /* Subtle border instead of heavy one */
+  border: 1px solid var(--color-border-light);
   text-align: center;
 }
 
@@ -418,6 +438,7 @@
   padding: var(--spacing-lg);
   border-radius: var(--radius-md);
   margin-bottom: var(--spacing-xl);
+  /* No shadow - rely on background color for separation */
 }
 
 .session-details h2,
@@ -467,7 +488,8 @@
 .error-icon {
   font-size: 4rem;
   margin-bottom: var(--spacing-md);
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+  /* Subtle shadow instead of heavy drop-shadow */
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.08));
 }
 
 .error-card h2 {
@@ -535,10 +557,9 @@
     grid-template-columns: 1fr;
   }
 
-  .auth-container {
-    padding: var(--spacing-lg);
+  .auth-page {
+    padding: var(--page-padding-mobile);
   }
-
 
   .avatar-preview {
     width: 120px;
@@ -567,5 +588,11 @@
 
   .button-group {
     width: 100%;
+  }
+}
+
+@media (min-width: 769px) {
+  .auth-page {
+    padding: var(--page-padding-desktop);
   }
 }
