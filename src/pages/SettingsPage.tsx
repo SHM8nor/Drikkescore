@@ -1,14 +1,20 @@
 import { useState, useEffect, useRef } from 'react';
 import type { FormEvent, ChangeEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useUpdateProfile } from '../hooks/useUpdateProfile';
 import { supabase } from '../lib/supabase';
+import { deleteUserDrinkingData, deleteUserAccount } from '../api/users';
 import type { Gender } from '../types/database';
 import { PageContainer } from '../components/layout/PageContainer';
+import PrivacySection from '../components/settings/PrivacySection';
+import DeleteDataDialog from '../components/settings/DeleteDataDialog';
+import DeleteAccountDialog from '../components/settings/DeleteAccountDialog';
 
 export function SettingsPage() {
-  const { profile, user, retryFetchProfile } = useAuth();
+  const { profile, user, retryFetchProfile, signOut } = useAuth();
   const { updateProfile, loading: updateLoading } = useUpdateProfile();
+  const navigate = useNavigate();
 
   const [fullName, setFullName] = useState('');
   const [weightKg, setWeightKg] = useState(0);
@@ -32,6 +38,11 @@ export function SettingsPage() {
   const [authError, setAuthError] = useState<string | null>(null);
   const [authSuccess, setAuthSuccess] = useState<string | null>(null);
   const [authLoading, setAuthLoading] = useState(false);
+
+  // Delete dialogs state
+  const [deleteDataDialogOpen, setDeleteDataDialogOpen] = useState(false);
+  const [deleteAccountDialogOpen, setDeleteAccountDialogOpen] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     if (profile) {
@@ -214,6 +225,49 @@ export function SettingsPage() {
     }
   };
 
+  // Handle delete drinking data
+  const handleDeleteData = async () => {
+    if (!user) return;
+
+    setDeleteLoading(true);
+    try {
+      await deleteUserDrinkingData(user.id);
+      setDeleteDataDialogOpen(false);
+      setProfileSuccess('Alle drikkeopplysninger ble slettet!');
+
+      // Reload profile to reflect changes
+      await retryFetchProfile();
+
+      setTimeout(() => setProfileSuccess(null), 5000);
+    } catch (err: any) {
+      console.error('Error deleting drinking data:', err);
+      setProfileError(err.message || 'Kunne ikke slette drikkeopplysninger');
+      setTimeout(() => setProfileError(null), 5000);
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  // Handle delete account
+  const handleDeleteAccount = async () => {
+    setDeleteLoading(true);
+    try {
+      await deleteUserAccount();
+      setDeleteAccountDialogOpen(false);
+
+      // Sign out and redirect to account deleted page
+      await signOut();
+      navigate('/konto-slettet');
+    } catch (err: any) {
+      console.error('Error deleting account:', err);
+      setProfileError(err.message || 'Kunne ikke slette kontoen. Prøv igjen eller kontakt support.');
+      setDeleteAccountDialogOpen(false);
+      setTimeout(() => setProfileError(null), 8000);
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   const getAvatarDisplay = () => {
     if (previewUrl) return previewUrl;
     if (avatarUrl) return avatarUrl;
@@ -341,8 +395,50 @@ export function SettingsPage() {
               </button>
             </form>
           </div>
+
+          {/* Privacy Section */}
+          <PrivacySection termsAcceptedAt={profile?.terms_accepted_at} />
+
+          {/* Danger Zone */}
+          <div className="danger-zone">
+            <h2>Faresone</h2>
+            <p>
+              Disse handlingene er permanente og kan ikke angres. Vær helt sikker før du fortsetter.
+            </p>
+            <div className="button-group">
+              <button
+                type="button"
+                className="btn-danger-outline"
+                onClick={() => setDeleteDataDialogOpen(true)}
+              >
+                Slett mine drikkeopplysninger
+              </button>
+              <button
+                type="button"
+                className="btn-danger"
+                onClick={() => setDeleteAccountDialogOpen(true)}
+              >
+                Slett kontoen min permanent
+              </button>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Delete Dialogs */}
+      <DeleteDataDialog
+        open={deleteDataDialogOpen}
+        onClose={() => setDeleteDataDialogOpen(false)}
+        onConfirm={handleDeleteData}
+        loading={deleteLoading}
+      />
+
+      <DeleteAccountDialog
+        open={deleteAccountDialogOpen}
+        onClose={() => setDeleteAccountDialogOpen(false)}
+        onConfirm={handleDeleteAccount}
+        loading={deleteLoading}
+      />
     </PageContainer>
   );
 }

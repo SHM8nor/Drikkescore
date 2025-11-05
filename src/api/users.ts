@@ -96,3 +96,102 @@ export async function getUserProfile(userId: string): Promise<Profile> {
 
   return data;
 }
+
+// =============================================================================
+// Account Deletion Functions
+// =============================================================================
+
+export interface DeleteDrinkingDataResult {
+  drinks_deleted: number;
+  active_sessions_deleted: number;
+  participations_deleted: number;
+  sessions_deleted: number;
+  success: boolean;
+}
+
+/**
+ * Delete all drinking-related data for a user (drinks, sessions, participations)
+ * This does NOT delete the user's account, only their drinking history
+ * @param userId - The user ID whose data should be deleted
+ * @returns Summary of deleted data
+ * @throws {UserSearchError} If the request fails or user is unauthorized
+ */
+export async function deleteUserDrinkingData(
+  userId: string
+): Promise<DeleteDrinkingDataResult> {
+  const { data, error } = await supabase.rpc('delete_user_drinking_data', {
+    target_user_id: userId,
+  });
+
+  if (error) {
+    console.error('Error deleting drinking data:', error);
+    throw new UserSearchError(
+      'Kunne ikke slette drikkedata',
+      error.code
+    );
+  }
+
+  if (!data) {
+    throw new UserSearchError('Ingen data ble returnert');
+  }
+
+  return data as DeleteDrinkingDataResult;
+}
+
+export interface DeleteAccountResult {
+  success: boolean;
+  message: string;
+  deleted_data?: {
+    avatar_deleted: boolean;
+    user_deleted: boolean;
+  };
+}
+
+/**
+ * Completely delete a user account including all associated data
+ * This calls a Supabase Edge Function with admin privileges
+ * @returns Result of the deletion operation
+ * @throws {UserSearchError} If the request fails or user is unauthorized
+ */
+export async function deleteUserAccount(): Promise<DeleteAccountResult> {
+  // Get the current session to retrieve the access token
+  const {
+    data: { session },
+    error: sessionError,
+  } = await supabase.auth.getSession();
+
+  if (sessionError || !session) {
+    throw new UserSearchError('Du må være logget inn for å slette kontoen');
+  }
+
+  // Get the Supabase URL from environment
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+
+  if (!supabaseUrl) {
+    throw new UserSearchError('Konfigureringsfeil: Mangler Supabase URL');
+  }
+
+  // Call the Edge Function
+  const response = await fetch(
+    `${supabaseUrl}/functions/v1/delete-user-account`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    console.error('Error deleting account:', errorData);
+    throw new UserSearchError(
+      errorData.error || 'Kunne ikke slette kontoen',
+      errorData.details
+    );
+  }
+
+  const result = await response.json();
+  return result as DeleteAccountResult;
+}
