@@ -53,9 +53,9 @@ export function useSessionRecap() {
         setLoading(true);
         setError(null);
 
-        // Calculate the time threshold (1 minute ago for testing, change back to 3 hours later)
+        // Calculate the time threshold (3 hours ago)
         const threeHoursAgo = new Date();
-        threeHoursAgo.setMinutes(threeHoursAgo.getMinutes() - 1);
+        threeHoursAgo.setHours(threeHoursAgo.getHours() - 3);
         const threeHoursAgoIso = threeHoursAgo.toISOString();
 
         // Step 1: Get all session IDs where user was a participant
