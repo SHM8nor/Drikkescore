@@ -163,36 +163,9 @@ export function ActiveSessions({
     );
   }
 
-  // Empty state
+  // Empty state - return null to hide the component entirely
   if (limitedFriends.length === 0) {
-    return (
-      <Card variant="outlined">
-        <CardContent>
-          <Box
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
-            justifyContent="center"
-            py={compact ? 2 : 4}
-            textAlign="center"
-          >
-            <PeopleIcon
-              sx={{
-                fontSize: compact ? 48 : 64,
-                color: 'text.disabled',
-                mb: 2
-              }}
-            />
-            <Typography variant="h6" color="text.secondary" gutterBottom>
-              Ingen venner drikker seg dritings akkurat nå
-            </Typography>
-            <Typography variant="body2" color="text.disabled">
-              Når vennene dine starter en økt, vises de her
-            </Typography>
-          </Box>
-        </CardContent>
-      </Card>
-    );
+    return null;
   }
 
   return (
