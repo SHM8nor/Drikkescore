@@ -24,6 +24,9 @@ export default function AlcoholConsumptionChartExample() {
       gender: 'male',
       age: 25,
       role: 'user',
+      has_accepted_terms: true,
+      terms_accepted_at: '2025-01-01T00:00:00Z',
+      privacy_policy_version: 1,
       created_at: '2025-01-01T00:00:00Z',
       updated_at: '2025-01-01T00:00:00Z',
     },
@@ -35,6 +38,9 @@ export default function AlcoholConsumptionChartExample() {
       gender: 'female',
       age: 23,
       role: 'user',
+      has_accepted_terms: true,
+      terms_accepted_at: '2025-01-01T00:00:00Z',
+      privacy_policy_version: 1,
       created_at: '2025-01-01T00:00:00Z',
       updated_at: '2025-01-01T00:00:00Z',
     },
@@ -46,6 +52,9 @@ export default function AlcoholConsumptionChartExample() {
       gender: 'male',
       age: 28,
       role: 'user',
+      has_accepted_terms: true,
+      terms_accepted_at: '2025-01-01T00:00:00Z',
+      privacy_policy_version: 1,
       created_at: '2025-01-01T00:00:00Z',
       updated_at: '2025-01-01T00:00:00Z',
     },
@@ -167,6 +176,7 @@ export default function AlcoholConsumptionChartExample() {
  *
  * This shows how to use the chart with real session data from the useSession hook
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function AlcoholConsumptionChartWithSession({ sessionId: _sessionId }: { sessionId: string }) {
   const [view, setView] = useState<'per-participant' | 'session-total'>('per-participant');
   const [unit, setUnit] = useState<'grams' | 'beers'>('beers');

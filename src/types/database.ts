@@ -14,6 +14,9 @@ export interface Profile {
   age: number;
   role: UserRole;
   avatar_url?: string;
+  has_accepted_terms: boolean;
+  terms_accepted_at: string | null;
+  privacy_policy_version: number;
   created_at: string;
   updated_at: string;
 }

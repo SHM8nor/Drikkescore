@@ -10,6 +10,7 @@ import { HistoryPage } from './pages/HistoryPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 import FriendsPage from './pages/FriendsPage';
 import AdminPage from './pages/AdminPage';
+import AccountDeletedPage from './pages/AccountDeletedPage';
 import ProtectedLayout from './layouts/ProtectedLayout';
 import PublicLayout from './layouts/PublicLayout';
 import AdminGuard from './guards/AdminGuard';
@@ -25,6 +26,9 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
           </Route>
+
+          {/* Account deleted page - public route */}
+          <Route path="/konto-slettet" element={<AccountDeletedPage />} />
 
           {/* Join session route - accessible to both authenticated and unauthenticated users */}
           <Route path="/join/:sessionId" element={<JoinSession />} />

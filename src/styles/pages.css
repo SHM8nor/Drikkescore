@@ -399,6 +399,78 @@
 }
 
 /* ========================================
+   DANGER ZONE (Settings Page)
+   ======================================== */
+
+.danger-zone {
+  background-color: #fef2f2;
+  border: 2px solid #dc2626;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  margin-top: var(--spacing-2xl);
+}
+
+.danger-zone h2 {
+  color: #dc2626;
+  margin-bottom: var(--spacing-sm);
+  font-size: var(--font-size-h4);
+  font-weight: var(--font-weight-bold);
+}
+
+.danger-zone p {
+  color: #991b1b;
+  margin-bottom: var(--spacing-lg);
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+}
+
+.danger-zone .button-group {
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.btn-danger-outline {
+  border: 2px solid #dc2626;
+  color: #dc2626;
+  background: white;
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  font-size: var(--font-size-base);
+}
+
+.btn-danger-outline:hover {
+  background: #fef2f2;
+}
+
+.btn-danger-outline:active {
+  transform: translateY(1px);
+}
+
+.btn-danger {
+  background: #dc2626;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  font-size: var(--font-size-base);
+}
+
+.btn-danger:hover {
+  background: #991b1b;
+}
+
+.btn-danger:active {
+  transform: translateY(1px);
+}
+
+/* ========================================
    JOIN SESSION PAGE
    ======================================== */
 
@@ -595,6 +667,21 @@
 
   .button-group {
     width: 100%;
+  }
+
+  /* Danger Zone responsive */
+  .danger-zone {
+    padding: var(--spacing-lg);
+  }
+
+  .danger-zone .button-group {
+    flex-direction: column;
+  }
+
+  .btn-danger-outline,
+  .btn-danger {
+    width: 100%;
+    margin-right: 0;
   }
 }
 
