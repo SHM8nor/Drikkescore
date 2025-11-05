@@ -264,8 +264,12 @@ export function ActiveSessions({
                   </ListItemAvatar>
 
                   <ListItemText
+                    sx={{
+                      // Add right padding on mobile to prevent overlap with button
+                      pr: { xs: 11, sm: 14 }
+                    }}
                     primary={
-                      <Box display="flex" alignItems="center" gap={1}>
+                      <Box display="flex" alignItems="center" gap={1} flexWrap="wrap">
                         <Typography
                           variant={compact ? 'body2' : 'body1'}
                           fontWeight="medium"
