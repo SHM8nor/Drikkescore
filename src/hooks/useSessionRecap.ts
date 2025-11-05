@@ -127,12 +127,15 @@ export function useSessionRecap() {
         const sessionDrinks = (drinksData || []) as DrinkEntry[];
 
         // Step 5: Calculate full analytics for the session
-        // Note: totalSpent is set to 0 as we're not fetching drink prices
+        // Estimate total spent using average drink price (80 kr per drink)
+        const AVERAGE_DRINK_PRICE = 80; // kr
+        const estimatedTotalSpent = sessionDrinks.length * AVERAGE_DRINK_PRICE;
+
         const sessionAnalytics = calculateSessionAnalytics(
           mostRecentSession,
           sessionDrinks,
           profile,
-          0
+          estimatedTotalSpent
         );
 
         // Step 6: Set state to show the recap

@@ -196,8 +196,8 @@ export default function SessionRecapModal({
     },
     {
       title: 'Penger brukt',
-      value: `${analytics.total_spent.toLocaleString('nb-NO')} kr`,
-      subtitle: 'Totalt',
+      value: `~${analytics.total_spent.toLocaleString('nb-NO')} kr`,
+      subtitle: 'Estimat',
       icon: <AttachMoneyIcon fontSize={isMobile ? 'small' : 'medium'} />,
       color: getSeverityColor(analytics.total_spent, { low: 300, high: 700 }),
     },
@@ -238,6 +238,10 @@ export default function SessionRecapModal({
           borderRadius: isMobile ? 0 : 'var(--radius-xl)',
           background: 'linear-gradient(135deg, var(--vanilla) 0%, var(--vanilla-light) 50%, var(--xanthous-bg) 100%)',
           overflow: 'hidden',
+          '& .MuiDialogContent-root': {
+            backgroundColor: 'transparent',
+            backgroundImage: 'none',
+          },
         },
       }}
     >
@@ -310,6 +314,8 @@ export default function SessionRecapModal({
         sx={{
           px: { xs: 2, sm: 3 },
           py: { xs: 2, sm: 3 },
+          backgroundColor: 'transparent !important',
+          backgroundImage: 'none !important',
         }}
       >
         {/* Stats Grid */}
@@ -323,7 +329,7 @@ export default function SessionRecapModal({
               fontSize: { xs: '1rem', sm: '1.125rem' },
             }}
           >
-            📊 Statistikk
+            Statistikk
           </Typography>
           <Grid container spacing={{ xs: 1.5, sm: 2 }}>
             {statCards.map((stat, index) => (
@@ -347,7 +353,7 @@ export default function SessionRecapModal({
               fontSize: { xs: '1rem', sm: '1.125rem' },
             }}
           >
-            💭 Tanker fra oss
+            Tanker fra oss
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
             {messages.map((message, index) => (
