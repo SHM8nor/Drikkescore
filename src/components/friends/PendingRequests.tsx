@@ -28,12 +28,14 @@ import { useFriends } from '../../hooks/useFriends';
 import type { FriendRequest } from '../../types/database';
 
 interface PendingRequestsProps {
+  /** Pending friend requests to display */
+  requests: FriendRequest[];
   /** Custom loading state override */
   isLoading?: boolean;
 }
 
-export default function PendingRequests({ isLoading }: PendingRequestsProps) {
-  const { pendingRequests, acceptRequest, declineRequest, loading } = useFriends();
+export default function PendingRequests({ requests, isLoading }: PendingRequestsProps) {
+  const { acceptRequest, declineRequest } = useFriends();
   const [processingId, setProcessingId] = useState<string | null>(null);
 
   const handleAccept = async (friendshipId: string) => {
@@ -78,7 +80,7 @@ export default function PendingRequests({ isLoading }: PendingRequestsProps) {
     });
   };
 
-  if (isLoading || loading) {
+  if (isLoading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
         <CircularProgress />
@@ -86,7 +88,7 @@ export default function PendingRequests({ isLoading }: PendingRequestsProps) {
     );
   }
 
-  if (pendingRequests.length === 0) {
+  if (requests.length === 0) {
     return (
       <Paper
         elevation={0}
@@ -109,11 +111,11 @@ export default function PendingRequests({ isLoading }: PendingRequestsProps) {
   }
 
   return (
-    <List sx={{ width: '100%', bgcolor: 'background.paper', borderRadius: 2 }}>
-      {pendingRequests.map((request: FriendRequest, index: number) => (
+    <List sx={{ width: '100%', bgcolor: 'transparent', borderRadius: 2 }}>
+      {requests.map((request: FriendRequest, index: number) => (
         <ListItem
           key={request.friendship_id}
-          divider={index < pendingRequests.length - 1}
+          divider={index < requests.length - 1}
           sx={{
             py: 2,
             '&:hover': {

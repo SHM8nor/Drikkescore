@@ -27,12 +27,14 @@ import { useFriends } from '../../hooks/useFriends';
 import type { SentFriendRequest } from '../../types/database';
 
 interface SentRequestsProps {
+  /** Sent friend requests to display */
+  requests: SentFriendRequest[];
   /** Custom loading state override */
   isLoading?: boolean;
 }
 
-export default function SentRequests({ isLoading }: SentRequestsProps) {
-  const { sentRequests, cancelRequest, loading } = useFriends();
+export default function SentRequests({ requests, isLoading }: SentRequestsProps) {
+  const { cancelRequest } = useFriends();
   const [processingId, setProcessingId] = useState<string | null>(null);
 
   const handleCancel = async (friendshipId: string) => {
@@ -66,7 +68,7 @@ export default function SentRequests({ isLoading }: SentRequestsProps) {
     });
   };
 
-  if (isLoading || loading) {
+  if (isLoading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
         <CircularProgress />
@@ -74,7 +76,7 @@ export default function SentRequests({ isLoading }: SentRequestsProps) {
     );
   }
 
-  if (sentRequests.length === 0) {
+  if (requests.length === 0) {
     return (
       <Paper
         elevation={0}
@@ -97,11 +99,11 @@ export default function SentRequests({ isLoading }: SentRequestsProps) {
   }
 
   return (
-    <List sx={{ width: '100%', bgcolor: 'background.paper', borderRadius: 2 }}>
-      {sentRequests.map((request: SentFriendRequest, index: number) => (
+    <List sx={{ width: '100%', bgcolor: 'transparent', borderRadius: 2 }}>
+      {requests.map((request: SentFriendRequest, index: number) => (
         <ListItem
           key={request.friendship_id}
-          divider={index < sentRequests.length - 1}
+          divider={index < requests.length - 1}
           sx={{
             py: 2,
             '&:hover': {

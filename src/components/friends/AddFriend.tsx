@@ -61,14 +61,25 @@ function SearchResultItem({ user, status, onSendRequest, loading }: SearchResult
   return (
     <div
       style={{
-        background: 'var(--color-background-primary)',
+        background: 'rgba(255, 255, 255, 0.7)',
         borderRadius: 'var(--radius-md)',
         padding: 'var(--spacing-md)',
         display: 'flex',
         alignItems: 'center',
         gap: 'var(--spacing-md)',
-        border: '1px solid var(--color-border)',
+        border: '1px solid rgba(0, 48, 73, 0.1)',
         boxShadow: 'var(--shadow-sm)',
+        transition: 'all var(--transition-base)',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
+        e.currentTarget.style.transform = 'translateY(-2px)';
+        e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.7)';
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
       }}
     >
       {/* Avatar - Using MUI Avatar for safe rendering */}
@@ -266,21 +277,22 @@ export function AddFriend() {
   };
 
   return (
-    <div style={{
-      background: 'var(--color-background-primary)',
-      borderRadius: 'var(--radius-lg)',
-      padding: 'var(--spacing-lg)',
-      border: '1px solid var(--color-border)',
-      boxShadow: 'var(--shadow-md)',
-    }}>
+    <div>
       <h3 style={{
         margin: '0 0 var(--spacing-md) 0',
         fontSize: 'var(--font-size-h5)',
-        color: 'var(--color-text-primary)',
+        color: 'var(--prussian-blue)',
         fontWeight: 'var(--font-weight-semibold)',
       }}>
         Søk etter venner
       </h3>
+      <p style={{
+        margin: '0 0 var(--spacing-lg) 0',
+        fontSize: 'var(--font-size-small)',
+        color: 'var(--color-text-muted)',
+      }}>
+        Søk etter brukere for å sende venneforespørsler
+      </p>
 
       {/* Search Input */}
       <div style={{
@@ -305,10 +317,11 @@ export function AddFriend() {
             width: '100%',
             padding: 'var(--spacing-md) var(--spacing-md) var(--spacing-md) calc(var(--spacing-md) * 3)',
             border: '1px solid var(--color-border)',
-            borderRadius: 'var(--radius-sm)',
+            borderRadius: 'var(--radius-md)',
             fontSize: 'var(--font-size-base)',
             outline: 'none',
             transition: 'all var(--transition-base)',
+            background: 'rgba(255, 255, 255, 0.9)',
           }}
           onFocus={(e) => {
             e.currentTarget.style.borderColor = 'var(--prussian-blue)';
