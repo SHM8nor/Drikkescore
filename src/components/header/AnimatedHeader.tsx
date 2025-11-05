@@ -48,7 +48,7 @@ const getPageTitle = (pathname: string): string => {
   if (pathname === '/history') return 'Historikk';
   if (pathname === '/analytics') return 'Analyse';
   if (pathname.startsWith('/session/')) return 'Økt';
-  return 'Drikkescore';
+  return 'Drikker du?';
 };
 
 export default function AnimatedHeader() {

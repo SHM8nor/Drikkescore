@@ -1,9 +1,10 @@
 {
-  "name": "drikkescore",
+  "name": "drikker-du",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "predev": "node -e \"const fs=require('fs'); if(!fs.existsSync('node_modules')||fs.statSync('package-lock.json').mtime>fs.statSync('node_modules').mtime){console.log('Installing dependencies...'); require('child_process').execSync('npm install',{stdio:'inherit'})}\"",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",

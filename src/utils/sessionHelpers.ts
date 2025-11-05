@@ -81,7 +81,7 @@ export async function shareSession(
   if (navigator.share) {
     try {
       await navigator.share({
-        title: `Drikkescore - ${sessionName}`,
+        title: `Drikker du? - ${sessionName}`,
         text: shareText,
         url: shareUrl,
       });

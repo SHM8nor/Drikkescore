@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useSession } from '../hooks/useSession';
 import { useSessionPresence } from '../hooks/useSessionPresence';
 import { useAuth } from '../context/AuthContext';
-import { formatBAC, getBACDescription } from '../utils/bacCalculator';
+import { formatBAC, getBACDescription, calculateTimeToPeak } from '../utils/bacCalculator';
 import { calculateTotalAlcoholGrams, convertGramsToBeers } from '../utils/chartHelpers';
 import BACLineChart from '../components/charts/BACLineChart';
 import AlcoholConsumptionChart from '../components/charts/AlcoholConsumptionChart';
@@ -90,6 +90,14 @@ export function SessionPage() {
     const saved = localStorage.getItem('lastDrinkAlcoholPercentage');
     return saved ? parseFloat(saved) : 4.5;
   });
+  const [foodConsumed, setFoodConsumed] = useState(() => {
+    const saved = localStorage.getItem('lastDrinkFoodConsumed');
+    return saved === 'true';
+  });
+  const [rapidConsumption, setRapidConsumption] = useState(() => {
+    const saved = localStorage.getItem('lastDrinkRapidConsumption');
+    return saved === 'true';
+  });
   const [submitting, setSubmitting] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<number>(0); // seconds remaining
@@ -155,6 +163,13 @@ export function SessionPage() {
     return convertGramsToBeers(totalGrams);
   }, [drinks, user]);
 
+  // Calculate time to peak BAC
+  const minutesToPeak = useMemo(() => {
+    if (!user) return 0;
+    const userDrinks = drinks.filter((d) => d.user_id === user.id);
+    return calculateTimeToPeak(userDrinks);
+  }, [drinks, user]);
+
   // Find the most recent drink added by current user
   const lastUserDrink = useMemo(() => {
     if (!user) return null;
@@ -208,7 +223,7 @@ export function SessionPage() {
 
   const handleAddDrink = async (e: FormEvent) => {
     e.preventDefault();
-    console.log('Add drink clicked!', { volumeMl, alcoholPercentage });
+    console.log('Add drink clicked!', { volumeMl, alcoholPercentage, foodConsumed, rapidConsumption });
     setSubmitting(true);
     setAddError(null);
 
@@ -221,8 +236,13 @@ export function SessionPage() {
 
     try {
       console.log('Calling addDrink...');
-      await addDrink(volumeMl, alcoholPercentage);
+      await addDrink(volumeMl, alcoholPercentage, foodConsumed, rapidConsumption);
       console.log('Drink added successfully!');
+
+      // Save values to localStorage for next time
+      localStorage.setItem('lastDrinkFoodConsumed', String(foodConsumed));
+      localStorage.setItem('lastDrinkRapidConsumption', String(rapidConsumption));
+
       setSubmitting(false);
       // Keep the last entered values so users can quickly add the same drink again
     } catch (err: any) {
@@ -320,6 +340,16 @@ export function SessionPage() {
                 <strong>{userBeerUnits.toFixed(1)}</strong> enheter konsumert
               </span>
             </p>
+            {minutesToPeak > 0 && (
+              <p className="user-stats" style={{ fontSize: '14px', marginTop: '4px', opacity: 0.9 }}>
+                <strong>⏱️ Topp promille om {minutesToPeak} min</strong>
+              </p>
+            )}
+            {minutesToPeak === 0 && userBeerUnits > 0 && (
+              <p className="user-stats" style={{ fontSize: '14px', marginTop: '4px', opacity: 0.9 }}>
+                <strong>📉 Promille synker nå</strong>
+              </p>
+            )}
             {timeSinceLastDrink && (
               <p className="user-stats" style={{ fontSize: '14px', marginTop: '4px', opacity: 0.8 }}>
                 {timeSinceLastDrink} siden forrige enhet
@@ -365,6 +395,32 @@ export function SessionPage() {
                   onChange={(e) => setAlcoholPercentage(parseFloat(e.target.value) || 0)}
                   required
                 />
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                <input
+                  id="foodConsumed"
+                  type="checkbox"
+                  checked={foodConsumed}
+                  onChange={(e) => setFoodConsumed(e.target.checked)}
+                  style={{ width: 'auto', margin: 0 }}
+                />
+                <label htmlFor="foodConsumed" style={{ margin: 0, cursor: 'pointer', display: 'inline' }}>
+                  Nettopp spist
+                </label>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                <input
+                  id="rapidConsumption"
+                  type="checkbox"
+                  checked={rapidConsumption}
+                  onChange={(e) => setRapidConsumption(e.target.checked)}
+                  style={{ width: 'auto', margin: 0 }}
+                />
+                <label htmlFor="rapidConsumption" style={{ margin: 0, cursor: 'pointer', display: 'inline' }}>
+                  Chugget/Shotgun 🍺
+                </label>
               </div>
 
               <button type="submit" className="btn-primary" disabled={submitting || sessionEnded}>
