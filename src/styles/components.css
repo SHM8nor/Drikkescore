@@ -2,6 +2,7 @@
  * Component Styles
  *
  * Reusable UI component styles (buttons, forms, cards, etc.)
+ * Phase 5: Minimal Apple/BCG-inspired design with reduced shadows and borders
  */
 
 /* ========================================
@@ -115,28 +116,33 @@
 }
 
 /* ========================================
-   CARDS
+   CARDS - MINIMAL DESIGN
    ======================================== */
 
 .card {
   background: var(--color-background-primary);
-  border: 1px solid var(--card-border-color);
+  border: 1px solid var(--color-border-light);
   border-radius: var(--card-border-radius);
   padding: var(--card-padding);
-  box-shadow: var(--card-shadow);
+  /* Minimal shadow - use xs instead of sm */
+  box-shadow: var(--shadow-xs);
   transition: all var(--transition-base);
 }
 
 .card:hover {
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
+  /* Subtle lift on hover */
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
 }
 
 .card-vanilla {
   background: var(--vanilla-light);
-  border: 1px solid var(--vanilla-dark);
+  /* Subtle border instead of heavy outline */
+  border: 1px solid var(--color-border-light);
   border-radius: var(--card-border-radius);
   padding: var(--card-padding);
+  /* No shadow for secondary cards */
+  box-shadow: none;
 }
 
 /* ========================================

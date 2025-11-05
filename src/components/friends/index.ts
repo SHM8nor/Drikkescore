@@ -5,4 +5,7 @@
  */
 
 export { ActiveSessions } from './ActiveSessions';
-export { default as FriendsExample } from './FriendsExample';
+export { FriendsList } from './FriendsList';
+export { default as PendingRequests } from './PendingRequests';
+export { default as SentRequests } from './SentRequests';
+export { AddFriend } from './AddFriend';

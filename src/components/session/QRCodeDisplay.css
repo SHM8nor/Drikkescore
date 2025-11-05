@@ -1,3 +1,8 @@
+/**
+ * QR Code Display Container
+ * Phase 5: Minimal Apple/BCG-inspired design with reduced shadows and borders
+ */
+
 /* QR Code Display Container */
 .qr-code-display {
   width: 100%;
@@ -10,12 +15,21 @@
   background: var(--color-background-primary, #ffffff);
   border-radius: var(--radius-lg, 12px);
   padding: 24px;
-  box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.1));
+  /* Reduced shadow - minimal look */
+  box-shadow: var(--shadow-xs, 0 1px 2px rgba(0, 0, 0, 0.05));
+  /* Subtle border */
+  border: 1px solid var(--color-border-light, #e5e7eb);
   display: flex;
   flex-direction: column;
   align-items: center;
   max-width: 400px;
   width: 100%;
+  transition: all var(--transition-base, 250ms ease-in-out);
+}
+
+.qr-code-container:hover {
+  /* Subtle lift on hover */
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.1));
 }
 
 /* QR Canvas */
@@ -25,7 +39,8 @@
   border-radius: var(--radius-md, 8px);
   background-color: white;
   padding: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  /* Minimal shadow for QR code itself */
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
 /* QR Info Section */

@@ -3,13 +3,16 @@
  *
  * Matches the card styling from SessionPage components
  * (user-bac-card, leaderboard-card, add-drink-card)
+ * Phase 5: Minimal Apple/BCG-inspired design with reduced shadows and borders
  */
 
 .chart-container {
   background: var(--color-background-primary);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
-  box-shadow: var(--shadow-md);
+  /* Reduced shadow - minimal look */
+  box-shadow: var(--shadow-xs);
+  /* Subtle border */
   border: 1px solid var(--color-border-light);
   transition: all var(--transition-base);
   /* Make chart containers take full width */
@@ -21,8 +24,9 @@
 }
 
 .chart-container:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  /* Subtle lift on hover */
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Header Section */

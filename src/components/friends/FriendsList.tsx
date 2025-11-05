@@ -36,7 +36,7 @@ function sanitizeAvatarUrl(url: string | null): string | null {
 interface FriendsListProps {
   friends: Friend[];
   loading: boolean;
-  onRemoveFriend: (friendId: string, friendName: string) => Promise<void>;
+  onRemoveFriend: (friendId: string) => Promise<void>;
 }
 
 export function FriendsList({ friends, loading, onRemoveFriend }: FriendsListProps) {
@@ -49,7 +49,7 @@ export function FriendsList({ friends, loading, onRemoveFriend }: FriendsListPro
 
     setRemovingId(friendId);
     try {
-      await onRemoveFriend(friendId, friendName);
+      await onRemoveFriend(friendId);
     } finally {
       setRemovingId(null);
     }
@@ -73,9 +73,9 @@ export function FriendsList({ friends, loading, onRemoveFriend }: FriendsListPro
       <div style={{
         textAlign: 'center',
         padding: 'var(--spacing-2xl)',
-        background: 'var(--color-background-primary)',
+        background: 'rgba(255, 255, 255, 0.5)',
         borderRadius: 'var(--radius-lg)',
-        border: '1px solid var(--color-border)',
+        border: '1px solid rgba(0, 48, 73, 0.1)',
       }}>
         <PeopleIcon
           sx={{
@@ -115,15 +115,25 @@ export function FriendsList({ friends, loading, onRemoveFriend }: FriendsListPro
           <div
             key={friend.friend_id}
             style={{
-              background: 'var(--color-background-primary)',
+              background: 'rgba(255, 255, 255, 0.7)',
               borderRadius: 'var(--radius-md)',
               padding: 'var(--spacing-md)',
               display: 'flex',
               alignItems: 'center',
               gap: 'var(--spacing-md)',
-              border: '1px solid var(--color-border)',
+              border: '1px solid rgba(0, 48, 73, 0.1)',
               boxShadow: 'var(--shadow-sm)',
               transition: 'all var(--transition-base)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.7)';
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
             }}
           >
             {/* Avatar - Using MUI Avatar for safe rendering */}

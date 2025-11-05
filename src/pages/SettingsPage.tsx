@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useUpdateProfile } from '../hooks/useUpdateProfile';
 import { supabase } from '../lib/supabase';
 import type { Gender } from '../types/database';
+import { PageContainer } from '../components/layout/PageContainer';
 
 export function SettingsPage() {
   const { profile, user, retryFetchProfile } = useAuth();
@@ -222,124 +223,126 @@ export function SettingsPage() {
   const avatarDisplay = getAvatarDisplay();
 
   return (
-    <div className="settings-page">
-      <div className="settings-content">
-        <div className="settings-card">
-          <h2>Profilinnstillinger</h2>
-          {profileError && <div className="error-message">{profileError}</div>}
-          {profileSuccess && <div className="success-message">{profileSuccess}</div>}
+    <PageContainer>
+      <div className="settings-page">
+        <div className="settings-content">
+          <div className="settings-card">
+            <h2>Profilinnstillinger</h2>
+            {profileError && <div className="error-message">{profileError}</div>}
+            {profileSuccess && <div className="success-message">{profileSuccess}</div>}
 
-          <form onSubmit={handleUpdateProfile} className="settings-form">
-            {/* Profile Picture Section */}
-            <div className="form-group avatar-section">
-              <label>Profilbilde</label>
-              <div className="avatar-container">
-                <div className="avatar-preview">
-                  {avatarDisplay ? (
-                    <img src={avatarDisplay} alt="Profilbilde" className="avatar-image" />
-                  ) : (
-                    <div className="avatar-placeholder">
-                      <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                        <circle cx="12" cy="7" r="4" />
-                      </svg>
+            <form onSubmit={handleUpdateProfile} className="settings-form">
+              {/* Profile Picture Section */}
+              <div className="form-group avatar-section">
+                <label>Profilbilde</label>
+                <div className="avatar-container">
+                  <div className="avatar-preview">
+                    {avatarDisplay ? (
+                      <img src={avatarDisplay} alt="Profilbilde" className="avatar-image" />
+                    ) : (
+                      <div className="avatar-placeholder">
+                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                          <circle cx="12" cy="7" r="4" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  <div className="avatar-controls">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileSelect}
+                      className="avatar-file-input"
+                      id="avatar-upload"
+                    />
+                    <label htmlFor="avatar-upload" className="btn-secondary avatar-select-btn">
+                      Velg bilde
+                    </label>
+                    {selectedFile && (
+                      <button
+                        type="button"
+                        onClick={handleUploadAvatar}
+                        disabled={uploadLoading}
+                        className="btn-primary"
+                      >
+                        {uploadLoading ? 'Laster opp...' : 'Last opp'}
+                      </button>
+                    )}
+                  </div>
+                  {uploadError && <div className="error-message avatar-error">{uploadError}</div>}
+                  {selectedFile && (
+                    <div className="avatar-file-info">
+                      Valgt fil: {selectedFile.name}
                     </div>
                   )}
                 </div>
-                <div className="avatar-controls">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileSelect}
-                    className="avatar-file-input"
-                    id="avatar-upload"
-                  />
-                  <label htmlFor="avatar-upload" className="btn-secondary avatar-select-btn">
-                    Velg bilde
-                  </label>
-                  {selectedFile && (
-                    <button
-                      type="button"
-                      onClick={handleUploadAvatar}
-                      disabled={uploadLoading}
-                      className="btn-primary"
-                    >
-                      {uploadLoading ? 'Laster opp...' : 'Last opp'}
-                    </button>
-                  )}
-                </div>
-                {uploadError && <div className="error-message avatar-error">{uploadError}</div>}
-                {selectedFile && (
-                  <div className="avatar-file-info">
-                    Valgt fil: {selectedFile.name}
-                  </div>
-                )}
               </div>
-            </div>
 
-            <div className="form-group">
-              <label htmlFor="full_name">Visningsnavn</label>
-              <input id="full_name" type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
-            </div>
-            <div className="form-group">
-              <label htmlFor="weight">Vekt (kg)</label>
-              <input id="weight" type="number" step="0.1" value={weightKg} onChange={(e) => setWeightKg(parseFloat(e.target.value) || 0)} required />
-            </div>
-            <div className="form-group">
-              <label htmlFor="height">Høyde (cm)</label>
-              <input id="height" type="number" value={heightCm} onChange={(e) => setHeightCm(parseInt(e.target.value) || 0)} required />
-            </div>
-            <div className="form-group">
-              <label htmlFor="gender">Kjønn</label>
-              <select id="gender" value={gender} onChange={(e) => setGender(e.target.value as Gender)} required>
-                <option value="male">Mann</option>
-                <option value="female">Kvinne</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label htmlFor="age">Alder</label>
-              <input id="age" type="number" value={age} onChange={(e) => setAge(parseInt(e.target.value) || 0)} required />
-            </div>
-            <button type="submit" className="btn-primary" disabled={updateLoading}>
-              {updateLoading ? 'Lagrer...' : 'Lagre endringer'}
-            </button>
-          </form>
-        </div>
+              <div className="form-group">
+                <label htmlFor="full_name">Visningsnavn</label>
+                <input id="full_name" type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+              </div>
+              <div className="form-group">
+                <label htmlFor="weight">Vekt (kg)</label>
+                <input id="weight" type="number" step="0.1" value={weightKg} onChange={(e) => setWeightKg(parseFloat(e.target.value) || 0)} required />
+              </div>
+              <div className="form-group">
+                <label htmlFor="height">Høyde (cm)</label>
+                <input id="height" type="number" value={heightCm} onChange={(e) => setHeightCm(parseInt(e.target.value) || 0)} required />
+              </div>
+              <div className="form-group">
+                <label htmlFor="gender">Kjønn</label>
+                <select id="gender" value={gender} onChange={(e) => setGender(e.target.value as Gender)} required>
+                  <option value="male">Mann</option>
+                  <option value="female">Kvinne</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label htmlFor="age">Alder</label>
+                <input id="age" type="number" value={age} onChange={(e) => setAge(parseInt(e.target.value) || 0)} required />
+              </div>
+              <button type="submit" className="btn-primary" disabled={updateLoading}>
+                {updateLoading ? 'Lagrer...' : 'Lagre endringer'}
+              </button>
+            </form>
+          </div>
 
-        <div className="settings-card">
-          <h2>Endre e-post</h2>
-          {authError && <div className="error-message">{authError}</div>}
-          {authSuccess && <div className="success-message">{authSuccess}</div>}
+          <div className="settings-card">
+            <h2>Endre e-post</h2>
+            {authError && <div className="error-message">{authError}</div>}
+            {authSuccess && <div className="success-message">{authSuccess}</div>}
 
-          <form onSubmit={handleUpdateEmail} className="settings-form">
-            <div className="form-group">
-              <label htmlFor="email">E-post</label>
-              <input id="email" type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} required />
-            </div>
-            <button type="submit" className="btn-primary" disabled={authLoading}>
-              {authLoading ? 'Oppdaterer...' : 'Oppdater e-post'}
-            </button>
-          </form>
-        </div>
+            <form onSubmit={handleUpdateEmail} className="settings-form">
+              <div className="form-group">
+                <label htmlFor="email">E-post</label>
+                <input id="email" type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} required />
+              </div>
+              <button type="submit" className="btn-primary" disabled={authLoading}>
+                {authLoading ? 'Oppdaterer...' : 'Oppdater e-post'}
+              </button>
+            </form>
+          </div>
 
-        <div className="settings-card">
-          <h2>Endre passord</h2>
-          <form onSubmit={handleUpdatePassword} className="settings-form">
-            <div className="form-group">
-              <label htmlFor="new_password">Nytt passord</label>
-              <input id="new_password" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} minLength={6} required />
-            </div>
-            <div className="form-group">
-              <label htmlFor="confirm_password">Bekreft passord</label>
-              <input id="confirm_password" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} minLength={6} required />
-            </div>
-            <button type="submit" className="btn-primary" disabled={authLoading}>
-              {authLoading ? 'Oppdaterer...' : 'Endre passord'}
-            </button>
-          </form>
+          <div className="settings-card">
+            <h2>Endre passord</h2>
+            <form onSubmit={handleUpdatePassword} className="settings-form">
+              <div className="form-group">
+                <label htmlFor="new_password">Nytt passord</label>
+                <input id="new_password" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} minLength={6} required />
+              </div>
+              <div className="form-group">
+                <label htmlFor="confirm_password">Bekreft passord</label>
+                <input id="confirm_password" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} minLength={6} required />
+              </div>
+              <button type="submit" className="btn-primary" disabled={authLoading}>
+                {authLoading ? 'Oppdaterer...' : 'Endre passord'}
+              </button>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 }

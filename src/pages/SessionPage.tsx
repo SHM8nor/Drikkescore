@@ -11,6 +11,7 @@ import AlcoholConsumptionChart from '../components/charts/AlcoholConsumptionChar
 import ChartContainer from '../components/charts/ChartContainer';
 import { ShareSessionModal } from '../components/session/ShareSessionModal';
 import { ActiveUsersIndicator } from '../components/session/ActiveUsersIndicator';
+import { PageContainer } from '../components/layout/PageContainer';
 
 // Helper function to format countdown timer
 function formatTime(seconds: number): string {
@@ -268,289 +269,291 @@ export function SessionPage() {
   const userLeaderboardEntry = leaderboard.find((entry) => entry.user_id === user?.id);
 
   return (
-    <div className="session-page">
-      {/* Session info banner - spans full width */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '16px 24px',
-        backgroundColor: 'rgba(0, 48, 73, 0.08)',
-        borderRadius: '8px',
-        marginBottom: '24px',
-        flexWrap: 'wrap',
-        gap: '16px'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '24px', flexWrap: 'wrap' }}>
-          <span style={{ fontWeight: 600, fontSize: '16px', color: 'var(--prussian-blue)' }}>
-            {session.session_name || 'Økt'}: <strong>{session.session_code}</strong>
-          </span>
-          <span style={{ fontSize: '15px', color: sessionEnded ? 'var(--fire-engine-red)' : 'var(--prussian-blue)' }}>
-            {sessionEnded ? (
-              <strong>Økten er avsluttet!</strong>
-            ) : (
-              <>⏱ {formatTime(timeRemaining)} igjen</>
-            )}
-          </span>
-          {/* Active users indicator */}
-          {sessionId && <ActiveUsersIndicator sessionId={sessionId} />}
-        </div>
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          <button onClick={() => setShareModalOpen(true)} className="btn-primary">
-            Del økt
-          </button>
-          <button onClick={() => navigate('/')} className="btn-secondary">
-            Forlat økt
-          </button>
-        </div>
-      </div>
-
-      <div className="session-content">
-        {/* User's current BAC */}
-        <div className="user-bac-card">
-          <h2>Din promille</h2>
-          <div className="bac-display">
-            <span className="bac-value">{formatBAC(currentUserBAC)}</span>
-            <span className="bac-description">{getBACDescription(currentUserBAC)}</span>
-          </div>
-          <p className="user-stats">
-            <span className="stat-item">
-              <strong>{userBeerUnits.toFixed(1)}</strong> enheter konsumert
+    <PageContainer>
+      <div className="session-page">
+        {/* Session info banner - spans full width */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '16px 24px',
+          backgroundColor: 'rgba(0, 48, 73, 0.08)',
+          borderRadius: '8px',
+          marginBottom: '24px',
+          flexWrap: 'wrap',
+          gap: '16px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '24px', flexWrap: 'wrap' }}>
+            <span style={{ fontWeight: 600, fontSize: '16px', color: 'var(--prussian-blue)' }}>
+              {session.session_name || 'Økt'}: <strong>{session.session_code}</strong>
             </span>
-          </p>
-          {timeSinceLastDrink && (
-            <p className="user-stats" style={{ fontSize: '14px', marginTop: '4px', opacity: 0.8 }}>
-              {timeSinceLastDrink} siden forrige enhet
-            </p>
-          )}
-          {userLeaderboardEntry && (
-            <p className="user-rank">
-              Nåværende plassering: #{userLeaderboardEntry.rank}
-            </p>
-          )}
-        </div>
-
-        {/* Add drink form */}
-        <div className="add-drink-card">
-          <h2>Legg til enhet</h2>
-          {sessionEnded && (
-            <div className="error-message" style={{ background: '#fff3cd', color: '#856404', borderColor: '#ffc107' }}>
-              Økten er avsluttet. Flere enheter kan ikke legges til.
-            </div>
-          )}
-          {addError && <div className="error-message">{addError}</div>}
-
-          <form onSubmit={handleAddDrink} className="add-drink-form">
-            <div className="form-group">
-              <label htmlFor="volume">Volum (ml)</label>
-              <input
-                id="volume"
-                type="number"
-                step="1"
-                value={volumeMl || ''}
-                onChange={(e) => setVolumeMl(parseFloat(e.target.value) || 0)}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="alcohol">Alkohol %</label>
-              <input
-                id="alcohol"
-                type="number"
-                step="0.1"
-                value={alcoholPercentage || ''}
-                onChange={(e) => setAlcoholPercentage(parseFloat(e.target.value) || 0)}
-                required
-              />
-            </div>
-
-            <button type="submit" className="btn-primary" disabled={submitting || sessionEnded}>
-              {submitting ? 'Legger til...' : 'Legg til enhet'}
+            <span style={{ fontSize: '15px', color: sessionEnded ? 'var(--fire-engine-red)' : 'var(--prussian-blue)' }}>
+              {sessionEnded ? (
+                <strong>Økten er avsluttet!</strong>
+              ) : (
+                <>⏱ {formatTime(timeRemaining)} igjen</>
+              )}
+            </span>
+            {/* Active users indicator */}
+            {sessionId && <ActiveUsersIndicator sessionId={sessionId} />}
+          </div>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <button onClick={() => setShareModalOpen(true)} className="btn-primary">
+              Del økt
             </button>
-
-            {canUndoLastDrink && !sessionEnded && (
-              <button
-                type="button"
-                onClick={handleUndoDrink}
-                className="btn-secondary"
-                disabled={submitting}
-                style={{
-                  marginTop: '8px',
-                  backgroundColor: '#ff9800',
-                  borderColor: '#ff9800',
-                  color: 'white'
-                }}
-              >
-                {submitting ? 'Angrer...' : 'Angre siste enhet'}
-              </button>
-            )}
-          </form>
-
-          {/* Quick preset buttons */}
-          <div className="drink-presets">
-            <button
-              onClick={() => {
-                setVolumeMl(330);
-                setAlcoholPercentage(4.5);
-              }}
-              className="preset-btn"
-            >
-              Øl (330ml, 4.5%)
-            </button>
-            <button
-              onClick={() => {
-                setVolumeMl(500);
-                setAlcoholPercentage(4.5);
-              }}
-              className="preset-btn"
-            >
-              Pint (500ml, 4.5%)
-            </button>
-            <button
-              onClick={() => {
-                setVolumeMl(150);
-                setAlcoholPercentage(12);
-              }}
-              className="preset-btn"
-            >
-              Vin (150ml, 12%)
-            </button>
-            <button
-              onClick={() => {
-                setVolumeMl(40);
-                setAlcoholPercentage(40);
-              }}
-              className="preset-btn"
-            >
-              Shot (40ml, 40%)
+            <button onClick={() => navigate('/')} className="btn-secondary">
+              Forlat økt
             </button>
           </div>
         </div>
 
-        {/* Leaderboard */}
-        <div className="leaderboard-card">
-          <h2>{sessionEnded ? 'Sluttresultat' : 'Toppliste'}</h2>
-          {sessionEnded && leaderboard.length > 0 && (
-            <div style={{
-              background: 'linear-gradient(135deg, #fff9c4, #fff59d)',
-              padding: '12px',
-              borderRadius: '6px',
-              marginBottom: '16px',
-              textAlign: 'center',
-              fontWeight: 'bold'
-            }}>
-              {leaderboard[0]?.full_name} vinner med {formatBAC(leaderboard[0]?.bac)}!
+        <div className="session-content">
+          {/* User's current BAC */}
+          <div className="user-bac-card">
+            <h2>Din promille</h2>
+            <div className="bac-display">
+              <span className="bac-value">{formatBAC(currentUserBAC)}</span>
+              <span className="bac-description">{getBACDescription(currentUserBAC)}</span>
             </div>
-          )}
-          {leaderboard.length === 0 ? (
-            <p className="no-data">Ingen deltakere ennå</p>
-          ) : (
-            <div className="leaderboard">
-              {leaderboard.map((entry) => (
-                <div
-                  key={entry.user_id}
-                  className={`leaderboard-entry ${entry.user_id === user?.id ? 'current-user' : ''}`}
+            <p className="user-stats">
+              <span className="stat-item">
+                <strong>{userBeerUnits.toFixed(1)}</strong> enheter konsumert
+              </span>
+            </p>
+            {timeSinceLastDrink && (
+              <p className="user-stats" style={{ fontSize: '14px', marginTop: '4px', opacity: 0.8 }}>
+                {timeSinceLastDrink} siden forrige enhet
+              </p>
+            )}
+            {userLeaderboardEntry && (
+              <p className="user-rank">
+                Nåværende plassering: #{userLeaderboardEntry.rank}
+              </p>
+            )}
+          </div>
+
+          {/* Add drink form */}
+          <div className="add-drink-card">
+            <h2>Legg til enhet</h2>
+            {sessionEnded && (
+              <div className="error-message" style={{ background: '#fff3cd', color: '#856404', borderColor: '#ffc107' }}>
+                Økten er avsluttet. Flere enheter kan ikke legges til.
+              </div>
+            )}
+            {addError && <div className="error-message">{addError}</div>}
+
+            <form onSubmit={handleAddDrink} className="add-drink-form">
+              <div className="form-group">
+                <label htmlFor="volume">Volum (ml)</label>
+                <input
+                  id="volume"
+                  type="number"
+                  step="1"
+                  value={volumeMl || ''}
+                  onChange={(e) => setVolumeMl(parseFloat(e.target.value) || 0)}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="alcohol">Alkohol %</label>
+                <input
+                  id="alcohol"
+                  type="number"
+                  step="0.1"
+                  value={alcoholPercentage || ''}
+                  onChange={(e) => setAlcoholPercentage(parseFloat(e.target.value) || 0)}
+                  required
+                />
+              </div>
+
+              <button type="submit" className="btn-primary" disabled={submitting || sessionEnded}>
+                {submitting ? 'Legger til...' : 'Legg til enhet'}
+              </button>
+
+              {canUndoLastDrink && !sessionEnded && (
+                <button
+                  type="button"
+                  onClick={handleUndoDrink}
+                  className="btn-secondary"
+                  disabled={submitting}
+                  style={{
+                    marginTop: '8px',
+                    backgroundColor: '#ff9800',
+                    borderColor: '#ff9800',
+                    color: 'white'
+                  }}
                 >
-                  <span className="rank">#{entry.rank}</span>
-                  <span className="name">{entry.full_name}</span>
-                  <span className="bac">{formatBAC(entry.bac)}</span>
-                </div>
-              ))}
+                  {submitting ? 'Angrer...' : 'Angre siste enhet'}
+                </button>
+              )}
+            </form>
+
+            {/* Quick preset buttons */}
+            <div className="drink-presets">
+              <button
+                onClick={() => {
+                  setVolumeMl(330);
+                  setAlcoholPercentage(4.5);
+                }}
+                className="preset-btn"
+              >
+                Øl (330ml, 4.5%)
+              </button>
+              <button
+                onClick={() => {
+                  setVolumeMl(500);
+                  setAlcoholPercentage(4.5);
+                }}
+                className="preset-btn"
+              >
+                Pint (500ml, 4.5%)
+              </button>
+              <button
+                onClick={() => {
+                  setVolumeMl(150);
+                  setAlcoholPercentage(12);
+                }}
+                className="preset-btn"
+              >
+                Vin (150ml, 12%)
+              </button>
+              <button
+                onClick={() => {
+                  setVolumeMl(40);
+                  setAlcoholPercentage(40);
+                }}
+                className="preset-btn"
+              >
+                Shot (40ml, 40%)
+              </button>
             </div>
+          </div>
+
+          {/* Leaderboard */}
+          <div className="leaderboard-card">
+            <h2>{sessionEnded ? 'Sluttresultat' : 'Toppliste'}</h2>
+            {sessionEnded && leaderboard.length > 0 && (
+              <div style={{
+                background: 'linear-gradient(135deg, #fff9c4, #fff59d)',
+                padding: '12px',
+                borderRadius: '6px',
+                marginBottom: '16px',
+                textAlign: 'center',
+                fontWeight: 'bold'
+              }}>
+                {leaderboard[0]?.full_name} vinner med {formatBAC(leaderboard[0]?.bac)}!
+              </div>
+            )}
+            {leaderboard.length === 0 ? (
+              <p className="no-data">Ingen deltakere ennå</p>
+            ) : (
+              <div className="leaderboard">
+                {leaderboard.map((entry) => (
+                  <div
+                    key={entry.user_id}
+                    className={`leaderboard-entry ${entry.user_id === user?.id ? 'current-user' : ''}`}
+                  >
+                    <span className="rank">#{entry.rank}</span>
+                    <span className="name">{entry.full_name}</span>
+                    <span className="bac">{formatBAC(entry.bac)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* BAC Evolution Chart */}
+          {participants.length > 0 && user?.id && (
+            <ChartContainer
+              title="Promilleutvikling over tid"
+              controls={
+                <div className="chart-controls">
+                  <button
+                    className={`preset-btn ${bacView === 'all' ? 'active' : ''}`}
+                    onClick={() => setBacView('all')}
+                  >
+                    Alle deltakere
+                  </button>
+                  <button
+                    className={`preset-btn ${bacView === 'self' ? 'active' : ''}`}
+                    onClick={() => setBacView('self')}
+                  >
+                    Min promille
+                  </button>
+                </div>
+              }
+            >
+              <BACLineChart
+                participants={participants}
+                drinks={drinks}
+                sessionStartTime={new Date(session.start_time)}
+                sessionEndTime={new Date(session.end_time)}
+                currentUserId={user.id}
+                view={bacView}
+              />
+            </ChartContainer>
+          )}
+
+          {/* Alcohol Consumption Chart */}
+          {participants.length > 0 && (
+            <ChartContainer
+              title="Alkoholforbruk"
+              controls={
+                <div className="chart-controls">
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      className={`preset-btn ${consumptionView === 'per-participant' ? 'active' : ''}`}
+                      onClick={() => setConsumptionView('per-participant')}
+                    >
+                      Per deltaker
+                    </button>
+                    <button
+                      className={`preset-btn ${consumptionView === 'session-total' ? 'active' : ''}`}
+                      onClick={() => setConsumptionView('session-total')}
+                    >
+                      Totalt for økt
+                    </button>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      className={`preset-btn ${consumptionUnit === 'beers' ? 'active' : ''}`}
+                      onClick={() => setConsumptionUnit('beers')}
+                    >
+                      Antall enheter
+                    </button>
+                    <button
+                      className={`preset-btn ${consumptionUnit === 'grams' ? 'active' : ''}`}
+                      onClick={() => setConsumptionUnit('grams')}
+                    >
+                      Gram
+                    </button>
+                  </div>
+                </div>
+              }
+            >
+              <AlcoholConsumptionChart
+                participants={participants}
+                drinks={drinks}
+                view={consumptionView}
+                unit={consumptionUnit}
+                currentUserId={user?.id}
+              />
+            </ChartContainer>
           )}
         </div>
 
-        {/* BAC Evolution Chart */}
-        {participants.length > 0 && user?.id && (
-          <ChartContainer
-            title="Promilleutvikling over tid"
-            controls={
-              <div className="chart-controls">
-                <button
-                  className={`preset-btn ${bacView === 'all' ? 'active' : ''}`}
-                  onClick={() => setBacView('all')}
-                >
-                  Alle deltakere
-                </button>
-                <button
-                  className={`preset-btn ${bacView === 'self' ? 'active' : ''}`}
-                  onClick={() => setBacView('self')}
-                >
-                  Min promille
-                </button>
-              </div>
-            }
-          >
-            <BACLineChart
-              participants={participants}
-              drinks={drinks}
-              sessionStartTime={new Date(session.start_time)}
-              sessionEndTime={new Date(session.end_time)}
-              currentUserId={user.id}
-              view={bacView}
-            />
-          </ChartContainer>
-        )}
-
-        {/* Alcohol Consumption Chart */}
-        {participants.length > 0 && (
-          <ChartContainer
-            title="Alkoholforbruk"
-            controls={
-              <div className="chart-controls">
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button
-                    className={`preset-btn ${consumptionView === 'per-participant' ? 'active' : ''}`}
-                    onClick={() => setConsumptionView('per-participant')}
-                  >
-                    Per deltaker
-                  </button>
-                  <button
-                    className={`preset-btn ${consumptionView === 'session-total' ? 'active' : ''}`}
-                    onClick={() => setConsumptionView('session-total')}
-                  >
-                    Totalt for økt
-                  </button>
-                </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button
-                    className={`preset-btn ${consumptionUnit === 'beers' ? 'active' : ''}`}
-                    onClick={() => setConsumptionUnit('beers')}
-                  >
-                    Antall enheter
-                  </button>
-                  <button
-                    className={`preset-btn ${consumptionUnit === 'grams' ? 'active' : ''}`}
-                    onClick={() => setConsumptionUnit('grams')}
-                  >
-                    Gram
-                  </button>
-                </div>
-              </div>
-            }
-          >
-            <AlcoholConsumptionChart
-              participants={participants}
-              drinks={drinks}
-              view={consumptionView}
-              unit={consumptionUnit}
-              currentUserId={user?.id}
-            />
-          </ChartContainer>
+        {/* SECURITY FIX #4: Only render ShareSessionModal if session_code exists */}
+        {session.session_code && (
+          <ShareSessionModal
+            open={shareModalOpen}
+            onClose={() => setShareModalOpen(false)}
+            sessionId={session.id}
+            sessionCode={session.session_code}
+            sessionName={session.session_name}
+          />
         )}
       </div>
-
-      {/* SECURITY FIX #4: Only render ShareSessionModal if session_code exists */}
-      {session.session_code && (
-        <ShareSessionModal
-          open={shareModalOpen}
-          onClose={() => setShareModalOpen(false)}
-          sessionId={session.id}
-          sessionCode={session.session_code}
-          sessionName={session.session_name}
-        />
-      )}
-    </div>
+    </PageContainer>
   );
 }
