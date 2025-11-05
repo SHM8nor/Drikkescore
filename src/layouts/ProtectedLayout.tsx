@@ -1,16 +1,28 @@
 import { useState } from 'react';
-import { Outlet, Navigate } from 'react-router-dom';
+import { Outlet, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import BurgerMenu from '../components/navigation/BurgerMenu/BurgerMenu';
 import AnimatedHeader from '../components/header/AnimatedHeader';
 import DisclaimerModal from '../components/legal/DisclaimerModal';
+import SessionRecapModal from '../components/recap/SessionRecapModal';
+import { useSessionRecap } from '../hooks/useSessionRecap';
 import { supabase } from '../lib/supabase';
 import '../styles/layouts.css';
 
 export default function ProtectedLayout() {
+  const navigate = useNavigate();
   const { user, profile, loading, profileError, retryFetchProfile } = useAuth();
   const [isUpdatingTerms, setIsUpdatingTerms] = useState(false);
   const [termsError, setTermsError] = useState<string | null>(null);
+  const [recapError, setRecapError] = useState<string | null>(null);
+
+  // Session Recap hook - shows fun stats from last drinking session
+  const {
+    shouldShow: shouldShowRecap,
+    session: recapSession,
+    analytics: recapAnalytics,
+    markAsViewed
+  } = useSessionRecap();
 
   if (loading) {
     return (
@@ -82,6 +94,29 @@ export default function ProtectedLayout() {
   // Show disclaimer modal if user hasn't accepted terms
   const shouldShowDisclaimerModal = profile && !profile.has_accepted_terms;
 
+  // Handle session recap dismiss
+  const handleRecapDismiss = async () => {
+    try {
+      setRecapError(null);
+      await markAsViewed(false);
+    } catch (err: unknown) {
+      console.error('Failed to mark recap as viewed:', err);
+      setRecapError('Kunne ikke lagre valget ditt. Prøv igjen.');
+    }
+  };
+
+  // Handle session recap view details
+  const handleRecapViewDetails = async () => {
+    try {
+      setRecapError(null);
+      await markAsViewed(true);
+      navigate('/analytics');
+    } catch (err: unknown) {
+      console.error('Failed to mark recap as viewed:', err);
+      setRecapError('Kunne ikke lagre valget ditt.');
+    }
+  };
+
   return (
     <>
       {/* Disclaimer Modal - blocking if terms not accepted */}
@@ -90,6 +125,27 @@ export default function ProtectedLayout() {
         onAccept={handleAcceptTerms}
         loading={isUpdatingTerms}
       />
+
+      {/* Session Recap Modal - shown after terms are accepted */}
+      <SessionRecapModal
+        open={shouldShowRecap && !shouldShowDisclaimerModal}
+        session={recapSession}
+        analytics={recapAnalytics}
+        onDismiss={handleRecapDismiss}
+        onViewDetails={handleRecapViewDetails}
+      />
+
+      {/* Error message for recap operations */}
+      {recapError && (
+        <div className="layout-error">
+          <div className="error-card">
+            <p className="error-message">{recapError}</p>
+            <button onClick={() => setRecapError(null)} className="retry-button">
+              OK
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Error message for terms update failure */}
       {termsError && (

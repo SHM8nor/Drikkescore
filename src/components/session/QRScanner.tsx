@@ -60,6 +60,7 @@ export function QRScanner({ onScanSuccess, onClose }: QRScannerProps) {
 
       cleanup();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const startScanning = async () => {
@@ -88,15 +89,16 @@ export function QRScanner({ onScanSuccess, onClose }: QRScannerProps) {
           console.debug('QR scan error:', errorMessage);
         }
       );
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error starting scanner:', err);
 
-      if (err.name === 'NotAllowedError' || err.message?.includes('Permission denied')) {
+      const error = err as { name?: string; message?: string };
+      if (error.name === 'NotAllowedError' || error.message?.includes('Permission denied')) {
         setPermissionDenied(true);
         setError('Kameratilgang ble avvist. Vennligst gi tillatelse til kameraet i nettleserinnstillingene.');
-      } else if (err.name === 'NotFoundError') {
+      } else if (error.name === 'NotFoundError') {
         setError('Ingen kamera funnet på enheten.');
-      } else if (err.name === 'NotReadableError') {
+      } else if (error.name === 'NotReadableError') {
         setError('Kameraet er i bruk av en annen applikasjon.');
       } else {
         setError('Kunne ikke starte kamera. Vennligst prøv igjen.');
