@@ -85,7 +85,11 @@ export function calculateAlcoholGrams(
 }
 
 /**
- * Calculate Blood Alcohol Content using the Widmark formula with gradual absorption
+ * Calculate Blood Alcohol Content using the Widmark formula with two-phase absorption model
+ *
+ * Two-phase model for realistic BAC curves:
+ * Phase 1: Absorption phase - alcohol enters bloodstream (minimal elimination)
+ * Phase 2: Elimination phase - after absorption peak, steady elimination
  *
  * Modified formula with per-drink absorption and elimination:
  * BAC = Σ (A_i × absorption_i - elimination_i)
@@ -93,7 +97,7 @@ export function calculateAlcoholGrams(
  * Where for each drink i:
  * - A_i = Alcohol from drink i / (W × r) × 1000 (peak BAC from that drink in promille)
  * - absorption_i = Sigmoid curve percentage based on time since consumption
- * - elimination_i = 0.15 × time_since_absorption_started (in hours)
+ * - elimination_i = Starts after absorption completes (more realistic)
  * - W = Body weight in kilograms
  * - r = Widmark constant (0.68 for males, 0.55 for females)
  *
@@ -131,9 +135,22 @@ export function calculateBAC(
     const timeElapsedMs = currentTime.getTime() - drinkTime.getTime();
     const minutesSinceConsumption = timeElapsedMs / (1000 * 60);
 
-    // Infer drink type and get absorption time
+    // Infer drink type and get base absorption time
     const drinkType = inferDrinkType(drink.alcohol_percentage);
-    const absorptionTimeMinutes = ABSORPTION_TIME_MINUTES[drinkType];
+    let absorptionTimeMinutes = ABSORPTION_TIME_MINUTES[drinkType];
+
+    // Check for rapid consumption (chugging/shotgunning)
+    // This drastically reduces absorption time (much faster peak)
+    const rapidConsumption = (drink as any).rapid_consumption === true;
+    if (rapidConsumption) {
+      absorptionTimeMinutes = 5; // Chugged drinks absorb in ~5 minutes
+    } else {
+      // Factor in food consumption (doubles absorption time if eating normally)
+      const foodConsumed = (drink as any).food_consumed === true;
+      if (foodConsumed) {
+        absorptionTimeMinutes *= 2;
+      }
+    }
 
     // Calculate alcohol grams from this drink
     const alcoholGrams = calculateAlcoholGrams(
@@ -144,20 +161,30 @@ export function calculateBAC(
     // Calculate peak BAC this drink would produce (if fully absorbed)
     const peakBACFromDrink = (alcoholGrams / (weightInGrams * widmarkR)) * 1000;
 
-    // Calculate absorption percentage using sigmoid curve
-    const absorptionPercentage = calculateAbsorptionPercentage(
-      minutesSinceConsumption,
-      absorptionTimeMinutes
-    );
+    let bacFromDrink = 0;
 
-    // Calculate BAC from absorbed portion
-    let bacFromDrink = peakBACFromDrink * absorptionPercentage;
+    // TWO-PHASE MODEL
+    if (minutesSinceConsumption <= absorptionTimeMinutes) {
+      // PHASE 1: ABSORPTION
+      // Still absorbing - minimal elimination (only 10% of normal rate)
+      const absorptionPercentage = calculateAbsorptionPercentage(
+        minutesSinceConsumption,
+        absorptionTimeMinutes
+      );
 
-    // Apply elimination based on time elapsed since consumption started
-    // Elimination happens gradually as absorption occurs
-    const hoursElapsed = minutesSinceConsumption / 60;
-    const eliminatedBAC = ELIMINATION_RATE * hoursElapsed;
-    bacFromDrink = Math.max(0, bacFromDrink - eliminatedBAC);
+      bacFromDrink = peakBACFromDrink * absorptionPercentage;
+
+      // Minimal elimination during absorption phase
+      const hoursElapsed = minutesSinceConsumption / 60;
+      const minimalElimination = ELIMINATION_RATE * hoursElapsed * 0.1;
+      bacFromDrink = Math.max(0, bacFromDrink - minimalElimination);
+    } else {
+      // PHASE 2: ELIMINATION
+      // Past absorption peak - full elimination rate
+      const hoursSincePeak = (minutesSinceConsumption - absorptionTimeMinutes) / 60;
+      const eliminatedBAC = ELIMINATION_RATE * hoursSincePeak;
+      bacFromDrink = Math.max(0, peakBACFromDrink - eliminatedBAC);
+    }
 
     // Add this drink's contribution to total BAC
     totalBAC += bacFromDrink;
@@ -168,6 +195,67 @@ export function calculateBAC(
 
   // Round to 4 decimal places
   return Math.round(totalBAC * 10000) / 10000;
+}
+
+/**
+ * Calculate time until BAC reaches its peak
+ * Peak occurs when the most recent drink finishes absorbing
+ *
+ * @param drinks Array of drink entries
+ * @param currentTime Current time (defaults to now)
+ * @returns Minutes until peak BAC (0 if already peaked or no drinks)
+ */
+export function calculateTimeToPeak(
+  drinks: DrinkEntry[],
+  currentTime: Date = new Date()
+): number {
+  if (drinks.length === 0) {
+    return 0;
+  }
+
+  let latestPeakTime = 0;
+
+  for (const drink of drinks) {
+    const drinkTime = new Date(drink.consumed_at);
+
+    // Skip drinks consumed after current time
+    if (drinkTime > currentTime) {
+      continue;
+    }
+
+    // Infer drink type and get base absorption time
+    const drinkType = inferDrinkType(drink.alcohol_percentage);
+    let absorptionTimeMinutes = ABSORPTION_TIME_MINUTES[drinkType];
+
+    // Check for rapid consumption
+    const rapidConsumption = (drink as any).rapid_consumption === true;
+    if (rapidConsumption) {
+      absorptionTimeMinutes = 5; // Chugged drinks peak in ~5 minutes
+    } else {
+      // Factor in food consumption
+      const foodConsumed = (drink as any).food_consumed === true;
+      if (foodConsumed) {
+        absorptionTimeMinutes *= 2;
+      }
+    }
+
+    // Calculate when this drink peaks
+    const peakTime = drinkTime.getTime() + (absorptionTimeMinutes * 60 * 1000);
+
+    // Track the latest peak time
+    if (peakTime > latestPeakTime) {
+      latestPeakTime = peakTime;
+    }
+  }
+
+  // If latest peak is in the past, return 0 (already peaked)
+  if (latestPeakTime <= currentTime.getTime()) {
+    return 0;
+  }
+
+  // Return minutes until peak
+  const minutesToPeak = (latestPeakTime - currentTime.getTime()) / (1000 * 60);
+  return Math.round(minutesToPeak);
 }
 
 /**

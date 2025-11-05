@@ -194,8 +194,13 @@ export function useSession(sessionId: string | null) {
   }, [drinks, participants]);
 
   // Add a drink
-  const addDrink = async (volumeMl: number, alcoholPercentage: number) => {
-    console.log('addDrink called with:', { volumeMl, alcoholPercentage, user, sessionId });
+  const addDrink = async (
+    volumeMl: number,
+    alcoholPercentage: number,
+    foodConsumed: boolean = false,
+    rapidConsumption: boolean = false
+  ) => {
+    console.log('addDrink called with:', { volumeMl, alcoholPercentage, foodConsumed, rapidConsumption, user, sessionId });
 
     if (!user || !sessionId) {
       console.error('Validation failed:', { user, sessionId });
@@ -208,6 +213,8 @@ export function useSession(sessionId: string | null) {
       user_id: user.id,
       volume_ml: volumeMl,
       alcohol_percentage: alcoholPercentage,
+      food_consumed: foodConsumed,
+      rapid_consumption: rapidConsumption,
     }).select().single();
 
     if (error) {

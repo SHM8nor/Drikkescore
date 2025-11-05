@@ -140,7 +140,7 @@ export function ShareSessionModal({
     const joinUrl = `${window.location.origin}/join/${encodeURIComponent(sessionCode)}`;
     const shareData = {
       title: sanitizedSessionName || 'Bli med i økten',
-      text: `Bli med i Drikkescore-økten "${sanitizedSessionName || 'min økt'}"! Bruk kode: ${sessionCode}`,
+      text: `Bli med i "${sanitizedSessionName || 'min økt'}" på Drikker du? Bruk kode: ${sessionCode}`,
       url: joinUrl,
     };
 

@@ -47,6 +47,8 @@ export interface DrinkEntry {
   alcohol_percentage: number;
   consumed_at: string;
   created_at: string;
+  food_consumed?: boolean; // Optional: true if user was eating when drinking
+  rapid_consumption?: boolean; // Optional: true if drink was chugged/shotgunned
 }
 
 export interface LeaderboardEntry {
