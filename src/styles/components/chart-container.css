@@ -60,9 +60,14 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  justify-content: flex-start;
+  align-items: stretch;
+  gap: var(--spacing-sm);
   min-height: 350px;
+}
+
+.chart-content > * {
+  width: 100%;
 }
 
 /* Responsive Design */

@@ -1,8 +1,9 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { LineChart } from "@mui/x-charts/LineChart";
 import { axisClasses } from "@mui/x-charts/ChartsAxis";
 import type { Profile, DrinkEntry } from "../../types/database";
 import { prepareLineChartData } from "../../utils/chartHelpers";
+import "../../styles/components/bac-line-chart.css";
 
 interface BACLineChartProps {
   participants: Profile[];
@@ -53,6 +54,21 @@ export default function BACLineChart({
   currentUserId,
   view,
 }: BACLineChartProps) {
+  const [chartKey, setChartKey] = useState(0);
+  const [selectedParticipantId, setSelectedParticipantId] = useState<string | null>(null);
+
+  const participantColors = useMemo(() => {
+    const colors = new Map<string, string>();
+    participants.forEach((participant, index) => {
+      const color =
+        participant.id === currentUserId
+          ? "#1976d2"
+          : CHART_COLORS[index % CHART_COLORS.length];
+      colors.set(participant.id, color);
+    });
+    return colors;
+  }, [participants, currentUserId]);
+
   // Prepare chart data using memoization for performance
   const chartData = useMemo(() => {
     const currentTime = new Date();
@@ -73,11 +89,18 @@ export default function BACLineChart({
       ? Math.min(minutesSinceStart + 5, sessionDurationMinutes)
       : sessionDurationMinutes;
 
-    // Filter participants based on view mode
-    const displayParticipants =
+    // Filter participants based on view mode + custom selection
+    let displayParticipants =
       view === "self"
         ? participants.filter((p) => p.id === currentUserId)
         : participants;
+
+    if (selectedParticipantId && view === "all") {
+      const selectedParticipant = participants.find((p) => p.id === selectedParticipantId);
+      if (selectedParticipant) {
+        displayParticipants = [selectedParticipant];
+      }
+    }
 
     // Generate line chart series for each participant
     const series = prepareLineChartData(
@@ -88,12 +111,8 @@ export default function BACLineChart({
     );
 
     // Assign colors to participants
-    const colors = displayParticipants.map((participant, index) => {
-      // Highlight current user's line with a bolder color
-      if (participant.id === currentUserId) {
-        return "#1976d2"; // Primary blue for current user
-      }
-      return CHART_COLORS[index % CHART_COLORS.length];
+    const colors = displayParticipants.map((participant) => {
+      return participantColors.get(participant.id) ?? "#1976d2";
     });
 
     return { series, colors, xAxisMax };
@@ -104,7 +123,31 @@ export default function BACLineChart({
     sessionEndTime,
     currentUserId,
     view,
+    selectedParticipantId,
+    participantColors,
   ]);
+
+  // Force a re-render when core inputs change so the chart is ready without manual toggling
+  useEffect(() => {
+    setChartKey((prev) => prev + 1);
+  }, [view, participants.length, drinks.length, selectedParticipantId]);
+
+  // Reset selection when switching away from "all" view
+  useEffect(() => {
+    if (view !== "all" && selectedParticipantId) {
+      setSelectedParticipantId(null);
+    }
+  }, [view, selectedParticipantId]);
+
+  // Reset selection if participant list changes and selected participant disappears
+  useEffect(() => {
+    if (
+      selectedParticipantId &&
+      !participants.some((participant) => participant.id === selectedParticipantId)
+    ) {
+      setSelectedParticipantId(null);
+    }
+  }, [participants, selectedParticipantId]);
 
   // Handle empty state
   if (chartData.series.length === 0) {
@@ -119,7 +162,7 @@ export default function BACLineChart({
           fontSize: "14px",
         }}
       >
-        Ingen promilledata tilgjengelig ennå. Legg til noen enheter for å se
+        Ingen promilledata tilgjengelig ennǿ. Legg til noen enheter for Ǿ se
         grafen!
       </div>
     );
@@ -148,23 +191,52 @@ export default function BACLineChart({
     };
   });
 
+  const legendItems = participants.map((participant) => ({
+    id: participant.id,
+    label: participant.full_name,
+    color: participantColors.get(participant.id) ?? "#1976d2",
+    isSelected: selectedParticipantId === participant.id,
+  }));
+
+  const handleLegendClick = (participantId: string) => {
+    if (view !== "all") {
+      return;
+    }
+    setSelectedParticipantId((prev) => (prev === participantId ? null : participantId));
+  };
+
   return (
-    <div
-      style={{
-        width: "100%",
-        height: "100%",
-        minHeight: "350px",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
+    <div className="bac-line-chart">
+      {legendItems.length > 0 && (
+        <div className="bac-line-chart__legend" aria-label="Deltakerforklaring">
+          {legendItems.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              className="bac-line-chart__legend-item"
+              data-selected={item.isSelected}
+              data-disabled={view !== "all"}
+              onClick={() => handleLegendClick(item.id)}
+            >
+              <span
+                className="bac-line-chart__legend-mark"
+                style={{ backgroundColor: item.color }}
+              />
+              <span className="bac-line-chart__legend-label">{item.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
       <LineChart
+        key={chartKey}
+        height={360}
         xAxis={[
           {
             data: xAxisData,
             label: "Tid",
             min: 0,
             max: chartData.xAxisMax,
+            scaleType: "linear",
             valueFormatter: (value) => {
               // Convert minutes offset to actual time (HH:MM format)
               const timeInMs =
@@ -178,23 +250,18 @@ export default function BACLineChart({
         ]}
         yAxis={[
           {
-            label: "Promille (‰)",
+            label: "Promille",
             min: 0,
           },
         ]}
         series={seriesConfig}
-        margin={{ top: 50, right: 20, bottom: 60, left: 80 }}
+        margin={{ top: 20, right: 32, bottom: 60, left: 72 }}
         grid={{ vertical: false, horizontal: true }}
         axisHighlight={{ x: "none", y: "none" }}
+        tooltip={{ trigger: "none" }}
         slotProps={{
           legend: {
-            direction: "row",
-            position: { vertical: "top", horizontal: "middle" },
-            padding: 0,
-            itemMarkWidth: 10,
-            itemMarkHeight: 10,
-            markGap: 5,
-            itemGap: 15,
+            hidden: true,
           },
         }}
         sx={{
@@ -217,16 +284,6 @@ export default function BACLineChart({
           },
           "& .MuiChartsAxis-tickLabel": {
             fontSize: "12px",
-          },
-          "& .MuiChartsLegend-root": {
-            marginBottom: "8px",
-          },
-          "& .MuiChartsLegend-series text": {
-            fontSize: "13px !important",
-            fontWeight: 500,
-          },
-          "& .MuiChartsLegend-mark": {
-            rx: 2,
           },
         }}
       />
