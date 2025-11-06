@@ -262,6 +262,9 @@ export function HomePage() {
                     <option value={240}>4 timer</option>
                     <option value={300}>5 timer</option>
                     <option value={360}>6 timer</option>
+                    <option value={480}>8 timer</option>
+                    <option value={600}>10 timer</option>
+                    <option value={720}>12 timer</option>
                   </select>
                 </div>
 
