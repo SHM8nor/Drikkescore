@@ -365,6 +365,9 @@ export function SessionPage() {
           {/* Add drink form */}
           <div className="add-drink-card">
             <h2>Legg til enhet</h2>
+            <p style={{ fontSize: 'var(--font-size-small)', color: 'var(--color-text-secondary)', marginTop: 'var(--spacing-xs)', marginBottom: 'var(--spacing-md)' }}>
+              Husk å legg inn <strong>etter</strong> du har drukket enheten
+            </p>
             {sessionEnded && (
               <div className="error-message" style={{ background: '#fff3cd', color: '#856404', borderColor: '#ffc107' }}>
                 Økten er avsluttet. Flere enheter kan ikke legges til.
