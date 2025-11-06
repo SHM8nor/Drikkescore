@@ -258,12 +258,10 @@ export default function BACLineChart({
         margin={{ top: 20, right: 32, bottom: 60, left: 72 }}
         grid={{ vertical: false, horizontal: true }}
         axisHighlight={{ x: "none", y: "none" }}
+        tooltip={{ trigger: "none" }}
         slotProps={{
           legend: {
             hidden: true,
-          },
-          tooltip: {
-            trigger: "none" as const,
           },
         }}
         sx={{
