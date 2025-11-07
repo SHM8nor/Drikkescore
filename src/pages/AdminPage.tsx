@@ -3,6 +3,7 @@ import { Box, Paper, Typography, Container, Snackbar, Alert } from '@mui/materia
 import { useQueryClient } from '@tanstack/react-query';
 import AdminSessionsGrid from '../components/admin/AdminSessionsGrid';
 import AdminActionsToolbar from '../components/admin/AdminActionsToolbar';
+import AdminStatsHeader from '../components/admin/AdminStatsHeader';
 import DeleteConfirmDialog from '../components/admin/DeleteConfirmDialog';
 import SessionEditDialog from '../components/admin/SessionEditDialog';
 import { useAdminSessions, type AdminSession } from '../hooks/useAdminSessions';
@@ -13,11 +14,14 @@ import { queryKeys } from '../lib/queryKeys';
 /**
  * Admin page for managing all sessions
  * Features:
+ * - System statistics header with real-time counts
  * - View all sessions in a data grid
  * - Search and filter sessions
  * - Bulk operations (delete, edit)
  * - Export to CSV
  * - Real-time updates via Supabase subscription
+ * - Duration column with color coding
+ * - View creator action
  */
 export default function AdminPage() {
   const queryClient = useQueryClient();
@@ -207,6 +211,9 @@ export default function AdminPage() {
           en celle, søke etter sesjoner, og utføre masseoperasjoner på valgte sesjoner.
         </Typography>
       </Box>
+
+      {/* Stats Header */}
+      <AdminStatsHeader />
 
       <Paper
         elevation={2}

@@ -38,6 +38,12 @@ export const queryKeys = {
       sessionId ?? 'unknown',
     ] as const,
   },
+  admin: {
+    sessions: ['admin', 'sessions'] as const,
+    users: ['admin', 'users'] as const,
+    analytics: ['admin', 'analytics'] as const,
+    sessionDetail: (id: string) => ['admin', 'sessions', 'detail', id] as const,
+  },
 };
 
 export type QueryKey = ReturnType<

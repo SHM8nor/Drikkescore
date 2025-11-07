@@ -10,6 +10,8 @@ import { HistoryPage } from './pages/HistoryPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 import FriendsPage from './pages/FriendsPage';
 import AdminPage from './pages/AdminPage';
+import AdminUsersPage from './pages/AdminUsersPage';
+import AdminAnalyticsPage from './pages/AdminAnalyticsPage';
 import AccountDeletedPage from './pages/AccountDeletedPage';
 import ProtectedLayout from './layouts/ProtectedLayout';
 import PublicLayout from './layouts/PublicLayout';
@@ -50,6 +52,26 @@ function App() {
               <AdminGuard>
                 <AdminLayout>
                   <AdminPage />
+                </AdminLayout>
+              </AdminGuard>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <AdminGuard>
+                <AdminLayout>
+                  <AdminUsersPage />
+                </AdminLayout>
+              </AdminGuard>
+            }
+          />
+          <Route
+            path="/admin/analytics"
+            element={
+              <AdminGuard>
+                <AdminLayout>
+                  <AdminAnalyticsPage />
                 </AdminLayout>
               </AdminGuard>
             }

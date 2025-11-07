@@ -106,9 +106,10 @@
      ======================================== */
 
   /* Font Families */
-  --font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
-    'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  --font-family-mono: 'Monaco', 'Courier New', monospace;
+  --font-family-primary: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+    "Helvetica Neue", sans-serif;
+  --font-family-mono: "Monaco", "Courier New", monospace;
 
   /* Font Weights */
   --font-weight-regular: 400;
@@ -117,15 +118,15 @@
   --font-weight-bold: 700;
 
   /* Font Sizes */
-  --font-size-h1: 2.5rem;      /* 40px */
-  --font-size-h2: 2rem;        /* 32px */
-  --font-size-h3: 1.75rem;     /* 28px */
-  --font-size-h4: 1.5rem;      /* 24px */
-  --font-size-h5: 1.25rem;     /* 20px */
-  --font-size-h6: 1rem;        /* 16px */
-  --font-size-base: 1rem;      /* 16px */
+  --font-size-h1: 2.5rem; /* 40px */
+  --font-size-h2: 2rem; /* 32px */
+  --font-size-h3: 1.75rem; /* 28px */
+  --font-size-h4: 1.5rem; /* 24px */
+  --font-size-h5: 1.25rem; /* 20px */
+  --font-size-h6: 1rem; /* 16px */
+  --font-size-base: 1rem; /* 16px */
   --font-size-small: 0.875rem; /* 14px */
-  --font-size-tiny: 0.75rem;   /* 12px */
+  --font-size-tiny: 0.75rem; /* 12px */
 
   /* Line Heights */
   --line-height-tight: 1.2;
@@ -136,14 +137,14 @@
      SPACING
      ======================================== */
 
-  --spacing-xs: 0.25rem;   /* 4px */
-  --spacing-sm: 0.5rem;    /* 8px */
-  --spacing-md: 1rem;      /* 16px */
-  --spacing-lg: 1.5rem;    /* 24px */
-  --spacing-xl: 2rem;      /* 32px */
-  --spacing-2xl: 3rem;     /* 48px */
-  --spacing-3xl: 4rem;     /* 64px */
-  --spacing-4xl: 6rem;     /* 96px */
+  --spacing-xs: 0.25rem; /* 4px */
+  --spacing-sm: 0.5rem; /* 8px */
+  --spacing-md: 1rem; /* 16px */
+  --spacing-lg: 1.5rem; /* 24px */
+  --spacing-xl: 2rem; /* 32px */
+  --spacing-2xl: 3rem; /* 48px */
+  --spacing-3xl: 4rem; /* 64px */
+  --spacing-4xl: 6rem; /* 96px */
 
   /* ========================================
      LAYOUT
@@ -231,7 +232,19 @@
      GRADIENTS (Optional - for future use)
      ======================================== */
 
-  --gradient-primary: linear-gradient(135deg, var(--prussian-blue), var(--prussian-blue-light));
-  --gradient-secondary: linear-gradient(135deg, var(--orange-wheel), var(--xanthous));
-  --gradient-danger: linear-gradient(135deg, var(--fire-engine-red), var(--fire-engine-red-dark));
+  --gradient-primary: linear-gradient(
+    135deg,
+    var(--prussian-blue),
+    var(--prussian-blue-light)
+  );
+  --gradient-secondary: linear-gradient(
+    135deg,
+    var(--orange-wheel),
+    var(--xanthous)
+  );
+  --gradient-danger: linear-gradient(
+    135deg,
+    var(--fire-engine-red),
+    var(--fire-engine-red-dark)
+  );
 }

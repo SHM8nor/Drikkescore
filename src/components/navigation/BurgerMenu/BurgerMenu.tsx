@@ -19,7 +19,9 @@ import PeopleIcon from '@mui/icons-material/People';
 import HistoryIcon from '@mui/icons-material/History';
 import AnalyticsIcon from '@mui/icons-material/Analytics';
 import SettingsIcon from '@mui/icons-material/Settings';
-import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import GroupIcon from '@mui/icons-material/Group';
+import InsightsIcon from '@mui/icons-material/Insights';
 import LogoutIcon from '@mui/icons-material/Logout';
 
 import './BurgerMenu.css';
@@ -32,11 +34,11 @@ const baseMenuItems: MenuItemData[] = [
   { label: 'Innstillinger', path: '/settings', icon: <SettingsIcon /> },
 ];
 
-const adminMenuItem: MenuItemData = {
-  label: 'Admin',
-  path: '/admin',
-  icon: <AdminPanelSettingsIcon />,
-};
+const adminMenuItems: MenuItemData[] = [
+  { label: 'Sesjoner', path: '/admin', icon: <DashboardIcon /> },
+  { label: 'Brukere', path: '/admin/users', icon: <GroupIcon /> },
+  { label: 'Analyse', path: '/admin/analytics', icon: <InsightsIcon /> },
+];
 
 export default function BurgerMenu() {
   const { isOpen, close, toggle } = useBurgerMenu();
@@ -48,7 +50,7 @@ export default function BurgerMenu() {
 
   // Build menu items array conditionally based on admin status
   const menuItems: MenuItemData[] = isAdmin
-    ? [...baseMenuItems, adminMenuItem]
+    ? [...baseMenuItems, ...adminMenuItems]
     : baseMenuItems;
 
   const handleNavigation = (path: string) => {

@@ -4,10 +4,26 @@ import type {
   GridColDef,
   GridRowSelectionModel,
   GridRowModel,
+  GridRowParams,
 } from '@mui/x-data-grid';
-import { Box, Alert, CircularProgress, Typography } from '@mui/material';
+import {
+  Box,
+  Alert,
+  CircularProgress,
+  Typography,
+  IconButton,
+  Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+} from '@mui/material';
+import { Person as PersonIcon } from '@mui/icons-material';
 import { useAdminSessions, type AdminSession } from '../../hooks/useAdminSessions';
 import { supabase } from '../../lib/supabase';
+import SessionDetailDialog from './SessionDetailDialog';
+import SessionDurationColumn from './SessionDurationColumn';
 
 interface AdminSessionsGridProps {
   onSelectionChange?: (selectedRows: AdminSession[]) => void;
@@ -24,6 +40,9 @@ interface AdminSessionsGridProps {
  * - Participant count display
  * - Status calculation (active/ended)
  * - Search and filter functionality
+ * - Duration column with color coding
+ * - View Creator action button
+ * - Click row to open Session Detail Dialog
  */
 export default function AdminSessionsGrid({
   onSelectionChange,
@@ -36,6 +55,13 @@ export default function AdminSessionsGrid({
     ids: new Set(),
   });
   const [updateError, setUpdateError] = useState<string | null>(null);
+  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
+  const [creatorDialogOpen, setCreatorDialogOpen] = useState(false);
+  const [selectedCreator, setSelectedCreator] = useState<{
+    name: string;
+    userId: string;
+  } | null>(null);
 
   // Format date for display
   const formatDate = (dateString: string) => {
@@ -50,6 +76,23 @@ export default function AdminSessionsGrid({
     const now = new Date();
     const end = new Date(endTime);
     return end > now ? 'Aktiv' : 'Avsluttet';
+  };
+
+  // Handle view creator
+  const handleViewCreator = (session: AdminSession, event: React.MouseEvent) => {
+    // Stop propagation to prevent row click
+    event.stopPropagation();
+    setSelectedCreator({
+      name: session.creator?.full_name || 'Ukjent',
+      userId: session.created_by,
+    });
+    setCreatorDialogOpen(true);
+  };
+
+  // Handle row click to open detail dialog
+  const handleRowClick = (params: GridRowParams) => {
+    setSelectedSessionId(String(params.id));
+    setDetailDialogOpen(true);
   };
 
   // Filter sessions based on search query and status filter
@@ -82,9 +125,33 @@ export default function AdminSessionsGrid({
     () => [
       {
         field: 'session_code',
-        headerName: 'Sesjonstode',
+        headerName: 'Sesjonskode',
         width: 130,
         editable: false,
+        renderCell: (params) => (
+          <Tooltip
+            title={
+              <Box>
+                <Typography variant="body2">Sesjon: {params.row.session_name}</Typography>
+                <Typography variant="caption">Kode: {params.value}</Typography>
+                <Typography variant="caption" display="block">
+                  ID: {params.row.id}
+                </Typography>
+              </Box>
+            }
+          >
+            <Typography
+              variant="body2"
+              sx={{
+                fontFamily: 'monospace',
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              {params.value}
+            </Typography>
+          </Tooltip>
+        ),
       },
       {
         field: 'session_name',
@@ -99,6 +166,23 @@ export default function AdminSessionsGrid({
         editable: false,
         valueGetter: (_value, row: AdminSession) => {
           return row.creator?.full_name || 'Ukjent';
+        },
+      },
+      {
+        field: 'duration',
+        headerName: 'Varighet',
+        width: 130,
+        editable: false,
+        sortable: true,
+        renderCell: (params) => (
+          <SessionDurationColumn
+            startTime={params.row.start_time}
+            endTime={params.row.end_time}
+          />
+        ),
+        // Value getter for sorting - returns duration in milliseconds
+        valueGetter: (_value, row: AdminSession) => {
+          return new Date(row.end_time).getTime() - new Date(row.start_time).getTime();
         },
       },
       {
@@ -130,6 +214,30 @@ export default function AdminSessionsGrid({
         valueGetter: (_value, row: AdminSession) => {
           return getSessionStatus(row.end_time);
         },
+      },
+      {
+        field: 'actions',
+        headerName: 'Handlinger',
+        width: 120,
+        editable: false,
+        sortable: false,
+        renderCell: (params) => (
+          <Tooltip title="Vis opprettet av">
+            <IconButton
+              size="small"
+              onClick={(e) => handleViewCreator(params.row, e)}
+              sx={{
+                color: 'primary.main',
+                '&:hover': {
+                  backgroundColor: 'primary.light',
+                  color: 'primary.dark',
+                },
+              }}
+            >
+              <PersonIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        ),
       },
     ],
     []
@@ -277,6 +385,7 @@ export default function AdminSessionsGrid({
         disableRowSelectionOnClick
         rowSelectionModel={selectionModel}
         onRowSelectionModelChange={handleSelectionChange}
+        onRowClick={handleRowClick}
         processRowUpdate={processRowUpdate}
         onProcessRowUpdateError={handleProcessRowUpdateError}
         autoHeight
@@ -284,6 +393,42 @@ export default function AdminSessionsGrid({
           '& .MuiDataGrid-cell:focus': {
             outline: 'none',
           },
+          '& .MuiDataGrid-row': {
+            cursor: 'pointer',
+          },
+        }}
+      />
+
+      {/* Creator Info Dialog */}
+      <Dialog
+        open={creatorDialogOpen}
+        onClose={() => setCreatorDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Sesjon opprettet av</DialogTitle>
+        <DialogContent>
+          <Box sx={{ py: 2 }}>
+            <Typography variant="body1" gutterBottom>
+              <strong>Navn:</strong> {selectedCreator?.name}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              <strong>Bruker-ID:</strong> {selectedCreator?.userId}
+            </Typography>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCreatorDialogOpen(false)}>Lukk</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Session Detail Dialog */}
+      <SessionDetailDialog
+        sessionId={selectedSessionId}
+        open={detailDialogOpen}
+        onClose={() => {
+          setDetailDialogOpen(false);
+          setSelectedSessionId(null);
         }}
       />
     </Box>
