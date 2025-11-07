@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import type { FormEvent } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useSession } from '../hooks/useSession';
 import { useSessionPresence } from '../hooks/useSessionPresence';
 import { useAuth } from '../context/AuthContext';
@@ -555,7 +555,24 @@ export function SessionPage() {
                   color: '#78350f',
                   textAlign: 'left'
                 }}>
-                  VICTOIRE! {leaderboard[0]?.display_name} erobrer med {formatBAC(leaderboard[0]?.bac)}!
+                  VICTOIRE!{' '}
+                  <Link
+                    to={`/profile/${leaderboard[0]?.user_id}`}
+                    style={{
+                      color: '#78350f',
+                      textDecoration: 'underline',
+                      cursor: 'pointer',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = 'var(--orange-wheel)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = '#78350f';
+                    }}
+                  >
+                    {leaderboard[0]?.display_name}
+                  </Link>
+                  {' '}erobrer med {formatBAC(leaderboard[0]?.bac)}!
                 </div>
               </div>
             )}
@@ -569,7 +586,31 @@ export function SessionPage() {
                     className={`leaderboard-entry ${entry.user_id === user?.id ? 'current-user' : ''}`}
                   >
                     <span className="rank">#{entry.rank}</span>
-                    <span className="name">{entry.display_name}</span>
+                    <Link
+                      to={`/profile/${entry.user_id}`}
+                      style={{
+                        textDecoration: 'none',
+                        color: 'inherit',
+                      }}
+                    >
+                      <span
+                        className="name"
+                        style={{
+                          cursor: 'pointer',
+                          transition: 'color 0.2s ease',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.color = 'var(--orange-wheel)';
+                          e.currentTarget.style.textDecoration = 'underline';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.color = 'inherit';
+                          e.currentTarget.style.textDecoration = 'none';
+                        }}
+                      >
+                        {entry.display_name}
+                      </span>
+                    </Link>
                     <span className="bac">{formatBAC(entry.bac)}</span>
                   </div>
                 ))}

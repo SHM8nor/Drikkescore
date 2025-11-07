@@ -23,6 +23,7 @@ import {
   Cancel as CancelIcon,
 } from '@mui/icons-material';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useFriends } from '../../hooks/useFriends';
 import type { SentFriendRequest } from '../../types/database';
 
@@ -144,9 +145,28 @@ export default function SentRequests({ requests, isLoading }: SentRequestsProps)
           <ListItemText
             primary={
               <Box display="flex" alignItems="center" gap={1}>
-                <Typography variant="h6" component="span">
-                  {request.display_name}
-                </Typography>
+                <Link
+                  to={`/profile/${request.recipient_id}`}
+                  style={{
+                    textDecoration: 'none',
+                    color: 'inherit',
+                  }}
+                >
+                  <Typography
+                    variant="h6"
+                    component="span"
+                    sx={{
+                      color: 'primary.main',
+                      cursor: 'pointer',
+                      '&:hover': {
+                        color: 'secondary.main',
+                        textDecoration: 'underline',
+                      },
+                    }}
+                  >
+                    {request.display_name}
+                  </Typography>
+                </Link>
                 <Chip
                   label="Venter"
                   size="small"

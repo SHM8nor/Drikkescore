@@ -97,6 +97,109 @@ export async function getUserProfile(userId: string): Promise<Profile> {
   return data;
 }
 
+/**
+ * Public profile information (visible to non-friends)
+ */
+export interface PublicProfile {
+  id: string;
+  display_name: string;
+  avatar_url: string | null;
+  isFriend: boolean;
+  isOwnProfile: boolean;
+}
+
+/**
+ * Full profile information (visible to friends and own profile)
+ */
+export interface FullProfileView extends PublicProfile {
+  full_name: string;
+  created_at: string;
+}
+
+/**
+ * Get user profile with privacy filtering based on friendship status
+ * - If viewing own profile: returns full profile
+ * - If viewing friend's profile: returns full profile (display_name + full_name)
+ * - If viewing non-friend's profile: returns public profile (display_name only)
+ * @param userId - The user ID to fetch
+ * @returns Profile with appropriate privacy level
+ * @throws {UserSearchError} If the request fails
+ */
+export async function getUserProfileWithPrivacy(
+  userId: string
+): Promise<PublicProfile | FullProfileView> {
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new UserSearchError('Du må være logget inn');
+  }
+
+  // Fetch the profile
+  const { data: profile, error } = await supabase
+    .from('profiles')
+    .select('id, display_name, full_name, avatar_url, created_at')
+    .eq('id', userId)
+    .single();
+
+  if (error) {
+    console.error('Error fetching user profile:', error);
+    throw new UserSearchError('Kunne ikke hente brukerprofil');
+  }
+
+  if (!profile) {
+    throw new UserSearchError('Bruker ikke funnet');
+  }
+
+  const isOwnProfile = user.id === userId;
+
+  // If viewing own profile, return full profile
+  if (isOwnProfile) {
+    return {
+      id: profile.id,
+      display_name: profile.display_name,
+      full_name: profile.full_name,
+      avatar_url: profile.avatar_url,
+      created_at: profile.created_at,
+      isFriend: false,
+      isOwnProfile: true,
+    };
+  }
+
+  // Check friendship status using database function
+  const { data: areFriendsData, error: friendsError } = await supabase.rpc('are_friends', {
+    p_user_id: user.id,
+    p_friend_id: userId,
+  });
+
+  if (friendsError) {
+    console.error('Error checking friendship:', friendsError);
+  }
+
+  const isFriend = areFriendsData === true;
+
+  // If friends, return full profile
+  if (isFriend) {
+    return {
+      id: profile.id,
+      display_name: profile.display_name,
+      full_name: profile.full_name,
+      avatar_url: profile.avatar_url,
+      created_at: profile.created_at,
+      isFriend: true,
+      isOwnProfile: false,
+    };
+  }
+
+  // If not friends, return public profile only
+  return {
+    id: profile.id,
+    display_name: profile.display_name,
+    avatar_url: profile.avatar_url,
+    isFriend: false,
+    isOwnProfile: false,
+  };
+}
+
 // =============================================================================
 // Account Deletion Functions
 // =============================================================================

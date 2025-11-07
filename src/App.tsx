@@ -9,6 +9,7 @@ import { SettingsPage } from './pages/SettingsPage';
 import { HistoryPage } from './pages/HistoryPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 import FriendsPage from './pages/FriendsPage';
+import ProfilePage from './pages/ProfilePage';
 import AdminPage from './pages/AdminPage';
 import AdminUsersPage from './pages/AdminUsersPage';
 import AdminAnalyticsPage from './pages/AdminAnalyticsPage';
@@ -40,6 +41,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/session/:sessionId" element={<SessionPage />} />
             <Route path="/friends" element={<FriendsPage />} />
+            <Route path="/profile/:userId" element={<ProfilePage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />

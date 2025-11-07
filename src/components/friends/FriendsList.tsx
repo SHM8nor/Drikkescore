@@ -6,6 +6,7 @@
  */
 
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import type { Friend } from '../../types/database';
 import PersonIcon from '@mui/icons-material/Person';
 import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
@@ -154,17 +155,36 @@ export function FriendsList({ friends, loading, onRemoveFriend }: FriendsListPro
 
             {/* Friend Info */}
             <div style={{ flex: 1, minWidth: 0 }}>
-              <h4 style={{
-                margin: 0,
-                fontSize: 'var(--font-size-base)',
-                fontWeight: 'var(--font-weight-medium)',
-                color: 'var(--color-text-primary)',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}>
-                {friend.display_name}
-              </h4>
+              <Link
+                to={`/profile/${friend.friend_id}`}
+                style={{
+                  textDecoration: 'none',
+                  color: 'inherit',
+                }}
+              >
+                <h4 style={{
+                  margin: 0,
+                  fontSize: 'var(--font-size-base)',
+                  fontWeight: 'var(--font-weight-medium)',
+                  color: 'var(--prussian-blue)',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  cursor: 'pointer',
+                  transition: 'color var(--transition-base)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = 'var(--orange-wheel)';
+                  e.currentTarget.style.textDecoration = 'underline';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = 'var(--prussian-blue)';
+                  e.currentTarget.style.textDecoration = 'none';
+                }}
+                >
+                  {friend.display_name}
+                </h4>
+              </Link>
               <p style={{
                 margin: 0,
                 fontSize: 'var(--font-size-small)',
