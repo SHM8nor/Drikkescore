@@ -15,47 +15,42 @@ import {
 } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
 import {
-  Delete as DeleteIcon,
-  Edit as EditIcon,
-  FileDownload as FileDownloadIcon,
+  AdminPanelSettings as AdminPanelSettingsIcon,
   Search as SearchIcon,
   FilterList as FilterListIcon,
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
-import type { AdminSession } from '../../hooks/useAdminSessions';
+import type { AdminUser } from '../../api/adminUsers';
 
-interface AdminActionsToolbarProps {
-  selectedSessions: AdminSession[];
-  onBulkDelete: () => void;
-  onBulkEdit: () => void;
+interface UserActionsToolbarProps {
+  selectedUsers: AdminUser[];
+  onBulkRoleChange: () => void;
   onSearch: (query: string) => void;
-  onStatusFilter: (status: 'all' | 'active' | 'ended') => void;
-  onExport: () => void;
+  onRoleFilter: (role: 'all' | 'admin' | 'user') => void;
   onRefresh: () => void;
 }
 
 /**
- * Toolbar component for admin session management
+ * Toolbar component for admin user management
  * Features:
- * - Search by session name or code
- * - Filter by status (all/active/ended)
- * - Bulk operations (delete, edit)
- * - Export to CSV
+ * - Search by name or email
+ * - Filter by role (all/admin/user)
+ * - Bulk role change operation
+ * - Refresh button
+ * - Selection count display
  */
-export default function AdminActionsToolbar({
-  selectedSessions,
-  onBulkDelete,
-  onBulkEdit,
+export default function UserActionsToolbar({
+  selectedUsers,
+  onBulkRoleChange,
   onSearch,
-  onStatusFilter,
-  onExport,
+  onRoleFilter,
   onRefresh,
-}: AdminActionsToolbarProps) {
+}: UserActionsToolbarProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'ended'>('all');
+  const [roleFilter, setRoleFilter] = useState<'all' | 'admin' | 'user'>('all');
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value;
@@ -63,13 +58,13 @@ export default function AdminActionsToolbar({
     onSearch(query);
   };
 
-  const handleStatusFilterChange = (event: SelectChangeEvent) => {
-    const status = event.target.value as 'all' | 'active' | 'ended';
-    setStatusFilter(status);
-    onStatusFilter(status);
+  const handleRoleFilterChange = (event: SelectChangeEvent) => {
+    const role = event.target.value as 'all' | 'admin' | 'user';
+    setRoleFilter(role);
+    onRoleFilter(role);
   };
 
-  const hasSelection = selectedSessions.length > 0;
+  const hasSelection = selectedUsers.length > 0;
 
   return (
     <Box sx={{ mb: 3 }}>
@@ -84,7 +79,7 @@ export default function AdminActionsToolbar({
         {/* Search Field */}
         <TextField
           size="small"
-          placeholder="Søk etter sesjonsnavn eller kode..."
+          placeholder="Søk etter navn eller e-post..."
           value={searchQuery}
           onChange={handleSearchChange}
           InputProps={{
@@ -97,23 +92,23 @@ export default function AdminActionsToolbar({
           sx={{ flexGrow: 1, minWidth: isMobile ? 'auto' : 300 }}
         />
 
-        {/* Status Filter */}
+        {/* Role Filter */}
         <FormControl size="small" sx={{ minWidth: 150 }}>
-          <InputLabel id="status-filter-label">
+          <InputLabel id="role-filter-label">
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
               <FilterListIcon fontSize="small" />
-              Status
+              Rolle
             </Box>
           </InputLabel>
           <Select
-            labelId="status-filter-label"
-            value={statusFilter}
-            label="Status"
-            onChange={handleStatusFilterChange}
+            labelId="role-filter-label"
+            value={roleFilter}
+            label="Rolle"
+            onChange={handleRoleFilterChange}
           >
             <MenuItem value="all">Alle</MenuItem>
-            <MenuItem value="active">Aktive</MenuItem>
-            <MenuItem value="ended">Avsluttede</MenuItem>
+            <MenuItem value="admin">Administrator</MenuItem>
+            <MenuItem value="user">Bruker</MenuItem>
           </Select>
         </FormControl>
 
@@ -132,36 +127,12 @@ export default function AdminActionsToolbar({
           </Button>
 
           <Button
-            variant="outlined"
-            startIcon={<EditIcon />}
-            onClick={onBulkEdit}
-            disabled={!hasSelection}
-          >
-            Rediger
-          </Button>
-
-          <Button
-            variant="outlined"
-            startIcon={<DeleteIcon />}
-            onClick={onBulkDelete}
-            disabled={!hasSelection}
-            color="error"
-            sx={{
-              '&.Mui-disabled': {
-                borderColor: 'rgba(0, 0, 0, 0.12)',
-              },
-            }}
-          >
-            Slett
-          </Button>
-
-          <Button
             variant="contained"
-            startIcon={<FileDownloadIcon />}
-            onClick={onExport}
+            startIcon={<AdminPanelSettingsIcon />}
+            onClick={onBulkRoleChange}
             disabled={!hasSelection}
           >
-            Eksporter
+            Endre rolle
           </Button>
         </Stack>
       </Stack>
@@ -169,7 +140,7 @@ export default function AdminActionsToolbar({
       {/* Selection Info */}
       {hasSelection && (
         <Typography variant="body2" color="primary" sx={{ mt: 1 }}>
-          {selectedSessions.length} sesjon(er) valgt
+          {selectedUsers.length} bruker(e) valgt
         </Typography>
       )}
     </Box>

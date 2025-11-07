@@ -229,12 +229,6 @@ export default function SessionEditDialog({
           disabled={loading}
           variant="contained"
           startIcon={loading ? <CircularProgress size={16} /> : null}
-          sx={{
-            backgroundColor: '#0f3460',
-            '&:hover': {
-              backgroundColor: '#0a2542',
-            },
-          }}
         >
           {loading ? 'Lagrer...' : 'Lagre'}
         </Button>

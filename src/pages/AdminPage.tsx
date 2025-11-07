@@ -1,23 +1,31 @@
 import { useState } from 'react';
 import { Box, Paper, Typography, Container, Snackbar, Alert } from '@mui/material';
+import { useQueryClient } from '@tanstack/react-query';
 import AdminSessionsGrid from '../components/admin/AdminSessionsGrid';
 import AdminActionsToolbar from '../components/admin/AdminActionsToolbar';
+import AdminStatsHeader from '../components/admin/AdminStatsHeader';
 import DeleteConfirmDialog from '../components/admin/DeleteConfirmDialog';
 import SessionEditDialog from '../components/admin/SessionEditDialog';
-import type { AdminSession } from '../hooks/useAdminSessions';
+import { useAdminSessions, type AdminSession } from '../hooks/useAdminSessions';
 import type { Session } from '../types/database';
 import { supabase } from '../lib/supabase';
+import { queryKeys } from '../lib/queryKeys';
 
 /**
  * Admin page for managing all sessions
  * Features:
+ * - System statistics header with real-time counts
  * - View all sessions in a data grid
  * - Search and filter sessions
  * - Bulk operations (delete, edit)
  * - Export to CSV
  * - Real-time updates via Supabase subscription
+ * - Duration column with color coding
+ * - View creator action
  */
 export default function AdminPage() {
+  const queryClient = useQueryClient();
+  const { refetch } = useAdminSessions();
   const [selectedSessions, setSelectedSessions] = useState<AdminSession[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'ended'>('all');
@@ -47,17 +55,27 @@ export default function AdminPage() {
     setStatusFilter(status);
   };
 
-  // Bulk delete handler
+  // Bulk delete handler with optimistic update
   const handleBulkDelete = async () => {
     if (selectedSessions.length === 0) return;
 
     try {
       const sessionIds = selectedSessions.map((s) => s.id);
 
+      // Optimistic update: immediately remove deleted sessions from cache
+      queryClient.setQueryData<AdminSession[]>(queryKeys.sessions.admin, (oldData) => {
+        if (!oldData) return oldData;
+        return oldData.filter((session) => !sessionIds.includes(session.id));
+      });
+
       // Delete sessions from Supabase
       const { error } = await supabase.from('sessions').delete().in('id', sessionIds);
 
-      if (error) throw error;
+      if (error) {
+        // Rollback on error - refetch to restore deleted items
+        await refetch();
+        throw error;
+      }
 
       // Success
       setSnackbar({
@@ -194,6 +212,9 @@ export default function AdminPage() {
         </Typography>
       </Box>
 
+      {/* Stats Header */}
+      <AdminStatsHeader />
+
       <Paper
         elevation={2}
         sx={{
@@ -210,6 +231,7 @@ export default function AdminPage() {
           onSearch={handleSearch}
           onStatusFilter={handleStatusFilter}
           onExport={handleExport}
+          onRefresh={refetch}
         />
 
         {/* Data Grid */}

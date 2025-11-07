@@ -48,3 +48,45 @@ export {
 } from './users';
 
 export type { UserSearchResult } from './users';
+
+// Session Details API
+export {
+  getSessionDetail,
+  getSessionDrinks,
+  getSessionLeaderboard,
+  SessionDetailsError,
+} from './sessionDetails';
+
+export type {
+  SessionDetailParticipant,
+  SessionDrinkWithUser,
+  SessionDetailData,
+} from './sessionDetails';
+
+// Admin Users API
+export {
+  getAllUsers,
+  updateUserRole,
+  AdminUsersError,
+} from './adminUsers';
+
+export type {
+  AdminUser,
+} from './adminUsers';
+
+// System Analytics API
+export {
+  getSystemStats,
+  getGrowthData,
+  getActivityHeatmap,
+  getTopUsers,
+  getAllDrinksAndProfiles,
+  SystemAnalyticsError,
+} from './systemAnalytics';
+
+export type {
+  SystemStats,
+  GrowthData,
+  ActivityHeatmap,
+  TopUser,
+} from './systemAnalytics';

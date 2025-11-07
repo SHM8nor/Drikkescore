@@ -48,7 +48,7 @@ export function useAdminSessions(): UseAdminSessionsReturn {
   const queryClient = useQueryClient();
 
   const sessionsQuery = useQuery({
-    queryKey: queryKeys.sessions.admin,
+    queryKey: queryKeys.admin.sessions,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('sessions')
@@ -79,7 +79,7 @@ export function useAdminSessions(): UseAdminSessionsReturn {
   });
 
   const invalidateSessions = useCallback(async () => {
-    await queryClient.invalidateQueries({ queryKey: queryKeys.sessions.admin });
+    await queryClient.invalidateQueries({ queryKey: queryKeys.admin.sessions });
   }, [queryClient]);
 
   useSupabaseSubscription(
