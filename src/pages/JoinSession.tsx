@@ -45,9 +45,9 @@ export function JoinSession() {
 
       // Navigate to session page
       navigate(`/session/${joinedSession.id}`, { replace: true });
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error joining session:', err);
-      setError(err.message || 'Kunne ikke bli med i økten');
+      setError(err instanceof Error ? err.message : 'Kunne ikke bli med i økten');
       setJoining(false);
     }
   }, [joinSession, navigate]);
@@ -130,9 +130,9 @@ export function JoinSession() {
         // User is authenticated - automatically join session
         setJoining(true);
         await handleJoinSession(sessionData);
-      } catch (err: any) {
+      } catch (err) {
         console.error('Error validating session:', err);
-        setError(err.message || 'Kunne ikke laste økt');
+        setError(err instanceof Error ? err.message : 'Kunne ikke laste økt');
       }
     };
 

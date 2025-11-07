@@ -91,8 +91,8 @@ export function LoginPage() {
       } else {
         navigate('/');
       }
-    } catch (err: any) {
-      setError(err.message || 'Kunne ikke logge inn');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Kunne ikke logge inn');
       setLoading(false);
     }
   };

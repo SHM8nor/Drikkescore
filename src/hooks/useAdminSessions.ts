@@ -1,6 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useMemo } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import type { Session } from '../types/database';
+import { useSupabaseSubscription } from './useSupabaseSubscription';
+import { queryKeys } from '../lib/queryKeys';
 
 /**
  * Extended session type with joined creator profile and participant count
@@ -42,20 +45,12 @@ interface RawSessionData {
  * Includes real-time subscription for live updates
  */
 export function useAdminSessions(): UseAdminSessionsReturn {
-  const [sessions, setSessions] = useState<AdminSession[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  // Fetch all sessions with creator and participant count
-  const fetchSessions = async (isInitialLoad = false) => {
-    try {
-      if (isInitialLoad) {
-        setLoading(true);
-      }
-      setError(null);
-
-      // Fetch sessions with creator profile joined and participant count
-      const { data, error: fetchError } = await supabase
+  const sessionsQuery = useQuery({
+    queryKey: queryKeys.sessions.admin,
+    queryFn: async () => {
+      const { data, error } = await supabase
         .from('sessions')
         .select(`
           *,
@@ -64,10 +59,11 @@ export function useAdminSessions(): UseAdminSessionsReturn {
         `)
         .order('created_at', { ascending: false });
 
-      if (fetchError) throw fetchError;
+      if (error) {
+        throw error;
+      }
 
-      // Transform the data to flatten the participants count
-      const transformedData: AdminSession[] = (data as RawSessionData[] || []).map((session) => ({
+      return ((data as RawSessionData[]) || []).map((session) => ({
         id: session.id,
         session_code: session.session_code,
         session_name: session.session_name,
@@ -78,75 +74,47 @@ export function useAdminSessions(): UseAdminSessionsReturn {
         updated_at: session.updated_at,
         participants_count: session.session_participants?.[0]?.count || 0,
         creator: session.creator || { full_name: 'Unknown' },
-      }));
+      })) as AdminSession[];
+    },
+  });
 
-      setSessions(transformedData);
+  const invalidateSessions = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: queryKeys.sessions.admin });
+  }, [queryClient]);
 
-      if (isInitialLoad) {
-        setLoading(false);
-      }
-    } catch (err) {
-      console.error('Error fetching admin sessions:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-      setError(errorMessage);
-      if (isInitialLoad) {
-        setLoading(false);
-      }
+  useSupabaseSubscription(
+    'admin-sessions',
+    useCallback(
+      (channel) => {
+        channel.on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'sessions' },
+          invalidateSessions,
+        );
+        channel.on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'session_participants' },
+          invalidateSessions,
+        );
+      },
+      [invalidateSessions],
+    ),
+    true,
+  );
+
+  const error = useMemo(() => {
+    if (sessionsQuery.error instanceof Error) {
+      return sessionsQuery.error.message;
     }
-  };
-
-  useEffect(() => {
-    // Initial fetch
-    fetchSessions(true);
-
-    // Subscribe to real-time updates for sessions table
-    const channel = supabase.channel('admin-sessions');
-
-    // Subscribe to session changes
-    channel.on(
-      'postgres_changes',
-      {
-        event: '*',
-        schema: 'public',
-        table: 'sessions',
-      },
-      (payload) => {
-        console.log('Real-time session update received:', payload);
-        // Refetch all sessions when any change occurs
-        // This ensures creator and participant count are up to date
-        fetchSessions(false);
-      }
-    );
-
-    // Subscribe to session_participants changes to update participant counts
-    channel.on(
-      'postgres_changes',
-      {
-        event: '*',
-        schema: 'public',
-        table: 'session_participants',
-      },
-      (payload) => {
-        console.log('Real-time participant update received:', payload);
-        // Refetch to update participant counts
-        fetchSessions(false);
-      }
-    );
-
-    channel.subscribe((status) => {
-      console.log('Admin sessions subscription status:', status);
-    });
-
-    return () => {
-      console.log('Cleaning up admin sessions subscription');
-      supabase.removeChannel(channel);
-    };
-  }, []);
+    return null;
+  }, [sessionsQuery.error]);
 
   return {
-    sessions,
-    loading,
+    sessions: sessionsQuery.data ?? [],
+    loading: sessionsQuery.isPending,
     error,
-    refetch: () => fetchSessions(false),
+    refetch: async () => {
+      await sessionsQuery.refetch();
+    },
   };
 }

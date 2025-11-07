@@ -141,12 +141,12 @@ export function calculateBAC(
 
     // Check for rapid consumption (chugging/shotgunning)
     // This drastically reduces absorption time (much faster peak)
-    const rapidConsumption = (drink as any).rapid_consumption === true;
+    const rapidConsumption = drink.rapid_consumption === true;
     if (rapidConsumption) {
       absorptionTimeMinutes = 5; // Chugged drinks absorb in ~5 minutes
     } else {
       // Factor in food consumption (doubles absorption time if eating normally)
-      const foodConsumed = (drink as any).food_consumed === true;
+      const foodConsumed = drink.food_consumed === true;
       if (foodConsumed) {
         absorptionTimeMinutes *= 2;
       }
@@ -228,12 +228,12 @@ export function calculateTimeToPeak(
     let absorptionTimeMinutes = ABSORPTION_TIME_MINUTES[drinkType];
 
     // Check for rapid consumption
-    const rapidConsumption = (drink as any).rapid_consumption === true;
+    const rapidConsumption = drink.rapid_consumption === true;
     if (rapidConsumption) {
       absorptionTimeMinutes = 5; // Chugged drinks peak in ~5 minutes
     } else {
       // Factor in food consumption
-      const foodConsumed = (drink as any).food_consumed === true;
+      const foodConsumed = drink.food_consumed === true;
       if (foodConsumed) {
         absorptionTimeMinutes *= 2;
       }

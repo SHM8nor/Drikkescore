@@ -59,7 +59,7 @@ export default function AdminActionsToolbar({
     onSearch(query);
   };
 
-  const handleStatusFilterChange = (event: any) => {
+  const handleStatusFilterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const status = event.target.value as 'all' | 'active' | 'ended';
     setStatusFilter(status);
     onStatusFilter(status);

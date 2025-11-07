@@ -11,7 +11,18 @@
  * - Simplified API for common operations
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import {
   getFriends,
   getPendingRequests,
@@ -31,6 +42,8 @@ import type {
   SentFriendRequest,
   FriendshipStatus,
 } from '../types/database';
+import { useAuth } from '../context/AuthContext';
+import { queryKeys } from '../lib/queryKeys';
 
 interface UseFriendsReturn {
   // Data
@@ -68,62 +81,55 @@ export function useFriends(
   autoLoad: boolean = true,
   enableRealtime: boolean = true
 ): UseFriendsReturn {
-  // Data state
-  const [friends, setFriends] = useState<Friend[]>([]);
-  const [pendingRequests, setPendingRequests] = useState<FriendRequest[]>([]);
-  const [sentRequests, setSentRequests] = useState<SentFriendRequest[]>([]);
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const [actionError, setActionError] = useState<string | null>(null);
 
-  // UI state
-  const [loading, setLoading] = useState(autoLoad);
-  const [error, setError] = useState<string | null>(null);
+  const enabled = autoLoad && Boolean(user);
 
-  // Load all friend data
-  const loadData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  const friendsQuery = useQuery({
+    queryKey: queryKeys.friends.list(user?.id ?? null),
+    queryFn: getFriends,
+    enabled,
+  });
 
-    try {
-      const [friendsData, pendingData, sentData] = await Promise.all([
-        getFriends(),
-        getPendingRequests(),
-        getSentRequests(),
-      ]);
+  const pendingQuery = useQuery({
+    queryKey: queryKeys.friends.pending(user?.id ?? null),
+    queryFn: getPendingRequests,
+    enabled,
+  });
 
-      setFriends(friendsData);
-      setPendingRequests(pendingData);
-      setSentRequests(sentData);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Kunne ikke laste venner';
-      setError(message);
-      console.error('Error loading friends:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const sentQuery = useQuery({
+    queryKey: queryKeys.friends.sent(user?.id ?? null),
+    queryFn: getSentRequests,
+    enabled,
+  });
+
+  const invalidateFriendData = useCallback(async () => {
+    if (!user) return;
+
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: queryKeys.friends.list(user.id) }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.friends.pending(user.id) }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.friends.sent(user.id) }),
+    ]);
+  }, [queryClient, user]);
 
   // Use ref to prevent stale closure in subscription callback
-  const loadDataRef = useRef(loadData);
+  const invalidateRef = useRef(invalidateFriendData);
   useEffect(() => {
-    loadDataRef.current = loadData;
-  }, [loadData]);
-
-  // Initial load
-  useEffect(() => {
-    if (autoLoad) {
-      loadData();
-    }
-  }, [autoLoad, loadData]);
+    invalidateRef.current = invalidateFriendData;
+  }, [invalidateFriendData]);
 
   // Real-time subscriptions
   useEffect(() => {
-    if (!enableRealtime) return;
+    if (!enableRealtime || !user) return;
 
     let unsubscribe: (() => void) | null = null;
 
     // Set up subscription
     subscribeFriendships(() => {
-      // Use ref to access latest loadData function
-      loadDataRef.current();
+      invalidateRef.current();
     }).then((unsub) => {
       unsubscribe = unsub;
     }).catch((err) => {
@@ -136,72 +142,97 @@ export function useFriends(
         unsubscribe();
       }
     };
-  }, [enableRealtime]);
+  }, [enableRealtime, user]);
 
-  // Send friend request
-  const sendRequest = useCallback(async (friendId: string) => {
-    setError(null);
-    try {
-      await sendFriendRequest(friendId);
-      await loadData();
-    } catch (err) {
+  const sendRequestMutation = useMutation({
+    mutationFn: async (friendId: string) => {
+      setActionError(null);
+      return sendFriendRequest(friendId);
+    },
+    onSuccess: invalidateFriendData,
+    onError: (err) => {
       const message = err instanceof Error ? err.message : 'Kunne ikke sende forespørsel';
-      setError(message);
-      throw err;
-    }
-  }, [loadData]);
+      setActionError(message);
+    },
+  });
 
-  // Accept friend request
-  const acceptRequest = useCallback(async (friendshipId: string) => {
-    setError(null);
-    try {
-      await acceptFriendRequest(friendshipId);
-      await loadData();
-    } catch (err) {
+  const acceptRequestMutation = useMutation({
+    mutationFn: async (friendshipId: string) => {
+      setActionError(null);
+      return acceptFriendRequest(friendshipId);
+    },
+    onSuccess: invalidateFriendData,
+    onError: (err) => {
       const message = err instanceof Error ? err.message : 'Kunne ikke akseptere forespørsel';
-      setError(message);
-      throw err;
-    }
-  }, [loadData]);
+      setActionError(message);
+    },
+  });
 
-  // Decline friend request
-  const declineRequest = useCallback(async (friendshipId: string) => {
-    setError(null);
-    try {
-      await declineFriendRequest(friendshipId);
-      await loadData();
-    } catch (err) {
+  const declineRequestMutation = useMutation({
+    mutationFn: async (friendshipId: string) => {
+      setActionError(null);
+      return declineFriendRequest(friendshipId);
+    },
+    onSuccess: invalidateFriendData,
+    onError: (err) => {
       const message = err instanceof Error ? err.message : 'Kunne ikke avslå forespørsel';
-      setError(message);
-      throw err;
-    }
-  }, [loadData]);
+      setActionError(message);
+    },
+  });
 
-  // Cancel sent friend request
-  const cancelRequest = useCallback(async (friendshipId: string) => {
-    setError(null);
-    try {
-      await cancelFriendRequest(friendshipId);
-      await loadData();
-    } catch (err) {
+  const cancelRequestMutation = useMutation({
+    mutationFn: async (friendshipId: string) => {
+      setActionError(null);
+      return cancelFriendRequest(friendshipId);
+    },
+    onSuccess: invalidateFriendData,
+    onError: (err) => {
       const message = err instanceof Error ? err.message : 'Kunne ikke kansellere forespørsel';
-      setError(message);
-      throw err;
-    }
-  }, [loadData]);
+      setActionError(message);
+    },
+  });
 
-  // Remove friend
-  const unfriend = useCallback(async (friendId: string) => {
-    setError(null);
-    try {
-      await removeFriend(friendId);
-      await loadData();
-    } catch (err) {
+  const unfriendMutation = useMutation({
+    mutationFn: async (friendId: string) => {
+      setActionError(null);
+      return removeFriend(friendId);
+    },
+    onSuccess: invalidateFriendData,
+    onError: (err) => {
       const message = err instanceof Error ? err.message : 'Kunne ikke fjerne venn';
-      setError(message);
-      throw err;
+      setActionError(message);
+    },
+  });
+
+  const refresh = useCallback(async () => {
+    await Promise.all([
+      friendsQuery.refetch(),
+      pendingQuery.refetch(),
+      sentQuery.refetch(),
+    ]);
+  }, [friendsQuery, pendingQuery, sentQuery]);
+
+  const queryError =
+    friendsQuery.error || pendingQuery.error || sentQuery.error;
+
+  const error = useMemo(() => {
+    if (actionError) {
+      return actionError;
     }
-  }, [loadData]);
+    if (queryError instanceof Error) {
+      return queryError.message;
+    }
+    return null;
+  }, [actionError, queryError]);
+
+  const initialPending =
+    friendsQuery.isPending || pendingQuery.isPending || sentQuery.isPending;
+
+  const loading =
+    initialPending ||
+    friendsQuery.isFetching ||
+    pendingQuery.isFetching ||
+    sentQuery.isFetching;
 
   // Check if users are friends
   const checkFriendship = useCallback(async (friendId: string): Promise<boolean> => {
@@ -225,33 +256,33 @@ export function useFriends(
 
   // Clear error
   const clearError = useCallback(() => {
-    setError(null);
+    setActionError(null);
   }, []);
 
   return {
     // Data
-    friends,
-    pendingRequests,
-    sentRequests,
+    friends: friendsQuery.data ?? [],
+    pendingRequests: pendingQuery.data ?? [],
+    sentRequests: sentQuery.data ?? [],
 
     // Counts
-    friendCount: friends.length,
-    pendingCount: pendingRequests.length,
-    sentCount: sentRequests.length,
+    friendCount: friendsQuery.data?.length ?? 0,
+    pendingCount: pendingQuery.data?.length ?? 0,
+    sentCount: sentQuery.data?.length ?? 0,
 
     // State
     loading,
     error,
 
     // Actions
-    sendRequest,
-    acceptRequest,
-    declineRequest,
-    cancelRequest,
-    unfriend,
+    sendRequest: sendRequestMutation.mutateAsync,
+    acceptRequest: acceptRequestMutation.mutateAsync,
+    declineRequest: declineRequestMutation.mutateAsync,
+    cancelRequest: cancelRequestMutation.mutateAsync,
+    unfriend: unfriendMutation.mutateAsync,
     checkFriendship,
     getStatus,
-    refresh: loadData,
+    refresh,
     clearError,
   };
 }

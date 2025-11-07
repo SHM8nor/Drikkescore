@@ -1,2 +1,12 @@
 export { default } from './BurgerMenu';
-export * from './types';
+export type {
+  BurgerMenuState,
+  MenuItemData,
+  BurgerMenuProps,
+  BurgerIconProps,
+  MenuOverlayProps,
+  MenuPanelProps,
+  MenuItemProps,
+  UserHeaderProps,
+  SwipeConfig
+} from './types';

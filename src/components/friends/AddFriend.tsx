@@ -221,8 +221,8 @@ export function AddFriend() {
     try {
       const results = await searchUsers(query);
       setSearchResults(results);
-    } catch (err: any) {
-      setError(err.message || 'Kunne ikke søke etter brukere');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Kunne ikke søke etter brukere');
       setSearchResults([]);
     } finally {
       setSearching(false);
@@ -258,8 +258,8 @@ export function AddFriend() {
       await sendRequest(userId);
       // Refresh search results to update status
       await handleSearch(searchQuery);
-    } catch (err: any) {
-      setError(err.message || 'Kunne ikke sende venneforespørsel');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Kunne ikke sende venneforespørsel');
     }
   };
 

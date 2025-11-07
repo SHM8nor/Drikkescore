@@ -40,8 +40,8 @@ export function HomePage() {
     try {
       const session = await createSession(sessionName.trim(), start, end);
       navigate(`/session/${session.id}`);
-    } catch (err: any) {
-      setError(err.message || "Kunne ikke opprette økt");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Kunne ikke opprette økt");
     }
   };
 
@@ -57,8 +57,8 @@ export function HomePage() {
     try {
       const session = await joinSession(sessionCode.toUpperCase().trim());
       navigate(`/session/${session.id}`);
-    } catch (err: any) {
-      setError(err.message || "Kunne ikke bli med i økt");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Kunne ikke bli med i økt");
     }
   };
 
@@ -69,8 +69,8 @@ export function HomePage() {
     try {
       const session = await joinSession(scannedCode.toUpperCase().trim());
       navigate(`/session/${session.id}`);
-    } catch (err: any) {
-      setError(err.message || "Kunne ikke bli med i økt");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Kunne ikke bli med i økt");
       // Switch to join tab to show error
       setActiveTab("join");
     }

@@ -143,9 +143,9 @@ export function RegisterPage() {
       } else {
         navigate('/');
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Signup error:', err);
-      setError(err.message || 'Kunne ikke registrere');
+      setError(err instanceof Error ? err.message : 'Kunne ikke registrere');
       setLoading(false);
       setShowDisclaimerModal(false);
     }
