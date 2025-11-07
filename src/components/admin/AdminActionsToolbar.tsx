@@ -20,6 +20,7 @@ import {
   FileDownload as FileDownloadIcon,
   Search as SearchIcon,
   FilterList as FilterListIcon,
+  Refresh as RefreshIcon,
 } from '@mui/icons-material';
 import type { AdminSession } from '../../hooks/useAdminSessions';
 
@@ -30,6 +31,7 @@ interface AdminActionsToolbarProps {
   onSearch: (query: string) => void;
   onStatusFilter: (status: 'all' | 'active' | 'ended') => void;
   onExport: () => void;
+  onRefresh: () => void;
 }
 
 /**
@@ -47,6 +49,7 @@ export default function AdminActionsToolbar({
   onSearch,
   onStatusFilter,
   onExport,
+  onRefresh,
 }: AdminActionsToolbarProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -122,20 +125,17 @@ export default function AdminActionsToolbar({
         >
           <Button
             variant="outlined"
+            startIcon={<RefreshIcon />}
+            onClick={onRefresh}
+          >
+            Oppdater
+          </Button>
+
+          <Button
+            variant="outlined"
             startIcon={<EditIcon />}
             onClick={onBulkEdit}
             disabled={!hasSelection}
-            sx={{
-              borderColor: '#0f3460',
-              color: '#0f3460',
-              '&:hover': {
-                borderColor: '#0f3460',
-                backgroundColor: 'rgba(15, 52, 96, 0.04)',
-              },
-              '&.Mui-disabled': {
-                borderColor: 'rgba(0, 0, 0, 0.12)',
-              },
-            }}
           >
             Rediger
           </Button>
@@ -160,15 +160,6 @@ export default function AdminActionsToolbar({
             startIcon={<FileDownloadIcon />}
             onClick={onExport}
             disabled={!hasSelection}
-            sx={{
-              backgroundColor: '#0f3460',
-              '&:hover': {
-                backgroundColor: '#0a2542',
-              },
-              '&.Mui-disabled': {
-                backgroundColor: 'rgba(0, 0, 0, 0.12)',
-              },
-            }}
           >
             Eksporter
           </Button>

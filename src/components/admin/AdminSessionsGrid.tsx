@@ -281,14 +281,8 @@ export default function AdminSessionsGrid({
         onProcessRowUpdateError={handleProcessRowUpdateError}
         autoHeight
         sx={{
-          '& .MuiDataGrid-row:hover': {
-            backgroundColor: 'rgba(15, 52, 96, 0.04)',
-          },
           '& .MuiDataGrid-cell:focus': {
             outline: 'none',
-          },
-          '& .MuiDataGrid-cell:focus-within': {
-            outline: '2px solid #0f3460',
           },
         }}
       />
