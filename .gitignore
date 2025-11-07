@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 .env
 nul
+supabase/.temp/
+supabase/.branches/
+supabase/seed.sql
