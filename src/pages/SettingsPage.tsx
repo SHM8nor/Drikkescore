@@ -25,6 +25,7 @@ export function SettingsPage() {
   const navigate = useNavigate();
 
   const [fullName, setFullName] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [weightKg, setWeightKg] = useState(0);
   const [heightCm, setHeightCm] = useState(0);
   const [gender, setGender] = useState<Gender>('male');
@@ -59,6 +60,7 @@ export function SettingsPage() {
   useEffect(() => {
     if (profile) {
       setFullName(profile.full_name);
+      setDisplayName(profile.display_name);
       setWeightKg(profile.weight_kg);
       setHeightCm(profile.height_cm);
       setGender(profile.gender);
@@ -179,6 +181,7 @@ export function SettingsPage() {
     try {
       await updateProfile({
         full_name: fullName,
+        display_name: displayName,
         weight_kg: weightKg,
         height_cm: heightCm,
         gender: gender,
@@ -395,8 +398,12 @@ export function SettingsPage() {
               </div>
 
               <div className="form-group">
-                <label htmlFor="full_name">Visningsnavn</label>
+                <label htmlFor="full_name">Fullt navn</label>
                 <input id="full_name" type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+              </div>
+              <div className="form-group">
+                <label htmlFor="display_name">Visningsnavn</label>
+                <input id="display_name" type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Dette er navnet andre ser når de søker etter deg" required />
               </div>
               <div className="form-group">
                 <label htmlFor="weight">Vekt (kg)</label>

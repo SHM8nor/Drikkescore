@@ -24,7 +24,7 @@ export function ReadOnlySessionView({ session, participants, drinks }: ReadOnlyS
 
       return {
         user_id: participant.id,
-        full_name: participant.full_name,
+        display_name: participant.display_name,
         bac,
         rank: 0,
       };
@@ -186,7 +186,7 @@ export function ReadOnlySessionView({ session, participants, drinks }: ReadOnlyS
             fontSize: '1.125rem',
             boxShadow: '0 2px 4px rgba(0, 48, 73, 0.1)'
           }}>
-            {leaderboard[0]?.full_name} vant med {formatBAC(leaderboard[0]?.bac)}!
+            {leaderboard[0]?.display_name} vant med {formatBAC(leaderboard[0]?.bac)}!
           </div>
         )}
         {leaderboard.length === 0 ? (
@@ -225,7 +225,7 @@ export function ReadOnlySessionView({ session, participants, drinks }: ReadOnlyS
                   fontWeight: index === 0 ? 'bold' : 'normal',
                   fontSize: index === 0 ? '1.125rem' : '1rem'
                 }}>
-                  {entry.full_name}
+                  {entry.display_name}
                 </span>
                 <span className="bac" style={{
                   fontWeight: 'bold',
@@ -270,7 +270,7 @@ export function ReadOnlySessionView({ session, participants, drinks }: ReadOnlyS
                 }}
               >
                 <span style={{ color: '#003049', fontWeight: '500' }}>
-                  {participant.full_name}
+                  {participant.display_name}
                 </span>
                 <span
                   className="participant-drinks"

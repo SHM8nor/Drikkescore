@@ -12,6 +12,7 @@ import {
   Alert,
   CircularProgress,
   Chip,
+  Tooltip,
 } from '@mui/material';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import type { TopUser } from '../../api/systemAnalytics';
@@ -46,7 +47,7 @@ function getMedalColor(rank: number): string {
  * Features:
  * - Ranking with medal icons for top 3
  * - User avatar with fallback
- * - Full name
+ * - Both display_name and full_name for admin visibility
  * - Total sessions
  * - Total drinks
  * - Peak BAC
@@ -104,7 +105,10 @@ export default function TopUsersTable({
           <TableHead>
             <TableRow>
               <TableCell sx={{ fontWeight: 600 }}>Rang</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Bruker</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Visningsnavn</TableCell>
+              <TableCell sx={{ fontWeight: 600, display: { xs: 'none', lg: 'table-cell' } }}>
+                Fullt navn
+              </TableCell>
               <TableCell align="right" sx={{ fontWeight: 600, display: { xs: 'none', md: 'table-cell' } }}>
                 Økter
               </TableCell>
@@ -154,29 +158,53 @@ export default function TopUsersTable({
                     </Box>
                   </TableCell>
 
-                  {/* User (Avatar + Name) */}
+                  {/* Display Name (Avatar + Display Name) */}
                   <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Avatar
-                        src={user.avatar_url || undefined}
-                        alt={user.full_name}
-                        sx={{
-                          width: 40,
-                          height: 40,
-                          bgcolor: 'var(--prussian-blue)',
-                        }}
-                      >
-                        {user.full_name.charAt(0).toUpperCase()}
-                      </Avatar>
-                      <Box>
-                        <Typography sx={{ fontWeight: 600 }}>
-                          {user.full_name}
-                        </Typography>
-                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                          {user.total_friends} {user.total_friends === 1 ? 'venn' : 'venner'}
-                        </Typography>
+                    <Tooltip
+                      title={
+                        <Box>
+                          <Typography variant="body2">
+                            Visningsnavn: {user.display_name}
+                          </Typography>
+                          <Typography variant="body2">
+                            Fullt navn: {user.full_name}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {user.total_friends} {user.total_friends === 1 ? 'venn' : 'venner'}
+                          </Typography>
+                        </Box>
+                      }
+                      arrow
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Avatar
+                          src={user.avatar_url || undefined}
+                          alt={user.display_name}
+                          sx={{
+                            width: 40,
+                            height: 40,
+                            bgcolor: 'var(--prussian-blue)',
+                          }}
+                        >
+                          {user.display_name.charAt(0).toUpperCase()}
+                        </Avatar>
+                        <Box>
+                          <Typography sx={{ fontWeight: 600 }}>
+                            {user.display_name}
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                            {user.total_friends} {user.total_friends === 1 ? 'venn' : 'venner'}
+                          </Typography>
+                        </Box>
                       </Box>
-                    </Box>
+                    </Tooltip>
+                  </TableCell>
+
+                  {/* Full Name (hidden on mobile/tablet) */}
+                  <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>
+                    <Typography variant="body2" color="text.secondary">
+                      {user.full_name}
+                    </Typography>
                   </TableCell>
 
                   {/* Sessions (hidden on mobile) */}

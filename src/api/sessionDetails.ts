@@ -30,6 +30,7 @@ export interface SessionDetailParticipant {
 
 export interface SessionDrinkWithUser extends DrinkEntry {
   user: {
+    display_name: string;
     full_name: string;
     avatar_url?: string;
   };
@@ -159,7 +160,7 @@ export async function getSessionDetail(sessionId: string): Promise<SessionDetail
 /**
  * Get all drink entries for a session with user information
  * @param sessionId - The session ID to fetch drinks for
- * @returns Array of drinks with user data
+ * @returns Array of drinks with user data (including both display_name and full_name)
  * @throws {SessionDetailsError} If the request fails
  */
 export async function getSessionDrinks(sessionId: string): Promise<SessionDrinkWithUser[]> {
@@ -168,6 +169,7 @@ export async function getSessionDrinks(sessionId: string): Promise<SessionDrinkW
     .select(`
       *,
       profiles:user_id (
+        display_name,
         full_name,
         avatar_url
       )
@@ -187,12 +189,13 @@ export async function getSessionDrinks(sessionId: string): Promise<SessionDrinkW
   // Transform the data to match our interface
   return data.map((item) => {
     const { profiles, ...drink } = item as DrinkEntry & {
-      profiles: { full_name: string; avatar_url?: string } | null;
+      profiles: { display_name: string; full_name: string; avatar_url?: string } | null;
     };
 
     return {
       ...drink,
       user: {
+        display_name: profiles?.display_name || 'Ukjent',
         full_name: profiles?.full_name || 'Ukjent',
         avatar_url: profiles?.avatar_url,
       },
@@ -213,7 +216,7 @@ export async function getSessionLeaderboard(sessionId: string) {
     .map((participant) => ({
       rank: 0, // Will be set after sorting
       user_id: participant.userId,
-      full_name: participant.profile.full_name,
+      display_name: participant.profile.display_name,
       avatar_url: participant.profile.avatar_url,
       bac: participant.currentBAC,
       drinkCount: participant.drinkCount,

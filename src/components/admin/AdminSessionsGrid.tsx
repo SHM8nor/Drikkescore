@@ -41,7 +41,7 @@ interface AdminSessionsGridProps {
  * - Status calculation (active/ended)
  * - Search and filter functionality
  * - Duration column with color coding
- * - View Creator action button
+ * - View Creator action button with both display_name and full_name
  * - Click row to open Session Detail Dialog
  */
 export default function AdminSessionsGrid({
@@ -59,7 +59,8 @@ export default function AdminSessionsGrid({
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [creatorDialogOpen, setCreatorDialogOpen] = useState(false);
   const [selectedCreator, setSelectedCreator] = useState<{
-    name: string;
+    displayName: string;
+    fullName: string;
     userId: string;
   } | null>(null);
 
@@ -83,7 +84,8 @@ export default function AdminSessionsGrid({
     // Stop propagation to prevent row click
     event.stopPropagation();
     setSelectedCreator({
-      name: session.creator?.full_name || 'Ukjent',
+      displayName: session.creator?.display_name || 'Ukjent',
+      fullName: session.creator?.full_name || 'Ukjent',
       userId: session.created_by,
     });
     setCreatorDialogOpen(true);
@@ -162,10 +164,12 @@ export default function AdminSessionsGrid({
       {
         field: 'creator',
         headerName: 'Opprettet av',
-        width: 200,
+        width: 250,
         editable: false,
         valueGetter: (_value, row: AdminSession) => {
-          return row.creator?.full_name || 'Ukjent';
+          const displayName = row.creator?.display_name || 'Ukjent';
+          const fullName = row.creator?.full_name || 'Ukjent';
+          return `${displayName} (${fullName})`;
         },
       },
       {
@@ -410,7 +414,10 @@ export default function AdminSessionsGrid({
         <DialogContent>
           <Box sx={{ py: 2 }}>
             <Typography variant="body1" gutterBottom>
-              <strong>Navn:</strong> {selectedCreator?.name}
+              <strong>Visningsnavn:</strong> {selectedCreator?.displayName}
+            </Typography>
+            <Typography variant="body1" gutterBottom>
+              <strong>Fullt navn:</strong> {selectedCreator?.fullName}
             </Typography>
             <Typography variant="body2" color="text.secondary">
               <strong>Bruker-ID:</strong> {selectedCreator?.userId}

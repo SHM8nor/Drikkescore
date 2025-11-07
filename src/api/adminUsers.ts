@@ -34,6 +34,7 @@ export interface AdminUser extends Profile {
 interface RawUserData {
   id: string;
   full_name: string;
+  display_name: string;
   weight_kg: number;
   height_cm: number;
   gender: 'male' | 'female';
@@ -95,6 +96,7 @@ export async function getAllUsers(): Promise<AdminUser[]> {
     return {
       id: user.id,
       full_name: user.full_name,
+      display_name: user.display_name,
       weight_kg: user.weight_kg,
       height_cm: user.height_cm,
       gender: user.gender,

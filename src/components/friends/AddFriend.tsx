@@ -85,7 +85,7 @@ function SearchResultItem({ user, status, onSendRequest, loading }: SearchResult
       {/* Avatar - Using MUI Avatar for safe rendering */}
       <Avatar
         src={safeAvatarUrl || undefined}
-        alt={user.full_name}
+        alt={user.display_name}
         sx={{
           width: 40,
           height: 40,
@@ -107,7 +107,7 @@ function SearchResultItem({ user, status, onSendRequest, loading }: SearchResult
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
         }}>
-          {user.full_name}
+          {user.display_name}
         </h4>
       </div>
 

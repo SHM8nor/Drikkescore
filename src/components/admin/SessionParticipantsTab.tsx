@@ -22,7 +22,7 @@ interface SessionParticipantsTabProps {
   participants: SessionDetailParticipant[];
 }
 
-type SortField = 'name' | 'joinedAt' | 'drinks' | 'currentBAC' | 'peakBAC';
+type SortField = 'displayName' | 'fullName' | 'joinedAt' | 'drinks' | 'currentBAC' | 'peakBAC';
 type SortOrder = 'asc' | 'desc';
 
 /**
@@ -31,6 +31,7 @@ type SortOrder = 'asc' | 'desc';
  * Features:
  * - Sortable columns
  * - Avatar display
+ * - Shows both display_name and full_name for admin visibility
  * - Current and peak BAC
  * - Drink count
  * - Responsive (hides columns on mobile)
@@ -58,7 +59,11 @@ export default function SessionParticipantsTab({
       let bValue: number | string = 0;
 
       switch (sortField) {
-        case 'name':
+        case 'displayName':
+          aValue = a.profile.display_name.toLowerCase();
+          bValue = b.profile.display_name.toLowerCase();
+          break;
+        case 'fullName':
           aValue = a.profile.full_name.toLowerCase();
           bValue = b.profile.full_name.toLowerCase();
           break;
@@ -131,18 +136,35 @@ export default function SessionParticipantsTab({
           <TableRow>
             <TableCell>
               <TableSortLabel
-                active={sortField === 'name'}
-                direction={sortField === 'name' ? sortOrder : 'asc'}
-                onClick={() => handleSort('name')}
+                active={sortField === 'displayName'}
+                direction={sortField === 'displayName' ? sortOrder : 'asc'}
+                onClick={() => handleSort('displayName')}
               >
-                Deltaker
-                {sortField === 'name' ? (
+                Visningsnavn
+                {sortField === 'displayName' ? (
                   <Box component="span" sx={visuallyHidden}>
                     {sortOrder === 'desc' ? 'sortert synkende' : 'sortert stigende'}
                   </Box>
                 ) : null}
               </TableSortLabel>
             </TableCell>
+
+            {!isMobile && (
+              <TableCell>
+                <TableSortLabel
+                  active={sortField === 'fullName'}
+                  direction={sortField === 'fullName' ? sortOrder : 'asc'}
+                  onClick={() => handleSort('fullName')}
+                >
+                  Fullt navn
+                  {sortField === 'fullName' ? (
+                    <Box component="span" sx={visuallyHidden}>
+                      {sortOrder === 'desc' ? 'sortert synkende' : 'sortert stigende'}
+                    </Box>
+                  ) : null}
+                </TableSortLabel>
+              </TableCell>
+            )}
 
             {!isMobile && (
               <TableCell>
@@ -216,21 +238,30 @@ export default function SessionParticipantsTab({
               hover
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
-              {/* Participant name with avatar */}
+              {/* Display name with avatar */}
               <TableCell>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Avatar
                     src={participant.profile.avatar_url}
-                    alt={participant.profile.full_name}
+                    alt={participant.profile.display_name}
                     sx={{ width: 32, height: 32 }}
                   >
-                    {participant.profile.full_name.charAt(0).toUpperCase()}
+                    {participant.profile.display_name.charAt(0).toUpperCase()}
                   </Avatar>
                   <Typography variant="body2">
-                    {participant.profile.full_name}
+                    {participant.profile.display_name}
                   </Typography>
                 </Box>
               </TableCell>
+
+              {/* Full name (hidden on mobile) */}
+              {!isMobile && (
+                <TableCell>
+                  <Typography variant="body2" color="text.secondary">
+                    {participant.profile.full_name}
+                  </Typography>
+                </TableCell>
+              )}
 
               {/* Joined at (hidden on mobile) */}
               {!isMobile && (

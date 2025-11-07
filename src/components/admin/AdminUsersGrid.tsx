@@ -21,6 +21,7 @@ interface AdminUsersGridProps {
  * - Row selection for bulk operations
  * - Search and filter functionality
  * - User statistics display
+ * - Shows both display_name and full_name for admin visibility
  */
 export default function AdminUsersGrid({
   onSelectionChange,
@@ -53,6 +54,7 @@ export default function AdminUsersGrid({
       result = result.filter(
         (user) =>
           user.full_name.toLowerCase().includes(query) ||
+          user.display_name.toLowerCase().includes(query) ||
           user.id.toLowerCase().includes(query)
       );
     }
@@ -77,17 +79,23 @@ export default function AdminUsersGrid({
         renderCell: (params) => (
           <Avatar
             src={params.row.avatar_url || undefined}
-            alt={params.row.full_name}
+            alt={params.row.display_name}
             sx={{ width: 36, height: 36 }}
           >
-            {params.row.full_name.charAt(0).toUpperCase()}
+            {params.row.display_name.charAt(0).toUpperCase()}
           </Avatar>
         ),
       },
       {
+        field: 'display_name',
+        headerName: 'Visningsnavn',
+        width: 180,
+        editable: false,
+      },
+      {
         field: 'full_name',
-        headerName: 'Navn',
-        width: 200,
+        headerName: 'Fullt navn',
+        width: 180,
         editable: false,
       },
       {

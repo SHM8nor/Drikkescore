@@ -193,7 +193,7 @@ export default function BACLineChart({
 
   const legendItems = participants.map((participant) => ({
     id: participant.id,
-    label: participant.full_name,
+    label: participant.display_name,
     color: participantColors.get(participant.id) ?? "#1976d2",
     isSelected: selectedParticipantId === participant.id,
   }));

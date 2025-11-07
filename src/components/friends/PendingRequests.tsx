@@ -177,13 +177,13 @@ export default function PendingRequests({ requests, isLoading }: PendingRequests
                 fontSize: '1.5rem',
               }}
             >
-              {(request.full_name || '?').charAt(0).toUpperCase()}
+              {(request.display_name || '?').charAt(0).toUpperCase()}
             </Avatar>
           </ListItemAvatar>
           <ListItemText
             primary={
               <Typography variant="h6" component="span">
-                {request.full_name}
+                {request.display_name}
               </Typography>
             }
             secondary={

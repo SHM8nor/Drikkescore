@@ -23,7 +23,7 @@ interface SessionOverviewTabProps {
   leaderboard: Array<{
     rank: number;
     user_id: string;
-    full_name: string;
+    display_name: string;
     avatar_url?: string;
     bac: number;
     drinkCount: number;
@@ -35,7 +35,7 @@ interface SessionOverviewTabProps {
  * Session Overview Tab - Summary of session statistics
  *
  * Displays:
- * - Basic session info (code, name, creator, times)
+ * - Basic session info (code, name, creator with both display_name and full_name, times)
  * - Quick stats (participants, drinks, avg/peak BAC)
  * - Session status indicator
  */
@@ -79,9 +79,11 @@ export default function SessionOverviewTab({
     ? Math.max(...leaderboard.map((p) => p.peakBAC))
     : 0;
 
-  // Find creator name
+  // Find creator and build name display
   const creator = participants.find((p) => p.userId === session.created_by);
-  const creatorName = creator?.profile.full_name || 'Ukjent';
+  const creatorDisplay = creator
+    ? `${creator.profile.display_name} (${creator.profile.full_name})`
+    : 'Ukjent';
 
   return (
     <Box>
@@ -110,7 +112,7 @@ export default function SessionOverviewTab({
             <Grid size={{ xs: 12, sm: 6 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
-                  Sesjonsgode:
+                  Sesjonskode:
                 </Typography>
                 <Typography variant="body1" fontWeight="medium">
                   {session.session_code}
@@ -121,7 +123,7 @@ export default function SessionOverviewTab({
                 <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
                   Opprettet av:
                 </Typography>
-                <Typography variant="body1">{creatorName}</Typography>
+                <Typography variant="body1">{creatorDisplay}</Typography>
               </Box>
             </Grid>
 

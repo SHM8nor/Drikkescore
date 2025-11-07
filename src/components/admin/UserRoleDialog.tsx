@@ -31,6 +31,7 @@ interface UserRoleDialogProps {
 /**
  * Dialog for managing user roles
  * Features:
+ * - Shows both display_name and full_name for admin visibility
  * - Radio buttons for role selection (user/admin)
  * - Confirmation message for role changes
  * - Loading and error states
@@ -86,7 +87,7 @@ export default function UserRoleDialog({
     try {
       await updateRole(user.id, selectedRole);
       const roleText = selectedRole === 'admin' ? 'Administrator' : 'Bruker';
-      onSuccess(`${user.full_name} er nå satt til rollen: ${roleText}`);
+      onSuccess(`${user.display_name} er nå satt til rollen: ${roleText}`);
       onClose();
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Ukjent feil oppstod';
@@ -113,14 +114,17 @@ export default function UserRoleDialog({
             <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 3, mt: 1 }}>
               <Avatar
                 src={user.avatar_url || undefined}
-                alt={user.full_name}
+                alt={user.display_name}
                 sx={{ width: 56, height: 56 }}
               >
-                {user.full_name.charAt(0).toUpperCase()}
+                {user.display_name.charAt(0).toUpperCase()}
               </Avatar>
               <Box>
-                <Typography variant="h6">{user.full_name}</Typography>
+                <Typography variant="h6">{user.display_name}</Typography>
                 <Typography variant="body2" color="text.secondary">
+                  {user.full_name}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
                   {user.id}
                 </Typography>
               </Box>
@@ -177,8 +181,8 @@ export default function UserRoleDialog({
             {hasRoleChanged && !isOwnUser && (
               <Alert severity="info" sx={{ mt: 2 }}>
                 {selectedRole === 'admin'
-                  ? `${user.full_name} vil få full tilgang til administrasjonspanelet.`
-                  : `${user.full_name} vil miste tilgang til administrasjonspanelet.`}
+                  ? `${user.display_name} vil få full tilgang til administrasjonspanelet.`
+                  : `${user.display_name} vil miste tilgang til administrasjonspanelet.`}
               </Alert>
             )}
           </Box>

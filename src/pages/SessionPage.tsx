@@ -555,7 +555,7 @@ export function SessionPage() {
                   color: '#78350f',
                   textAlign: 'left'
                 }}>
-                  VICTOIRE! {leaderboard[0]?.full_name} erobrer med {formatBAC(leaderboard[0]?.bac)}!
+                  VICTOIRE! {leaderboard[0]?.display_name} erobrer med {formatBAC(leaderboard[0]?.bac)}!
                 </div>
               </div>
             )}
@@ -569,7 +569,7 @@ export function SessionPage() {
                     className={`leaderboard-entry ${entry.user_id === user?.id ? 'current-user' : ''}`}
                   >
                     <span className="rank">#{entry.rank}</span>
-                    <span className="name">{entry.full_name}</span>
+                    <span className="name">{entry.display_name}</span>
                     <span className="bac">{formatBAC(entry.bac)}</span>
                   </div>
                 ))}

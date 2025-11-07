@@ -141,7 +141,7 @@ export function FriendsList({ friends, loading, onRemoveFriend }: FriendsListPro
             {/* Avatar - Using MUI Avatar for safe rendering */}
             <Avatar
               src={safeAvatarUrl || undefined}
-              alt={friend.full_name}
+              alt={friend.display_name}
               sx={{
                 width: 48,
                 height: 48,
@@ -163,7 +163,7 @@ export function FriendsList({ friends, loading, onRemoveFriend }: FriendsListPro
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
               }}>
-                {friend.full_name}
+                {friend.display_name}
               </h4>
               <p style={{
                 margin: 0,
@@ -180,7 +180,7 @@ export function FriendsList({ friends, loading, onRemoveFriend }: FriendsListPro
 
             {/* Remove Button */}
             <button
-              onClick={() => handleRemove(friend.friend_id, friend.full_name)}
+              onClick={() => handleRemove(friend.friend_id, friend.display_name)}
               disabled={removingId === friend.friend_id}
               style={{
                 padding: 'var(--spacing-sm) var(--spacing-md)',

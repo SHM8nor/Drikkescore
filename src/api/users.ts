@@ -19,7 +19,7 @@ export class UserSearchError extends Error {
 
 export interface UserSearchResult {
   id: string;
-  full_name: string;
+  display_name: string;
   avatar_url: string | null;
 }
 
@@ -59,9 +59,9 @@ export async function searchUsers(
 
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, full_name, avatar_url')
+    .select('id, display_name, avatar_url')
     .neq('id', user.id) // Exclude current user
-    .ilike('full_name', `%${sanitizedQuery}%`)
+    .ilike('display_name', `%${sanitizedQuery}%`)
     .limit(limit);
 
   if (error) {

@@ -198,7 +198,7 @@ export function ActiveUsersIndicator({ sessionId }: ActiveUsersIndicatorProps) {
                       color: 'var(--prussian-blue)',
                     }}
                   >
-                    {user.full_name}
+                    {user.display_name}
                   </span>
                   <span
                     style={{

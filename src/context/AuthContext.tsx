@@ -128,6 +128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       options: {
         data: {
           full_name: data.full_name,
+          display_name: data.display_name,
           weight_kg: data.weight_kg,
           height_cm: data.height_cm,
           gender: data.gender,
@@ -166,6 +167,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const metadata = user.user_metadata || {};
           if (
             metadata.full_name &&
+            metadata.display_name &&
             metadata.weight_kg &&
             metadata.height_cm &&
             metadata.gender &&
@@ -174,6 +176,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const { error: createError } = await supabase.from('profiles').insert({
               id: user.id,
               full_name: metadata.full_name,
+              display_name: metadata.display_name,
               weight_kg: metadata.weight_kg,
               height_cm: metadata.height_cm,
               gender: metadata.gender,

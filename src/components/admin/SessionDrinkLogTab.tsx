@@ -14,6 +14,7 @@ import {
   TablePagination,
   useMediaQuery,
   useTheme,
+  Tooltip,
 } from '@mui/material';
 import { Fastfood, Speed } from '@mui/icons-material';
 import type { SessionDrinkWithUser } from '../../api/sessionDetails';
@@ -28,7 +29,7 @@ interface SessionDrinkLogTabProps {
  *
  * Features:
  * - Chronological drink list (newest first)
- * - User info with avatar
+ * - User info with avatar showing both display_name and full_name
  * - Drink details (volume, alcohol %, type)
  * - Rapid consumption and food flags
  * - Pagination for 100+ drinks
@@ -155,22 +156,41 @@ export default function SessionDrinkLogTab({ drinks }: SessionDrinkLogTabProps) 
                   </Box>
                 </TableCell>
 
-                {/* User */}
+                {/* User - Show display_name with full_name in tooltip */}
                 <TableCell>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Avatar
-                      src={drink.user.avatar_url}
-                      alt={drink.user.full_name}
-                      sx={{ width: 28, height: 28 }}
-                    >
-                      {drink.user.full_name.charAt(0).toUpperCase()}
-                    </Avatar>
-                    {!isMobile && (
-                      <Typography variant="body2">
-                        {drink.user.full_name}
-                      </Typography>
-                    )}
-                  </Box>
+                  <Tooltip
+                    title={
+                      <Box>
+                        <Typography variant="body2">
+                          Visningsnavn: {drink.user.display_name}
+                        </Typography>
+                        <Typography variant="body2">
+                          Fullt navn: {drink.user.full_name}
+                        </Typography>
+                      </Box>
+                    }
+                    arrow
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Avatar
+                        src={drink.user.avatar_url}
+                        alt={drink.user.display_name}
+                        sx={{ width: 28, height: 28 }}
+                      >
+                        {drink.user.display_name.charAt(0).toUpperCase()}
+                      </Avatar>
+                      {!isMobile && (
+                        <Box>
+                          <Typography variant="body2">
+                            {drink.user.display_name}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {drink.user.full_name}
+                          </Typography>
+                        </Box>
+                      )}
+                    </Box>
+                  </Tooltip>
                 </TableCell>
 
                 {/* Drink type (hidden on mobile) */}

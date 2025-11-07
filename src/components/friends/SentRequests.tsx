@@ -138,14 +138,14 @@ export default function SentRequests({ requests, isLoading }: SentRequestsProps)
                 fontSize: '1.5rem',
               }}
             >
-              {(request.full_name || '?').charAt(0).toUpperCase()}
+              {(request.display_name || '?').charAt(0).toUpperCase()}
             </Avatar>
           </ListItemAvatar>
           <ListItemText
             primary={
               <Box display="flex" alignItems="center" gap={1}>
                 <Typography variant="h6" component="span">
-                  {request.full_name}
+                  {request.display_name}
                 </Typography>
                 <Chip
                   label="Venter"

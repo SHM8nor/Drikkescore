@@ -59,7 +59,7 @@ export default function AlcoholConsumptionChart({
       // Assign colors to match BAC chart
       return data.map((item, index) => {
         const participant = participants.find(
-          (p) => p.full_name === item.participant
+          (p) => p.display_name === item.participant
         );
         let color: string;
 

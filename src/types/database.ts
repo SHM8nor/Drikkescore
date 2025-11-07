@@ -8,6 +8,7 @@ export type SessionStatus = 'active' | 'idle' | 'offline';
 export interface Profile {
   id: string;
   full_name: string;
+  display_name: string;
   weight_kg: number;
   height_cm: number;
   gender: Gender;
@@ -57,7 +58,7 @@ export interface DrinkEntry {
 export interface LeaderboardEntry {
   rank: number;
   user_id: string;
-  full_name: string;
+  display_name: string;
   bac: number;
 }
 
@@ -80,7 +81,7 @@ export interface Friendship {
 
 export interface Friend {
   friend_id: string;
-  full_name: string;
+  display_name: string;
   avatar_url: string | null;
   created_at: string;
 }
@@ -88,7 +89,7 @@ export interface Friend {
 export interface FriendRequest {
   friendship_id: string;
   requester_id: string;
-  full_name: string;
+  display_name: string;
   avatar_url: string | null;
   created_at: string;
 }
@@ -96,7 +97,7 @@ export interface FriendRequest {
 export interface SentFriendRequest {
   friendship_id: string;
   recipient_id: string;
-  full_name: string;
+  display_name: string;
   avatar_url: string | null;
   created_at: string;
 }
@@ -125,7 +126,7 @@ export interface ActiveFriendSession {
 
 export interface SessionActiveUser {
   user_id: string;
-  full_name: string;
+  display_name: string;
   avatar_url: string | null;
   status: SessionStatus;
   last_seen: string;
@@ -139,6 +140,7 @@ export interface RegisterFormData {
   email: string;
   password: string;
   full_name: string;
+  display_name: string;
   weight_kg: number;
   height_cm: number;
   gender: Gender;
@@ -167,6 +169,7 @@ export interface AddDrinkFormData {
 
 export interface UpdateProfileFormData {
   full_name?: string;
+  display_name?: string;
   weight_kg?: number;
   height_cm?: number;
   gender?: Gender;
