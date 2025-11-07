@@ -12,6 +12,7 @@ import ChartContainer from '../components/charts/ChartContainer';
 import { ShareSessionModal } from '../components/session/ShareSessionModal';
 import { ActiveUsersIndicator } from '../components/session/ActiveUsersIndicator';
 import { PageContainer } from '../components/layout/PageContainer';
+import napoleonImage from '/Napoleonic Ruse.png';
 
 // Helper function to format countdown timer
 function formatTime(seconds: number): string {
@@ -526,14 +527,36 @@ export function SessionPage() {
             <h2>{sessionEnded ? 'Sluttresultat' : 'Toppliste'}</h2>
             {sessionEnded && leaderboard.length > 0 && (
               <div style={{
-                background: 'linear-gradient(135deg, #fff9c4, #fff59d)',
-                padding: '12px',
-                borderRadius: '6px',
+                background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
+                padding: '16px',
+                borderRadius: '8px',
                 marginBottom: '16px',
-                textAlign: 'center',
-                fontWeight: 'bold'
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                flexWrap: 'wrap',
+                boxShadow: '0 4px 6px rgba(251, 191, 36, 0.3)'
               }}>
-                {leaderboard[0]?.full_name} vinner med {formatBAC(leaderboard[0]?.bac)}!
+                <img
+                  src={napoleonImage}
+                  alt="Napoleon"
+                  style={{
+                    width: '48px',
+                    height: '48px',
+                    objectFit: 'contain',
+                    filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))'
+                  }}
+                />
+                <div style={{
+                  flex: 1,
+                  minWidth: '200px',
+                  fontWeight: 'bold',
+                  fontSize: '16px',
+                  color: '#78350f',
+                  textAlign: 'left'
+                }}>
+                  VICTOIRE! {leaderboard[0]?.full_name} erobrer med {formatBAC(leaderboard[0]?.bac)}!
+                </div>
               </div>
             )}
             {leaderboard.length === 0 ? (

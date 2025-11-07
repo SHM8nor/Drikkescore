@@ -355,6 +355,62 @@ export default function SessionRecapModal({
           >
             Tanker fra oss
           </Typography>
+
+          {/* Napoleon Achievement - Imperial BAC Levels */}
+          {analytics.peak_bac >= 0.15 && (
+            <Box
+              sx={{
+                mb: 2,
+                background: 'linear-gradient(135deg, rgba(214, 40, 40, 0.15) 0%, rgba(247, 127, 0, 0.15) 100%)',
+                backdropFilter: 'blur(10px)',
+                borderRadius: 'var(--radius-md)',
+                border: '2px solid rgba(214, 40, 40, 0.3)',
+                p: { xs: 1.5, sm: 2 },
+                display: 'flex',
+                alignItems: 'center',
+                gap: 2,
+                boxShadow: '0 4px 12px rgba(214, 40, 40, 0.2)',
+              }}
+            >
+              <Box
+                component="img"
+                src="/Napoleonic Ruse.png"
+                alt="Napoleon"
+                sx={{
+                  width: { xs: 60, sm: 70 },
+                  height: { xs: 60, sm: 70 },
+                  borderRadius: 'var(--radius-sm)',
+                  objectFit: 'cover',
+                  flexShrink: 0,
+                  border: '2px solid rgba(214, 40, 40, 0.3)',
+                }}
+              />
+              <Box sx={{ flex: 1 }}>
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    fontWeight: 700,
+                    color: 'var(--fire-engine-red)',
+                    fontSize: { xs: '0.95rem', sm: '1.1rem' },
+                    mb: 0.5,
+                  }}
+                >
+                  Mon Dieu! Keiserlige nivåer av beruselse!
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: 'var(--color-text-secondary)',
+                    fontSize: { xs: '0.8rem', sm: '0.875rem' },
+                    fontWeight: 500,
+                  }}
+                >
+                  Du oppnådde en svært høy promille ({formatBAC(analytics.peak_bac)})
+                </Typography>
+              </Box>
+            </Box>
+          )}
+
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
             {messages.map((message, index) => (
               <Box

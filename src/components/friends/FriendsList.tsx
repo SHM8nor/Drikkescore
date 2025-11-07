@@ -9,7 +9,6 @@ import { useState } from 'react';
 import type { Friend } from '../../types/database';
 import PersonIcon from '@mui/icons-material/Person';
 import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
-import PeopleIcon from '@mui/icons-material/People';
 import Avatar from '@mui/material/Avatar';
 
 /**
@@ -77,11 +76,14 @@ export function FriendsList({ friends, loading, onRemoveFriend }: FriendsListPro
         borderRadius: 'var(--radius-lg)',
         border: '1px solid rgba(0, 48, 73, 0.1)',
       }}>
-        <PeopleIcon
-          sx={{
-            fontSize: 64,
-            color: 'var(--color-text-muted)',
+        <img
+          src="/Napoleonic Ruse.png"
+          alt="Napoleon"
+          style={{
+            width: '140px',
+            height: 'auto',
             marginBottom: 'var(--spacing-md)',
+            opacity: 0.9,
           }}
         />
         <h3 style={{
@@ -95,7 +97,7 @@ export function FriendsList({ friends, loading, onRemoveFriend }: FriendsListPro
           color: 'var(--color-text-muted)',
           fontSize: 'var(--font-size-base)',
         }}>
-          Søk etter brukere for å legge til venner
+          Selv Napoleon trengte allierte! Søk etter venner for å bygge ditt drikkeimperium.
         </p>
       </div>
     );
