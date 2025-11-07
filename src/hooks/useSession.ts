@@ -185,6 +185,38 @@ export function useSession(sessionId: string | null) {
     },
   });
 
+  const extendSessionMutation = useMutation({
+    mutationFn: async (additionalMinutes: number) => {
+      if (!user || !sessionId) {
+        throw new Error('User not authenticated or session missing');
+      }
+
+      const session = sessionQuery.data;
+      if (!session) {
+        throw new Error('Session not found');
+      }
+
+      if (session.created_by !== user.id) {
+        throw new Error('Only the session creator can extend the session');
+      }
+
+      const currentEndTime = new Date(session.end_time);
+      const newEndTime = new Date(currentEndTime.getTime() + additionalMinutes * 60 * 1000);
+
+      const { error } = await supabase
+        .from('sessions')
+        .update({ end_time: newEndTime.toISOString() })
+        .eq('id', sessionId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      if (sessionId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.sessions.detail(sessionId) });
+      }
+    },
+  });
+
   const drinks = useMemo(() => drinksQuery.data ?? [], [drinksQuery.data]);
   const participants = useMemo(
     () => participantsQuery.data ?? [],
@@ -221,7 +253,8 @@ export function useSession(sessionId: string | null) {
     participantsQuery.error ||
     drinksQuery.error ||
     addDrinkMutation.error ||
-    deleteDrinkMutation.error;
+    deleteDrinkMutation.error ||
+    extendSessionMutation.error;
 
   const error =
     errorMessage instanceof Error ? errorMessage.message : errorMessage ? String(errorMessage) : null;
@@ -257,6 +290,11 @@ export function useSession(sessionId: string | null) {
     return calculateBAC(userDrinks, profile, new Date());
   }, [drinks, profile, user]);
 
+  const extendSession = useCallback(
+    (additionalMinutes: number) => extendSessionMutation.mutateAsync(additionalMinutes),
+    [extendSessionMutation],
+  );
+
   return {
     session: sessionQuery.data ?? null,
     drinks,
@@ -267,6 +305,8 @@ export function useSession(sessionId: string | null) {
     addDrink,
     deleteDrink,
     getCurrentUserBAC,
+    extendSession,
+    isExtending: extendSessionMutation.isPending,
   };
 }
 
