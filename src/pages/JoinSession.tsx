@@ -52,10 +52,21 @@ export function JoinSession() {
     }
   }, [joinSession, navigate]);
 
-  // Validate and fetch session info
+  // Redirect unauthenticated users to login immediately
   useEffect(() => {
     if (authLoading || !sessionId) return;
 
+    // If not authenticated, redirect to login with join context
+    if (!user) {
+      // Validate sessionId format before storing
+      if (isValidSessionId(sessionId)) {
+        sessionStorage.setItem('redirect_after_login', `/join/${sessionId}`);
+      }
+      navigate('/login?from=join', { replace: true });
+      return;
+    }
+
+    // User is authenticated - proceed with session validation and join
     const validateAndFetchSession = async () => {
       try {
         setError(null);
@@ -116,12 +127,9 @@ export function JoinSession() {
 
         setSession(sessionData);
 
-        // SECURITY FIX #4: Pass validated sessionData directly to handleJoinSession
-        // Prevents race condition by not relying on state update
-        if (user) {
-          setJoining(true);
-          await handleJoinSession(sessionData);
-        }
+        // User is authenticated - automatically join session
+        setJoining(true);
+        await handleJoinSession(sessionData);
       } catch (err: any) {
         console.error('Error validating session:', err);
         setError(err.message || 'Kunne ikke laste økt');
@@ -129,33 +137,13 @@ export function JoinSession() {
     };
 
     validateAndFetchSession();
-  }, [sessionId, authLoading, user, handleJoinSession]);
+  }, [sessionId, authLoading, user, handleJoinSession, navigate]);
 
   // Handle manual retry
   const handleRetry = () => {
     if (session && user) {
       handleJoinSession(session);
     }
-  };
-
-  // Handle login redirect
-  const handleLoginRedirect = () => {
-    // SECURITY FIX #1: Validate sessionId format BEFORE storing in sessionStorage
-    // Prevents open redirect attacks via malicious sessionId values
-    if (sessionId && isValidSessionId(sessionId)) {
-      sessionStorage.setItem('redirect_after_login', `/join/${sessionId}`);
-    }
-    navigate('/login');
-  };
-
-  // Handle register redirect
-  const handleRegisterRedirect = () => {
-    // SECURITY FIX #1: Validate sessionId format BEFORE storing in sessionStorage
-    // Prevents open redirect attacks via malicious sessionId values
-    if (sessionId && isValidSessionId(sessionId)) {
-      sessionStorage.setItem('redirect_after_login', `/join/${sessionId}`);
-    }
-    navigate('/register');
   };
 
   // Loading state while auth is initializing
@@ -185,41 +173,6 @@ export function JoinSession() {
               <button onClick={() => navigate('/')} className="btn-primary">
                 Gå til hjemmeside
               </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Not authenticated - prompt login/register
-  if (!user && session) {
-    return (
-      <div className="join-session-page">
-        <div className="join-session-container">
-          <div className="session-info-card">
-            <h1>Bli med i økt</h1>
-            <div className="session-details">
-              <h2>{session.session_name}</h2>
-              <p className="session-code">Kode: <strong>{session.session_code}</strong></p>
-              <p className="session-time">
-                Starter: {new Date(session.start_time).toLocaleString('nb-NO')}
-              </p>
-              <p className="session-time">
-                Slutter: {new Date(session.end_time).toLocaleString('nb-NO')}
-              </p>
-            </div>
-
-            <div className="auth-prompt">
-              <p>Du må være logget inn for å bli med i denne økten</p>
-              <div className="button-group">
-                <button onClick={handleLoginRedirect} className="btn-primary">
-                  Logg inn
-                </button>
-                <button onClick={handleRegisterRedirect} className="btn-secondary">
-                  Registrer deg
-                </button>
-              </div>
             </div>
           </div>
         </div>
