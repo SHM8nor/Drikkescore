@@ -395,7 +395,7 @@ export default function SessionRecapModal({
                     mb: 0.5,
                   }}
                 >
-                  Mon Dieu! Imperial levels of intoxication!
+                  Mon Dieu! Keiserlige nivåer av beruselse!
                 </Typography>
                 <Typography
                   variant="body2"

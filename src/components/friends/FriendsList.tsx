@@ -97,7 +97,7 @@ export function FriendsList({ friends, loading, onRemoveFriend }: FriendsListPro
           color: 'var(--color-text-muted)',
           fontSize: 'var(--font-size-base)',
         }}>
-          Even Napoleon needed allies! Search for friends to join your drinking empire.
+          Selv Napoleon trengte allierte! Søk etter venner for å bygge ditt drikkeimperium.
         </p>
       </div>
     );
