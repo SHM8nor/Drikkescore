@@ -69,8 +69,7 @@ export async function getAllUsers(): Promise<AdminUser[]> {
       session_participants(count),
       drink_entries(count),
       friendships_user:friendships!friendships_user_id_fkey(count),
-      friendships_friend:friendships!friendships_friend_id_fkey(count),
-      session_active_users(last_seen)
+      friendships_friend:friendships!friendships_friend_id_fkey(count)
     `)
     .order('created_at', { ascending: false });
 
@@ -89,7 +88,8 @@ export async function getAllUsers(): Promise<AdminUser[]> {
     const friendCountFriend = user.friendships_friend?.[0]?.count || 0;
     const friendCount = friendCountUser + friendCountFriend;
 
-    // Get most recent last_seen from session_active_users
+    // Note: last_active is currently undefined (session_active_users table not available)
+    // This will be populated when the table exists with proper foreign key relationship
     const lastActive = user.session_active_users?.[0]?.last_seen;
 
     return {
