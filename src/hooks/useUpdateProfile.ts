@@ -1,26 +1,23 @@
-import { useState } from 'react';
+import { useMemo } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import type { UpdateProfileFormData } from '../types/database';
 import { useAuth } from '../context/AuthContext';
+import { queryKeys } from '../lib/queryKeys';
 
 /**
  * Hook to update user profile
  */
 export function useUpdateProfile() {
   const { user } = useAuth();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const updateProfile = async (data: UpdateProfileFormData) => {
-    if (!user) {
-      throw new Error('User not authenticated');
-    }
+  const mutation = useMutation({
+    mutationFn: async (data: UpdateProfileFormData) => {
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
 
-    setLoading(true);
-    setError(null);
-
-    try {
-      // Update profile in database
       const { error: profileError } = await supabase
         .from('profiles')
         .update(data)
@@ -31,31 +28,35 @@ export function useUpdateProfile() {
         throw profileError;
       }
 
-      // Clear profile cache to force fresh fetch
-      const PROFILE_CACHE_KEY = 'drikkescore_profile_cache';
-      sessionStorage.removeItem(`${PROFILE_CACHE_KEY}_${user.id}`);
-
-      // Update auth user metadata to keep it in sync
       const { error: metadataError } = await supabase.auth.updateUser({
-        data: data,
+        data,
       });
 
       if (metadataError) {
         console.error('Metadata update error:', metadataError);
-        // Don't throw - profile was updated successfully
-        // Metadata is just for backup/recovery
       }
 
-      console.log('Profile updated successfully');
-      setLoading(false);
       return { success: true };
-    } catch (err: any) {
-      console.error('Error updating profile:', err);
-      setError(err.message);
-      setLoading(false);
-      throw err;
-    }
-  };
+    },
+    onSuccess: async () => {
+      if (user) {
+        await queryClient.invalidateQueries({
+          queryKey: queryKeys.auth.profile(user.id),
+        });
+      }
+    },
+  });
 
-  return { updateProfile, loading, error };
+  const error = useMemo(() => {
+    if (mutation.error instanceof Error) {
+      return mutation.error.message;
+    }
+    return null;
+  }, [mutation.error]);
+
+  return {
+    updateProfile: mutation.mutateAsync,
+    loading: mutation.isPending,
+    error,
+  };
 }

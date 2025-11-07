@@ -5,7 +5,7 @@
  * Allows users to accept or decline requests directly from the notification.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Card,
@@ -44,6 +44,13 @@ export function FriendRequestNotification({
   const [processing, setProcessing] = useState(false);
   const [actionTaken, setActionTaken] = useState<'accepted' | 'declined' | null>(null);
 
+  const handleDismiss = useCallback(() => {
+    setVisible(false);
+    setTimeout(() => {
+      onDismiss();
+    }, 300); // Wait for slide-out animation
+  }, [onDismiss]);
+
   useEffect(() => {
     if (autoHideDelay > 0) {
       const timer = setTimeout(() => {
@@ -52,14 +59,7 @@ export function FriendRequestNotification({
 
       return () => clearTimeout(timer);
     }
-  }, [autoHideDelay]);
-
-  const handleDismiss = () => {
-    setVisible(false);
-    setTimeout(() => {
-      onDismiss();
-    }, 300); // Wait for slide-out animation
-  };
+  }, [autoHideDelay, handleDismiss]);
 
   const handleAccept = async () => {
     setProcessing(true);

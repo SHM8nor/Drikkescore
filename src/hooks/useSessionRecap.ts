@@ -1,9 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useMemo } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { calculateSessionAnalytics } from '../utils/analyticsCalculator';
 import type { Session, DrinkEntry } from '../types/database';
 import type { SessionAnalytics } from '../types/analytics';
+import { queryKeys } from '../lib/queryKeys';
 
 /**
  * Hook to manage session recap display logic
@@ -23,194 +25,140 @@ import type { SessionAnalytics } from '../types/analytics';
  */
 export function useSessionRecap() {
   const { user, profile } = useAuth();
-  const [shouldShow, setShouldShow] = useState(false);
-  const [session, setSession] = useState<Session | null>(null);
-  const [analytics, setAnalytics] = useState<SessionAnalytics | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    // Early return if no user or profile
-    if (!user || !profile) {
-      setLoading(false);
-      setShouldShow(false);
-      setSession(null);
-      setAnalytics(null);
-      return;
-    }
-
-    // Early return if session recaps are disabled
-    if (!profile.session_recaps_enabled) {
-      setLoading(false);
-      setShouldShow(false);
-      setSession(null);
-      setAnalytics(null);
-      return;
-    }
-
-    const checkForSessionRecap = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        // Calculate the time threshold (3 hours ago)
-        const threeHoursAgo = new Date();
-        threeHoursAgo.setHours(threeHoursAgo.getHours() - 3);
-        const threeHoursAgoIso = threeHoursAgo.toISOString();
-
-        // Step 1: Get all session IDs where user was a participant
-        const { data: participantData, error: participantError } = await supabase
-          .from('session_participants')
-          .select('session_id')
-          .eq('user_id', user.id);
-
-        if (participantError) throw participantError;
-
-        // No sessions found
-        if (!participantData || participantData.length === 0) {
-          setShouldShow(false);
-          setSession(null);
-          setAnalytics(null);
-          setLoading(false);
-          return;
-        }
-
-        const sessionIds = participantData.map((p) => p.session_id);
-
-        // Step 2: Get the most recent completed session
-        // Session must be:
-        // - User participated in it
-        // - end_time is in the past (completed)
-        // - end_time was more than 3 hours ago
-        // - Different from the last viewed recap
-        const { data: sessionsData, error: sessionsError } = await supabase
-          .from('sessions')
-          .select('*')
-          .in('id', sessionIds)
-          .lt('end_time', new Date().toISOString()) // Completed sessions
-          .lt('end_time', threeHoursAgoIso) // More than 3 hours ago
-          .order('end_time', { ascending: false })
-          .limit(1);
-
-        if (sessionsError) throw sessionsError;
-
-        // No eligible sessions found
-        if (!sessionsData || sessionsData.length === 0) {
-          setShouldShow(false);
-          setSession(null);
-          setAnalytics(null);
-          setLoading(false);
-          return;
-        }
-
-        const mostRecentSession = sessionsData[0] as Session;
-
-        // Step 3: Check if this session has already been viewed
-        if (profile.last_session_recap_viewed === mostRecentSession.id) {
-          setShouldShow(false);
-          setSession(null);
-          setAnalytics(null);
-          setLoading(false);
-          return;
-        }
-
-        // Step 4: Fetch drink entries for this session
-        const { data: drinksData, error: drinksError } = await supabase
-          .from('drink_entries')
-          .select('*')
-          .eq('session_id', mostRecentSession.id)
-          .eq('user_id', user.id)
-          .order('consumed_at', { ascending: true });
-
-        if (drinksError) throw drinksError;
-
-        const sessionDrinks = (drinksData || []) as DrinkEntry[];
-
-        // Step 5: Calculate full analytics for the session
-        // Estimate total spent using average drink price (80 kr per drink)
-        const AVERAGE_DRINK_PRICE = 80; // kr
-        const estimatedTotalSpent = sessionDrinks.length * AVERAGE_DRINK_PRICE;
-
-        const sessionAnalytics = calculateSessionAnalytics(
-          mostRecentSession,
-          sessionDrinks,
-          profile,
-          estimatedTotalSpent
-        );
-
-        // Step 6: Set state to show the recap
-        setShouldShow(true);
-        setSession(mostRecentSession);
-        setAnalytics(sessionAnalytics);
-        setLoading(false);
-      } catch (err: unknown) {
-        console.error('Error checking for session recap:', err);
-        const errorMessage = err instanceof Error ? err.message : 'Failed to check for session recap';
-        setError(errorMessage);
-        setShouldShow(false);
-        setSession(null);
-        setAnalytics(null);
-        setLoading(false);
-      }
-    };
-
-    checkForSessionRecap();
-  }, [user, profile]);
-
-  /**
-   * Mark the current session recap as viewed
-   *
-   * @param viewedDetails - If true, user viewed the full details. If false, user dismissed it.
-   */
-  const markAsViewed = useCallback(
-    async (viewedDetails: boolean) => {
-      if (!user || !session) {
-        console.error('Cannot mark recap as viewed: missing user or session');
-        return;
+  const recapQuery = useQuery<{ session: Session | null; analytics: SessionAnalytics | null }>({
+    queryKey: queryKeys.sessions.recap(user?.id ?? null),
+    enabled: Boolean(user && profile?.session_recaps_enabled),
+    queryFn: async () => {
+      if (!user || !profile) {
+        return { session: null, analytics: null };
       }
 
-      try {
-        const updateData: {
-          last_session_recap_viewed: string;
-          last_recap_dismissed_at?: string;
-        } = {
-          last_session_recap_viewed: session.id,
-        };
+      if (!profile.session_recaps_enabled) {
+        return { session: null, analytics: null };
+      }
 
-        // If user dismissed without viewing details, record the dismissal time
-        if (!viewedDetails) {
-          updateData.last_recap_dismissed_at = new Date().toISOString();
-        }
+      const threeHoursAgo = new Date();
+      threeHoursAgo.setHours(threeHoursAgo.getHours() - 3);
+      const threeHoursAgoIso = threeHoursAgo.toISOString();
 
-        const { error: updateError } = await supabase
-          .from('profiles')
-          .update(updateData)
-          .eq('id', user.id);
+      const { data: participantData, error: participantError } = await supabase
+        .from('session_participants')
+        .select('session_id')
+        .eq('user_id', user.id);
 
-        if (updateError) {
-          console.error('Error marking recap as viewed:', updateError);
-          throw updateError;
-        }
+      if (participantError) throw participantError;
 
-        // Update local state to hide the recap
-        setShouldShow(false);
-        setSession(null);
-        setAnalytics(null);
-      } catch (err: unknown) {
-        console.error('Exception marking recap as viewed:', err);
-        const errorMessage = err instanceof Error ? err.message : 'Failed to mark recap as viewed';
-        setError(errorMessage);
+      if (!participantData || participantData.length === 0) {
+        return { session: null, analytics: null };
+      }
+
+      const sessionIds = participantData.map((p) => p.session_id);
+
+      const { data: sessionsData, error: sessionsError } = await supabase
+        .from('sessions')
+        .select('*')
+        .in('id', sessionIds)
+        .lt('end_time', new Date().toISOString())
+        .lt('end_time', threeHoursAgoIso)
+        .order('end_time', { ascending: false })
+        .limit(1);
+
+      if (sessionsError) throw sessionsError;
+
+      if (!sessionsData || sessionsData.length === 0) {
+        return { session: null, analytics: null };
+      }
+
+      const mostRecentSession = sessionsData[0] as Session;
+
+      if (profile.last_session_recap_viewed === mostRecentSession.id) {
+        return { session: null, analytics: null };
+      }
+
+      const { data: drinksData, error: drinksError } = await supabase
+        .from('drink_entries')
+        .select('*')
+        .eq('session_id', mostRecentSession.id)
+        .eq('user_id', user.id)
+        .order('consumed_at', { ascending: true });
+
+      if (drinksError) throw drinksError;
+
+      const sessionDrinks = (drinksData || []) as DrinkEntry[];
+      const estimatedTotalSpent = sessionDrinks.length * 80;
+
+      const sessionAnalytics = calculateSessionAnalytics(
+        mostRecentSession,
+        sessionDrinks,
+        profile,
+        estimatedTotalSpent,
+      );
+
+      return {
+        session: mostRecentSession,
+        analytics: sessionAnalytics,
+      };
+    },
+  });
+
+  const markAsViewedMutation = useMutation({
+    mutationFn: async (viewedDetails: boolean) => {
+      if (!user || !recapQuery.data?.session) {
+        throw new Error('Kan ikke oppdatere oppsummering nå');
+      }
+
+      const updateData: {
+        last_session_recap_viewed: string;
+        last_recap_dismissed_at?: string;
+      } = {
+        last_session_recap_viewed: recapQuery.data.session.id,
+      };
+
+      if (!viewedDetails) {
+        updateData.last_recap_dismissed_at = new Date().toISOString();
+      }
+
+      const { error } = await supabase
+        .from('profiles')
+        .update(updateData)
+        .eq('id', user.id);
+
+      if (error) {
+        throw error;
       }
     },
-    [user, session]
-  );
+    onSuccess: async () => {
+      if (user) {
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: queryKeys.auth.profile(user.id) }),
+          queryClient.invalidateQueries({ queryKey: queryKeys.sessions.recap(user.id) }),
+        ]);
+      }
+    },
+  });
+
+  const shouldShow = useMemo(() => {
+    return Boolean(recapQuery.data?.session && recapQuery.data.analytics);
+  }, [recapQuery.data]);
+
+  const error = useMemo(() => {
+    if (recapQuery.error instanceof Error) {
+      return recapQuery.error.message;
+    }
+    if (markAsViewedMutation.error instanceof Error) {
+      return markAsViewedMutation.error.message;
+    }
+    return null;
+  }, [recapQuery.error, markAsViewedMutation.error]);
 
   return {
     shouldShow,
-    session,
-    analytics,
-    markAsViewed,
-    loading,
+    session: recapQuery.data?.session ?? null,
+    analytics: recapQuery.data?.analytics ?? null,
+    markAsViewed: markAsViewedMutation.mutateAsync,
+    loading: recapQuery.isPending || markAsViewedMutation.isPending,
     error,
   };
 }

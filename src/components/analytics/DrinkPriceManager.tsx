@@ -22,7 +22,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { useDrinkPrices } from '../../hooks/useDrinkPrices';
-import type { DrinkPriceFormData } from '../../types/analytics';
+import type { DrinkPriceFormData, DrinkPrice } from '../../types/analytics';
 
 /**
  * DrinkPriceManager Component
@@ -103,16 +103,16 @@ export default function DrinkPriceManager() {
         is_default: false,
       });
       setFormErrors({});
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error adding price:', err);
-      setSubmitError(err.message || 'Kunne ikke legge til pris');
+      setSubmitError(err instanceof Error ? err.message : 'Kunne ikke legge til pris');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   // Start editing a price
-  const handleEditStart = (price: any) => {
+  const handleEditStart = (price: DrinkPrice) => {
     setEditingId(price.id);
     setEditFormData({
       drink_name: price.drink_name,
@@ -139,9 +139,9 @@ export default function DrinkPriceManager() {
       setEditingId(null);
       setEditFormData(null);
       setFormErrors({});
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error updating price:', err);
-      setSubmitError(err.message || 'Kunne ikke oppdatere pris');
+      setSubmitError(err instanceof Error ? err.message : 'Kunne ikke oppdatere pris');
     } finally {
       setIsSubmitting(false);
     }
@@ -165,9 +165,9 @@ export default function DrinkPriceManager() {
 
     try {
       await deletePrice(id);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error deleting price:', err);
-      setSubmitError(err.message || 'Kunne ikke slette pris');
+      setSubmitError(err instanceof Error ? err.message : 'Kunne ikke slette pris');
     } finally {
       setIsSubmitting(false);
     }

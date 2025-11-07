@@ -245,9 +245,9 @@ export function SessionPage() {
 
       setSubmitting(false);
       // Keep the last entered values so users can quickly add the same drink again
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error adding drink:', err);
-      setAddError(err.message || 'Failed to add drink');
+      setAddError(err instanceof Error ? err.message : 'Failed to add drink');
       setSubmitting(false);
     }
   };
@@ -263,9 +263,9 @@ export function SessionPage() {
       await deleteDrink(lastUserDrink.id);
       console.log('Drink undone successfully!');
       setSubmitting(false);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error undoing drink:', err);
-      setAddError(err.message || 'Failed to undo drink');
+      setAddError(err instanceof Error ? err.message : 'Failed to undo drink');
       setSubmitting(false);
     }
   };
