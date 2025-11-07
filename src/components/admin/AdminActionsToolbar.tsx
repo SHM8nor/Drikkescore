@@ -13,6 +13,7 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
+import type { SelectChangeEvent } from '@mui/material';
 import {
   Delete as DeleteIcon,
   Edit as EditIcon,
@@ -59,7 +60,7 @@ export default function AdminActionsToolbar({
     onSearch(query);
   };
 
-  const handleStatusFilterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleStatusFilterChange = (event: SelectChangeEvent) => {
     const status = event.target.value as 'all' | 'active' | 'ended';
     setStatusFilter(status);
     onStatusFilter(status);

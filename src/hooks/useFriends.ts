@@ -275,8 +275,8 @@ export function useFriends(
     error,
 
     // Actions
-    sendRequest: sendRequestMutation.mutateAsync,
-    acceptRequest: acceptRequestMutation.mutateAsync,
+    sendRequest: async (friendId: string) => { await sendRequestMutation.mutateAsync(friendId); },
+    acceptRequest: async (friendshipId: string) => { await acceptRequestMutation.mutateAsync(friendshipId); },
     declineRequest: declineRequestMutation.mutateAsync,
     cancelRequest: cancelRequestMutation.mutateAsync,
     unfriend: unfriendMutation.mutateAsync,
