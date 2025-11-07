@@ -25,7 +25,8 @@
       "Bash(npm run typecheck:*)",
       "Bash(npm run:*)",
       "Bash(NUL)",
-      "Bash(del \"\\?\\C:\\Users\\Felles\\Documents\\Projects\\Drikkescore\\nul\")"
+      "Bash(del \"\\?\\C:\\Users\\Felles\\Documents\\Projects\\Drikkescore\\nul\")",
+      "Bash(del ACTIVE_SESSIONS_FEATURE.md FRIEND_REQUEST_DECLINE_FIX.md FRIEND_REQUEST_UI_SUMMARY.md FRIEND_SYSTEM_COMPLETE_SUMMARY.md FRIEND_SYSTEM_QUICKSTART.md FRIENDS_UI_ARCHITECTURE.md FRIENDS_UI_IMPLEMENTATION_SUMMARY.md FRIENDS_UI_QUICKSTART.md INTEGRATION_SUMMARY.md PHASE_1C_SECURITY_SUMMARY.md PRESENCE_TRACKING_FIXES.md SECURITY_FIXES_COMPARISON.md SECURITY_FIXES_PHASE_1B.md)"
     ],
     "deny": [],
     "ask": []
