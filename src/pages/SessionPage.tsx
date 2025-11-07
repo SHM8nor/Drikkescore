@@ -66,6 +66,8 @@ export function SessionPage() {
     addDrink,
     deleteDrink,
     getCurrentUserBAC,
+    extendSession,
+    isExtending,
   } = useSession(sessionId || null);
 
   // FIX #6: Check if user is session participant before enabling presence
@@ -104,6 +106,7 @@ export function SessionPage() {
   const [sessionEnded, setSessionEnded] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [timeSinceLastDrink, setTimeSinceLastDrink] = useState<string>('');
+  const [extendSessionOpen, setExtendSessionOpen] = useState(false);
 
   // Chart view toggles
   const [bacView, setBacView] = useState<'all' | 'self'>('all');
@@ -270,6 +273,20 @@ export function SessionPage() {
     }
   };
 
+  const handleExtendSession = async (minutes: number) => {
+    try {
+      await extendSession(minutes);
+      setExtendSessionOpen(false);
+    } catch (err) {
+      console.error('Error extending session:', err);
+      setAddError(err instanceof Error ? err.message : 'Failed to extend session');
+    }
+  };
+
+  const isSessionCreator = useMemo(() => {
+    return session && user && session.created_by === user.id;
+  }, [session, user]);
+
   if (loading) {
     return <div className="loading">Laster økt...</div>;
   }
@@ -314,6 +331,21 @@ export function SessionPage() {
                 <>⏱ {formatTime(timeRemaining)} igjen</>
               )}
             </span>
+            {isSessionCreator && !sessionEnded && (
+              <button
+                onClick={() => setExtendSessionOpen(true)}
+                className="btn-secondary"
+                style={{
+                  padding: '4px 12px',
+                  fontSize: '14px',
+                  backgroundColor: '#4CAF50',
+                  borderColor: '#4CAF50',
+                  color: 'white'
+                }}
+              >
+                Forleng økt
+              </button>
+            )}
             {/* Active users indicator */}
             {sessionId && <ActiveUsersIndicator sessionId={sessionId} />}
           </div>
@@ -601,6 +633,83 @@ export function SessionPage() {
             </ChartContainer>
           )}
         </div>
+
+        {/* Extend Session Dialog */}
+        {extendSessionOpen && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000,
+            }}
+            onClick={() => setExtendSessionOpen(false)}
+          >
+            <div
+              style={{
+                backgroundColor: 'white',
+                padding: '24px',
+                borderRadius: '8px',
+                maxWidth: '400px',
+                width: '90%',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h2 style={{ marginTop: 0, marginBottom: '16px' }}>Forleng økt</h2>
+              <p style={{ marginBottom: '20px', color: '#666' }}>
+                Velg hvor mye du vil forlenge økten med:
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <button
+                  onClick={() => handleExtendSession(15)}
+                  disabled={isExtending}
+                  className="btn-primary"
+                  style={{ width: '100%' }}
+                >
+                  + 15 minutter
+                </button>
+                <button
+                  onClick={() => handleExtendSession(30)}
+                  disabled={isExtending}
+                  className="btn-primary"
+                  style={{ width: '100%' }}
+                >
+                  + 30 minutter
+                </button>
+                <button
+                  onClick={() => handleExtendSession(60)}
+                  disabled={isExtending}
+                  className="btn-primary"
+                  style={{ width: '100%' }}
+                >
+                  + 1 time
+                </button>
+                <button
+                  onClick={() => handleExtendSession(120)}
+                  disabled={isExtending}
+                  className="btn-primary"
+                  style={{ width: '100%' }}
+                >
+                  + 2 timer
+                </button>
+                <button
+                  onClick={() => setExtendSessionOpen(false)}
+                  disabled={isExtending}
+                  className="btn-secondary"
+                  style={{ width: '100%', marginTop: '8px' }}
+                >
+                  Avbryt
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* SECURITY FIX #4: Only render ShareSessionModal if session_code exists */}
         {session.session_code && (
