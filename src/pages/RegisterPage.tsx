@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import type { RegisterFormData, Gender } from '../types/database';
 import DisclaimerModal from '../components/legal/DisclaimerModal';
@@ -40,6 +40,7 @@ function isValidRedirectPath(redirectPath: string): boolean {
 export function RegisterPage() {
   const navigate = useNavigate();
   const { signUp } = useAuth();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showDisclaimerModal, setShowDisclaimerModal] = useState(false);
@@ -54,8 +55,9 @@ export function RegisterPage() {
     age: 18,
   });
 
-  // Check for redirect parameter
+  // Check for redirect parameter and join context
   const [redirectPath, setRedirectPath] = useState<string | null>(null);
+  const isFromJoin = searchParams.get('from') === 'join';
 
   useEffect(() => {
     // Check sessionStorage for redirect path
@@ -163,7 +165,7 @@ export function RegisterPage() {
           <h1>Opprett konto</h1>
           <p className="auth-subtitle">Registrer deg for å begynne å spore promillen din</p>
 
-          {redirectPath && (
+          {(redirectPath || isFromJoin) && (
             <div style={{
               background: 'var(--vanilla-light)',
               padding: 'var(--spacing-md)',
@@ -281,7 +283,7 @@ export function RegisterPage() {
           </form>
 
           <p className="auth-footer">
-            Har du allerede en konto? <Link to="/login">Logg inn her</Link>
+            Har du allerede en konto? <Link to={isFromJoin ? "/login?from=join" : "/login"}>Logg inn her</Link>
           </p>
         </div>
       </div>

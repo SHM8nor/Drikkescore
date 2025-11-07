@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 /**
@@ -37,14 +37,16 @@ function isValidRedirectPath(redirectPath: string): boolean {
 export function LoginPage() {
   const navigate = useNavigate();
   const { signIn } = useAuth();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // Check for redirect parameter
+  // Check for redirect parameter and join context
   const [redirectPath, setRedirectPath] = useState<string | null>(null);
+  const isFromJoin = searchParams.get('from') === 'join';
 
   useEffect(() => {
     // Check sessionStorage for redirect path
@@ -101,7 +103,7 @@ export function LoginPage() {
         <h1>Velkommen tilbake</h1>
         <p className="auth-subtitle">Logg inn for å fortsette</p>
 
-        {redirectPath && (
+        {(redirectPath || isFromJoin) && (
           <div style={{
             background: 'var(--vanilla-light)',
             padding: 'var(--spacing-md)',
@@ -111,7 +113,7 @@ export function LoginPage() {
             fontSize: 'var(--font-size-small)',
             textAlign: 'center'
           }}>
-            Du må logge inn for å bli med i økten
+            Logg inn for å bli med i økten
           </div>
         )}
 
@@ -147,7 +149,7 @@ export function LoginPage() {
         </form>
 
         <p className="auth-footer">
-          Har du ikke en konto? <Link to="/register">Registrer deg her</Link>
+          Har du ikke en konto? <Link to={isFromJoin ? "/register?from=join" : "/register"}>Registrer deg her</Link>
         </p>
       </div>
     </div>
