@@ -3,7 +3,6 @@ import { LineChart } from "@mui/x-charts/LineChart";
 import { axisClasses } from "@mui/x-charts/ChartsAxis";
 import type { Profile, DrinkEntry } from "../../types/database";
 import { prepareLineChartData } from "../../utils/chartHelpers";
-import { calculateBAC } from "../../utils/bacCalculator";
 import "../../styles/components/bac-line-chart.css";
 
 interface BACLineChartProps {
@@ -119,20 +118,7 @@ export default function BACLineChart({
       return participantColors.get(participant.id) ?? "#1976d2";
     });
 
-    // Generate drink markers (scatter plot data) - only at drink entry timestamps
-    const sessionStartMs = sessionStartTime.getTime();
-    const drinkMarkers = displayParticipants.map((participant) => {
-      const participantDrinks = drinks.filter((d) => d.user_id === participant.id);
-      const markerData = participantDrinks.map((drink) => {
-        const drinkTime = new Date(drink.consumed_at);
-        const minutesSinceStart = (drinkTime.getTime() - sessionStartMs) / (1000 * 60);
-        const bac = calculateBAC(participantDrinks, participant, drinkTime);
-        return { x: Math.round(minutesSinceStart * 10) / 10, y: bac };
-      });
-      return markerData;
-    });
-
-    return { series, colors, xAxisMax, drinkMarkers };
+    return { series, colors, xAxisMax };
   }, [
     participants,
     drinks,
@@ -200,11 +186,6 @@ export default function BACLineChart({
     // For each x value in the axis, get the corresponding y value or null
     const alignedData = xAxisData.map((x) => dataMap.get(x) ?? null);
 
-    // Get drink timestamps for this specific participant to conditionally show markers
-    const participantDrinkTimestamps = new Set(
-      chartData.drinkMarkers[index]?.map(m => m.x) ?? []
-    );
-
     return {
       type: 'line' as const,
       data: alignedData,
@@ -212,10 +193,9 @@ export default function BACLineChart({
       color: chartData.colors[index],
       connectNulls: true, // Connect the line even if there are null values
       curve: 'monotoneX' as const, // Smooth curve interpolation (monotone to avoid overshooting)
-      // Show markers only at drink entry timestamps
-      showMark: (params: any) => {
-        const xValue = xAxisData[params.dataIndex];
-        return participantDrinkTimestamps.has(xValue);
+      showMark: false, // Hide markers - with dense sampling (36+ points) they would clutter the graph
+      valueFormatter: (value: number | null) => {
+        return value !== null ? `${value.toFixed(3)}‰` : '';
       },
     };
   });
@@ -304,8 +284,9 @@ export default function BACLineChart({
             strokeWidth: 2,
           },
           "& .MuiMarkElement-root": {
-            scale: "0.8",
+            scale: "1.2", // Larger markers to make them visible
             strokeWidth: 2,
+            fill: "currentColor", // Ensure markers are filled
           },
           "& .MuiChartsAxis-label": {
             fontSize: "14px",
