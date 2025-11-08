@@ -76,9 +76,9 @@ export default function BadgeEditDialog({
   // EFFECTS
   // ============================================================================
 
-  // Pre-populate form when badge changes
+  // Pre-populate form when dialog opens or badge changes
   useEffect(() => {
-    if (badge) {
+    if (open && badge) {
       setTitle(badge.title);
       setDescription(badge.description);
       setCategory(badge.category);
@@ -91,7 +91,7 @@ export default function BadgeEditDialog({
       setIsAutomatic(badge.is_automatic);
       setErrors({});
     }
-  }, [badge]);
+  }, [open, badge]);
 
   // ============================================================================
   // VALIDATION

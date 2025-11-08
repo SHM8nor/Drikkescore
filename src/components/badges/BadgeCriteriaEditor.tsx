@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   TextField,
@@ -59,6 +59,16 @@ export default function BadgeCriteriaEditor({
   const [showHelp, setShowHelp] = useState(false);
   const [jsonText, setJsonText] = useState(() => JSON.stringify(value, null, 2));
   const [validationError, setValidationError] = useState<string | null>(null);
+
+  // ============================================================================
+  // EFFECTS
+  // ============================================================================
+
+  // Update jsonText when value prop changes
+  useEffect(() => {
+    setJsonText(JSON.stringify(value, null, 2));
+    setValidationError(null);
+  }, [value]);
 
   // ============================================================================
   // HANDLERS
