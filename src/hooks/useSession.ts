@@ -10,6 +10,7 @@ import { calculateBAC } from '../utils/bacCalculator';
 import { useAuth } from '../context/AuthContext';
 import { queryKeys } from '../lib/queryKeys';
 import { useSupabaseSubscription } from './useSupabaseSubscription';
+import { useCheckAndAwardBadges } from './useBadgeAwarding';
 
 interface AddDrinkPayload {
   volumeMl: number;
@@ -24,6 +25,7 @@ interface AddDrinkPayload {
 export function useSession(sessionId: string | null) {
   const { user, profile } = useAuth();
   const queryClient = useQueryClient();
+  const { checkAndAward } = useCheckAndAwardBadges();
 
   const sessionQuery = useQuery({
     queryKey: queryKeys.sessions.detail(sessionId),
@@ -160,6 +162,11 @@ export function useSession(sessionId: string | null) {
     onSuccess: () => {
       if (sessionId) {
         queryClient.invalidateQueries({ queryKey: queryKeys.sessions.drinks(sessionId) });
+
+        // Check and award badges after drink added (fire and forget)
+        checkAndAward('drink_added', sessionId).catch((error) => {
+          console.error('[BadgeAwarding] Error checking badges after drink added:', error);
+        });
       }
     },
   });
