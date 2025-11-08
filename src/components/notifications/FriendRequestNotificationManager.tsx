@@ -27,7 +27,7 @@ export function FriendRequestNotificationManager() {
   useEffect(() => {
     console.log('[FriendRequestNotificationManager] State:', {
       pendingRequestsCount: pendingRequests.length,
-      pendingRequests: pendingRequests.map(r => ({ id: r.friendship_id, name: r.full_name })),
+      pendingRequests: pendingRequests.map(r => ({ id: r.friendship_id, name: r.display_name })),
       isInitialized,
       previousRequests: Array.from(previousRequestsRef.current),
       notificationsCount: notifications.length,
@@ -60,7 +60,7 @@ export function FriendRequestNotificationManager() {
 
     console.log('[FriendRequestNotificationManager] Checking for new requests:', {
       newRequestsCount: newRequests.length,
-      newRequests: newRequests.map(r => ({ id: r.friendship_id, name: r.full_name })),
+      newRequests: newRequests.map(r => ({ id: r.friendship_id, name: r.display_name })),
     });
 
     if (newRequests.length > 0) {

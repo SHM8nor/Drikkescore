@@ -234,7 +234,7 @@ export function useSession(sessionId: string | null) {
       const bac = calculateBAC(userDrinks, participant, now);
       return {
         user_id: participant.id,
-        full_name: participant.full_name,
+        display_name: participant.display_name,
         bac,
         rank: 0,
       };

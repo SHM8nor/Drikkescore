@@ -167,7 +167,7 @@ export function FriendRequestNotification({
           >
             <Avatar
               src={request.avatar_url || undefined}
-              alt={request.full_name}
+              alt={request.display_name}
               sx={{
                 width: 56,
                 height: 56,
@@ -191,7 +191,7 @@ export function FriendRequestNotification({
                   mb: 0.5,
                 }}
               >
-                {request.full_name}
+                {request.display_name}
               </Typography>
               <Typography
                 variant="body2"

@@ -6,6 +6,7 @@
  */
 
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { searchUsers, type UserSearchResult } from '../../api';
 import { useFriends } from '../../hooks/useFriends';
 import SearchIcon from '@mui/icons-material/Search';
@@ -85,7 +86,7 @@ function SearchResultItem({ user, status, onSendRequest, loading }: SearchResult
       {/* Avatar - Using MUI Avatar for safe rendering */}
       <Avatar
         src={safeAvatarUrl || undefined}
-        alt={user.full_name}
+        alt={user.display_name}
         sx={{
           width: 40,
           height: 40,
@@ -98,17 +99,36 @@ function SearchResultItem({ user, status, onSendRequest, loading }: SearchResult
 
       {/* User Info */}
       <div style={{ flex: 1, minWidth: 0 }}>
-        <h4 style={{
-          margin: 0,
-          fontSize: 'var(--font-size-base)',
-          fontWeight: 'var(--font-weight-medium)',
-          color: 'var(--color-text-primary)',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-        }}>
-          {user.full_name}
-        </h4>
+        <Link
+          to={`/profile/${user.id}`}
+          style={{
+            textDecoration: 'none',
+            color: 'inherit',
+          }}
+        >
+          <h4 style={{
+            margin: 0,
+            fontSize: 'var(--font-size-base)',
+            fontWeight: 'var(--font-weight-medium)',
+            color: 'var(--prussian-blue)',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            cursor: 'pointer',
+            transition: 'color var(--transition-base)',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = 'var(--orange-wheel)';
+            e.currentTarget.style.textDecoration = 'underline';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = 'var(--prussian-blue)';
+            e.currentTarget.style.textDecoration = 'none';
+          }}
+          >
+            {user.display_name}
+          </h4>
+        </Link>
       </div>
 
       {/* Action Button */}

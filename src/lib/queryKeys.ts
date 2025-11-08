@@ -44,6 +44,10 @@ export const queryKeys = {
     analytics: ['admin', 'analytics'] as const,
     sessionDetail: (id: string) => ['admin', 'sessions', 'detail', id] as const,
   },
+  users: {
+    root: ['users'] as const,
+    profile: (userId: string) => ['users', 'profile', userId] as const,
+  },
 };
 
 export type QueryKey = ReturnType<

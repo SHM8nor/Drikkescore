@@ -24,6 +24,7 @@ import {
   PersonAdd as PersonAddIcon,
 } from '@mui/icons-material';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useFriends } from '../../hooks/useFriends';
 import type { FriendRequest } from '../../types/database';
 
@@ -177,14 +178,33 @@ export default function PendingRequests({ requests, isLoading }: PendingRequests
                 fontSize: '1.5rem',
               }}
             >
-              {(request.full_name || '?').charAt(0).toUpperCase()}
+              {(request.display_name || '?').charAt(0).toUpperCase()}
             </Avatar>
           </ListItemAvatar>
           <ListItemText
             primary={
-              <Typography variant="h6" component="span">
-                {request.full_name}
-              </Typography>
+              <Link
+                to={`/profile/${request.requester_id}`}
+                style={{
+                  textDecoration: 'none',
+                  color: 'inherit',
+                }}
+              >
+                <Typography
+                  variant="h6"
+                  component="span"
+                  sx={{
+                    color: 'primary.main',
+                    cursor: 'pointer',
+                    '&:hover': {
+                      color: 'secondary.main',
+                      textDecoration: 'underline',
+                    },
+                  }}
+                >
+                  {request.display_name}
+                </Typography>
+              </Link>
             }
             secondary={
               <Typography variant="body2" color="text.secondary" component="span">

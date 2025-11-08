@@ -17,7 +17,7 @@ interface UseSessionDetailReturn {
   leaderboard: Array<{
     rank: number;
     user_id: string;
-    full_name: string;
+    display_name: string;
     avatar_url?: string;
     bac: number;
     drinkCount: number;
@@ -130,7 +130,7 @@ export function useSessionDetail(sessionId: string): UseSessionDetailReturn {
       .map((participant) => ({
         rank: 0, // Will be set after sorting
         user_id: participant.userId,
-        full_name: participant.profile.full_name,
+        display_name: participant.profile.display_name,
         avatar_url: participant.profile.avatar_url,
         bac: participant.currentBAC,
         drinkCount: participant.drinkCount,

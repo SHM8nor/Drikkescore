@@ -49,6 +49,7 @@ export function RegisterPage() {
     email: '',
     password: '',
     full_name: '',
+    display_name: '',
     weight_kg: 0,
     height_cm: 0,
     gender: 'male',
@@ -72,7 +73,7 @@ export function RegisterPage() {
     setError(null);
 
     // Validation
-    if (!formData.email || !formData.password || !formData.full_name) {
+    if (!formData.email || !formData.password || !formData.full_name || !formData.display_name) {
       setError('Vennligst fyll inn alle obligatoriske felt');
       return;
     }
@@ -214,6 +215,19 @@ export function RegisterPage() {
                 type="text"
                 value={formData.full_name}
                 onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                required
+                disabled={loading}
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="display_name">Visningsnavn</label>
+              <input
+                id="display_name"
+                type="text"
+                value={formData.display_name}
+                onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
+                placeholder="Dette er navnet andre brukere ser når de søker etter deg"
                 required
                 disabled={loading}
               />

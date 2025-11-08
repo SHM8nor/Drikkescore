@@ -116,7 +116,7 @@ export default function BurgerMenu() {
       <MenuPanel isOpen={isOpen} onClose={close}>
         {profile && (
           <UserHeader
-            displayName={profile.full_name || 'User'}
+            displayName={profile.display_name || 'User'}
             email={user?.email || ''}
           />
         )}

@@ -47,6 +47,7 @@ export interface ActivityHeatmap {
 export interface TopUser {
   user_id: string;
   full_name: string;
+  display_name: string;
   avatar_url: string | null;
   total_drinks: number;
   total_sessions: number;
@@ -293,7 +294,7 @@ export async function getTopUsers(limit: number = 10): Promise<TopUser[]> {
     // Fetch all users
     const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
-      .select('id, full_name, avatar_url');
+      .select('id, full_name, display_name, avatar_url');
 
     if (profilesError) throw profilesError;
     if (!profiles || profiles.length === 0) return [];
@@ -357,6 +358,7 @@ export async function getTopUsers(limit: number = 10): Promise<TopUser[]> {
       return {
         user_id: profile.id,
         full_name: profile.full_name,
+        display_name: profile.display_name,
         avatar_url: profile.avatar_url || null,
         total_drinks: stats.total_drinks,
         total_sessions: stats.total_sessions.size,

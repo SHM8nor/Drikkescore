@@ -11,6 +11,7 @@ import { queryKeys } from '../lib/queryKeys';
 export interface AdminSession extends Session {
   creator?: {
     full_name: string;
+    display_name: string;
   };
   participants_count?: number;
 }
@@ -36,6 +37,7 @@ interface RawSessionData {
   updated_at: string;
   creator?: {
     full_name: string;
+    display_name: string;
   } | null;
   session_participants?: Array<{ count: number }>;
 }
@@ -54,7 +56,7 @@ export function useAdminSessions(): UseAdminSessionsReturn {
         .from('sessions')
         .select(`
           *,
-          creator:profiles!sessions_created_by_fkey(full_name),
+          creator:profiles!sessions_created_by_fkey(full_name, display_name),
           session_participants(count)
         `)
         .order('created_at', { ascending: false });
@@ -73,7 +75,7 @@ export function useAdminSessions(): UseAdminSessionsReturn {
         created_at: session.created_at,
         updated_at: session.updated_at,
         participants_count: session.session_participants?.[0]?.count || 0,
-        creator: session.creator || { full_name: 'Unknown' },
+        creator: session.creator || { full_name: 'Unknown', display_name: 'Unknown' },
       })) as AdminSession[];
     },
   });

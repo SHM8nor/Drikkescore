@@ -18,7 +18,7 @@ import { queryKeys } from '../lib/queryKeys';
  * - View all sessions in a data grid
  * - Search and filter sessions
  * - Bulk operations (delete, edit)
- * - Export to CSV
+ * - Export to CSV with both display_name and full_name
  * - Real-time updates via Supabase subscription
  * - Duration column with color coding
  * - View creator action
@@ -137,7 +137,7 @@ export default function AdminPage() {
     }
   };
 
-  // Export to CSV handler
+  // Export to CSV handler - includes both display_name and full_name
   const handleExport = () => {
     if (selectedSessions.length === 0) return;
 
@@ -146,7 +146,8 @@ export default function AdminPage() {
       const headers = [
         'Sesjonskode',
         'Sesjonsnavn',
-        'Opprettet av',
+        'Opprettet av (visningsnavn)',
+        'Opprettet av (fullt navn)',
         'Starttid',
         'Sluttid',
         'Deltakere',
@@ -155,10 +156,14 @@ export default function AdminPage() {
 
       const rows = selectedSessions.map((session) => {
         const status = new Date(session.end_time) > new Date() ? 'Aktiv' : 'Avsluttet';
+        const displayName = session.creator?.display_name || 'Ukjent';
+        const fullName = session.creator?.full_name || 'Ukjent';
+
         return [
           session.session_code,
           `"${session.session_name.replace(/"/g, '""')}"`, // Escape quotes
-          `"${(session.creator?.full_name || 'Ukjent').replace(/"/g, '""')}"`,
+          `"${displayName.replace(/"/g, '""')}"`,
+          `"${fullName.replace(/"/g, '""')}"`,
           new Date(session.start_time).toLocaleString('nb-NO'),
           new Date(session.end_time).toLocaleString('nb-NO'),
           session.participants_count?.toString() || '0',

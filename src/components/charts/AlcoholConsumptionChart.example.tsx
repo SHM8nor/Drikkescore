@@ -19,6 +19,7 @@ export default function AlcoholConsumptionChartExample() {
     {
       id: '1',
       full_name: 'John Doe',
+      display_name: 'JohnD',
       weight_kg: 80,
       height_cm: 180,
       gender: 'male',
@@ -36,6 +37,7 @@ export default function AlcoholConsumptionChartExample() {
     {
       id: '2',
       full_name: 'Jane Smith',
+      display_name: 'JaneS',
       weight_kg: 65,
       height_cm: 165,
       gender: 'female',
@@ -53,6 +55,7 @@ export default function AlcoholConsumptionChartExample() {
     {
       id: '3',
       full_name: 'Bob Johnson',
+      display_name: 'BobJ',
       weight_kg: 90,
       height_cm: 185,
       gender: 'male',
