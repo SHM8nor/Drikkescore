@@ -8,9 +8,9 @@
  */
 
 import { useState } from 'react';
-import { Box, Stack, Avatar, Chip, Typography } from '@mui/material';
+import { Box, Stack, Avatar, Chip, Typography, Badge } from '@mui/material';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
-import type { UserBadgeWithDetails } from '../../types/badges';
+import type { UserBadgeGrouped } from '../../types/badges';
 import { BadgeDetailModal } from './BadgeDetailModal';
 
 // Tier color mapping
@@ -23,10 +23,10 @@ const TIER_COLORS = {
 } as const;
 
 interface BadgeShowcaseProps {
-  badges: UserBadgeWithDetails[];
+  badges: UserBadgeGrouped[];
   maxDisplay?: number;
   compact?: boolean;
-  onClick?: (badge: UserBadgeWithDetails) => void;
+  onClick?: (badge: UserBadgeGrouped) => void;
 }
 
 export function BadgeShowcase({
@@ -35,14 +35,14 @@ export function BadgeShowcase({
   compact = true,
   onClick
 }: BadgeShowcaseProps) {
-  const [selectedBadge, setSelectedBadge] = useState<UserBadgeWithDetails | null>(null);
+  const [selectedBadge, setSelectedBadge] = useState<UserBadgeGrouped | null>(null);
   const displayBadges = badges.slice(0, maxDisplay);
 
   if (displayBadges.length === 0) {
     return null;
   }
 
-  const handleBadgeClick = (badge: UserBadgeWithDetails) => {
+  const handleBadgeClick = (badge: UserBadgeGrouped) => {
     if (onClick) {
       onClick(badge);
     } else {
@@ -77,13 +77,14 @@ export function BadgeShowcase({
           },
         }}
       >
-        {displayBadges.map((userBadge) => {
-          const tierColor = TIER_COLORS[userBadge.badge.tier];
+        {displayBadges.map((groupedBadge) => {
+          const tierColor = TIER_COLORS[groupedBadge.badge.tier];
+          const showCount = groupedBadge.count > 1;
 
           return (
             <Box
-              key={userBadge.id}
-              onClick={() => handleBadgeClick(userBadge)}
+              key={groupedBadge.badge.id}
+              onClick={() => handleBadgeClick(groupedBadge)}
               sx={{
                 cursor: 'pointer',
                 transition: 'transform var(--transition-base)',
@@ -105,35 +106,53 @@ export function BadgeShowcase({
                   boxShadow: `0 4px 12px ${tierColor}20`,
                 }}
               >
-                {/* Badge Avatar */}
-                <Avatar
-                  src={userBadge.badge.icon_url || undefined}
-                  alt={userBadge.badge.title}
+                {/* Badge Avatar with Count Overlay */}
+                <Badge
+                  badgeContent={showCount ? `x${groupedBadge.count}` : null}
+                  color="primary"
                   sx={{
-                    width: compact ? 60 : 80,
-                    height: compact ? 60 : 80,
-                    backgroundColor: tierColor,
-                    border: `3px solid white`,
-                    boxShadow: `0 0 20px ${tierColor}40`,
+                    '& .MuiBadge-badge': {
+                      backgroundColor: 'var(--orange-wheel)',
+                      color: 'white',
+                      fontWeight: 700,
+                      fontSize: '0.75rem',
+                      minWidth: 24,
+                      height: 24,
+                      borderRadius: '12px',
+                      border: '2px solid white',
+                      boxShadow: '0 2px 8px rgba(247, 127, 0, 0.4)',
+                    },
                   }}
                 >
-                  {!userBadge.badge.icon_url && (
-                    <EmojiEventsIcon
-                      sx={{
-                        fontSize: compact ? 32 : 40,
-                        color: 'white'
-                      }}
-                    />
-                  )}
-                </Avatar>
+                  <Avatar
+                    src={groupedBadge.badge.icon_url || undefined}
+                    alt={groupedBadge.badge.title}
+                    sx={{
+                      width: compact ? 60 : 80,
+                      height: compact ? 60 : 80,
+                      backgroundColor: tierColor,
+                      border: `3px solid white`,
+                      boxShadow: `0 0 20px ${tierColor}40`,
+                    }}
+                  >
+                    {!groupedBadge.badge.icon_url && (
+                      <EmojiEventsIcon
+                        sx={{
+                          fontSize: compact ? 32 : 40,
+                          color: 'white'
+                        }}
+                      />
+                    )}
+                  </Avatar>
+                </Badge>
 
                 {/* Tier Chip */}
                 <Chip
-                  label={userBadge.badge.tier.charAt(0).toUpperCase() + userBadge.badge.tier.slice(1)}
+                  label={groupedBadge.badge.tier.charAt(0).toUpperCase() + groupedBadge.badge.tier.slice(1)}
                   size="small"
                   sx={{
                     backgroundColor: tierColor,
-                    color: userBadge.badge.tier === 'silver' || userBadge.badge.tier === 'platinum' ? 'black' : 'white',
+                    color: groupedBadge.badge.tier === 'silver' || groupedBadge.badge.tier === 'platinum' ? 'black' : 'white',
                     fontWeight: 600,
                     fontSize: '10px',
                     height: 20,
@@ -159,7 +178,7 @@ export function BadgeShowcase({
                     minHeight: 30,
                   }}
                 >
-                  {userBadge.badge.title}
+                  {groupedBadge.badge.title}
                 </Typography>
               </Stack>
             </Box>
