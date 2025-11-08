@@ -117,20 +117,25 @@ export async function getSessionDetail(sessionId: string): Promise<SessionDetail
     }
 
     const userDrinks = drinksData.filter((d) => d.user_id === participant.user_id);
-    const currentBAC = calculateBAC(userDrinks, profile, now);
+
+    // Calculate current BAC (at session end or now, whichever is earlier)
+    const sessionEnd = new Date(session.end_time);
+    const currentTime = sessionEnd < now ? sessionEnd : now;
+    const currentBAC = calculateBAC(userDrinks, profile, currentTime);
 
     // Calculate peak BAC (max BAC achieved during session)
-    let peakBAC = currentBAC;
+    let peakBAC = 0; // Initialize to 0, not currentBAC
     if (userDrinks.length > 0) {
-      // Check BAC at different time points to find peak
+      // Check BAC at different time points throughout the entire session
       const sessionStart = new Date(session.start_time);
-      const sessionEnd = new Date(session.end_time);
-      const now = new Date();
-      const endTime = sessionEnd < now ? sessionEnd : now;
+
+      // For peak calculation, we need to sample the entire session duration
+      // even if it extends beyond the current time
+      const sessionEndTime = new Date(session.end_time);
 
       // Sample BAC every 5 minutes to find peak
       const startTime = sessionStart.getTime();
-      const endTimeMs = endTime.getTime();
+      const endTimeMs = sessionEndTime.getTime();
       const interval = 5 * 60 * 1000; // 5 minutes in ms
 
       for (let time = startTime; time <= endTimeMs; time += interval) {
@@ -138,6 +143,12 @@ export async function getSessionDetail(sessionId: string): Promise<SessionDetail
         if (bacAtTime > peakBAC) {
           peakBAC = bacAtTime;
         }
+      }
+
+      // Also check at the exact end time
+      const endBAC = calculateBAC(userDrinks, profile, sessionEndTime);
+      if (endBAC > peakBAC) {
+        peakBAC = endBAC;
       }
     }
 
@@ -204,7 +215,7 @@ export async function getSessionDrinks(sessionId: string): Promise<SessionDrinkW
 }
 
 /**
- * Get session leaderboard with all participants ranked by current BAC
+ * Get session leaderboard with all participants ranked by peak BAC
  * @param sessionId - The session ID
  * @returns Array of participants with BAC and rankings
  * @throws {SessionDetailsError} If the request fails
@@ -218,11 +229,12 @@ export async function getSessionLeaderboard(sessionId: string) {
       user_id: participant.userId,
       display_name: participant.profile.display_name,
       avatar_url: participant.profile.avatar_url,
-      bac: participant.currentBAC,
+      bac: participant.peakBAC, // Use peak BAC for display and sorting
+      currentBAC: participant.currentBAC, // Keep current BAC for reference
       drinkCount: participant.drinkCount,
       peakBAC: participant.peakBAC,
     }))
-    .sort((a, b) => b.bac - a.bac);
+    .sort((a, b) => b.peakBAC - a.peakBAC); // Sort by peak BAC
 
   // Assign ranks
   leaderboard.forEach((entry, index) => {
