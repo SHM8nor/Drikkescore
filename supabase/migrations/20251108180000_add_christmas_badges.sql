@@ -32,7 +32,7 @@ INSERT INTO "public"."badges" (
   'juleglede',
   'Juleglede',
   'Deltok på din første julebord! Velkommen til julefeiringen! 🎄',
-  'special',
+  'milestone',
   'bronze',
   1,
   NULL, -- Icon to be added later
@@ -73,7 +73,7 @@ INSERT INTO "public"."badges" (
   'nissehue',
   'Nissehue',
   'Deltatt på 3 julebord! Du er en ekte julefest-veteran! 🎅',
-  'special',
+  'milestone',
   'silver',
   2,
   NULL, -- Icon to be added later
@@ -114,7 +114,7 @@ INSERT INTO "public"."badges" (
   'gloggmester',
   'Gløggmester',
   'Drakk 5+ drinker i et julebord! Skål for gløggmesteren! 🍷',
-  'special',
+  'milestone',
   'gold',
   3,
   NULL, -- Icon to be added later
@@ -208,7 +208,7 @@ INSERT INTO "public"."badges" (
   'snowmann',
   'Snømann',
   'Holdt deg edru på et julebord! Kjempebra! ⛄',
-  'special',
+  'session', -- Changed from 'special' to 'session' so it's checked at session end only
   'silver',
   2,
   NULL, -- Icon to be added later
@@ -255,7 +255,7 @@ INSERT INTO "public"."badges" (
   'julenisse',
   'Julenisse',
   'Opprettet et julebord! Du er den som sprer juleglede! 🎁',
-  'special',
+  'social',
   'bronze',
   1,
   NULL, -- Icon to be added later

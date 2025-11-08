@@ -9,7 +9,7 @@ import { ActiveSessions } from "../components/friends/ActiveSessions";
 import { SessionTypeIndicator } from "../components/session/SessionTypeIndicator";
 import { PageContainer } from "../components/layout/PageContainer";
 import type { SessionType } from "../types/database";
-import { Box, Paper, Typography, Alert } from "@mui/material";
+import { Box, Paper, Typography } from "@mui/material";
 import { isThemeAvailable, getRecommendedTheme } from "../config/themes";
 
 export function HomePage() {
