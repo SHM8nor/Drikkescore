@@ -158,6 +158,23 @@ export interface UserBadgeWithDetails extends UserBadge {
 }
 
 /**
+ * Grouped user badge with count for repeated badges
+ * Used for displaying badges that can be earned multiple times
+ */
+export interface UserBadgeGrouped {
+  /** The badge definition */
+  badge: Badge;
+  /** Number of times this badge has been earned */
+  count: number;
+  /** First time this badge was earned */
+  first_earned: string;
+  /** Most recent time this badge was earned */
+  last_earned: string;
+  /** All instances of earning this badge */
+  instances: UserBadgeWithDetails[];
+}
+
+/**
  * Badge statistics for a user
  * Summary of user's badge achievements
  */

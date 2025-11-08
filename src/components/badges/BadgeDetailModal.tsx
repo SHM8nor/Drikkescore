@@ -29,7 +29,7 @@ import {
   Link as LinkIcon,
 } from '@mui/icons-material';
 import { Link } from 'react-router-dom';
-import type { UserBadgeWithDetails, BadgeCategory } from '../../types/badges';
+import type { UserBadgeGrouped, BadgeCategory } from '../../types/badges';
 
 // Tier color mapping with consistent color scheme
 const TIER_COLORS = {
@@ -51,7 +51,7 @@ const CATEGORY_LABELS: Record<BadgeCategory, string> = {
 
 interface BadgeDetailModalProps {
   open: boolean;
-  badge: UserBadgeWithDetails | null;
+  badge: UserBadgeGrouped | null;
   onClose: () => void;
 }
 
@@ -72,9 +72,10 @@ export function BadgeDetailModal({ open, badge, onClose }: BadgeDetailModalProps
 
   const tierColor = TIER_COLORS[badge.badge.tier];
   const categoryLabel = CATEGORY_LABELS[badge.badge.category];
+  const isRepeatable = badge.count > 1;
 
   // Format date in Norwegian style (dd. month yyyy)
-  const earnedDate = new Date(badge.earned_at).toLocaleDateString('nb-NO', {
+  const firstEarnedDate = new Date(badge.first_earned).toLocaleDateString('nb-NO', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
@@ -321,7 +322,7 @@ export function BadgeDetailModal({ open, badge, onClose }: BadgeDetailModalProps
                           color: 'var(--color-text-secondary)',
                         }}
                       >
-                        Oppnådd:
+                        {isRepeatable ? 'Første gang oppnådd:' : 'Oppnådd:'}
                       </Typography>
                     </Stack>
                     <Typography
@@ -331,12 +332,51 @@ export function BadgeDetailModal({ open, badge, onClose }: BadgeDetailModalProps
                         color: 'var(--color-text-primary)',
                       }}
                     >
-                      {earnedDate}
+                      {firstEarnedDate}
                     </Typography>
                   </Stack>
 
+                  {/* Badge Count (if repeatable) */}
+                  {isRepeatable && (
+                    <Stack
+                      direction="row"
+                      spacing={1}
+                      alignItems="center"
+                      justifyContent="space-between"
+                      sx={{
+                        p: 2,
+                        borderRadius: 2,
+                        background: `linear-gradient(135deg, ${tierColor}10 0%, ${tierColor}05 100%)`,
+                        border: `1px solid ${tierColor}30`,
+                      }}
+                    >
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <TrophyIcon sx={{ fontSize: 20, color: tierColor }} />
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontWeight: 600,
+                            color: 'var(--color-text-secondary)',
+                          }}
+                        >
+                          Oppnådd totalt:
+                        </Typography>
+                      </Stack>
+                      <Chip
+                        label={`${badge.count} ganger`}
+                        size="small"
+                        sx={{
+                          backgroundColor: tierColor,
+                          color: tierTextColor,
+                          fontWeight: 700,
+                          fontSize: '0.875rem',
+                        }}
+                      />
+                    </Stack>
+                  )}
+
                   {/* Session Link (if exists) */}
-                  {badge.session_id && (
+                  {badge.instances[0].session_id && (
                     <Stack direction="row" alignItems="center" justifyContent="space-between">
                       <Stack direction="row" alignItems="center" spacing={1}>
                         <LinkIcon sx={{ color: 'var(--color-text-muted)', fontSize: 24 }} />
@@ -352,7 +392,7 @@ export function BadgeDetailModal({ open, badge, onClose }: BadgeDetailModalProps
                       </Stack>
                       <Typography
                         component={Link}
-                        to={`/session/${badge.session_id}`}
+                        to={`/session/${badge.instances[0].session_id}`}
                         variant="body1"
                         onClick={onClose}
                         sx={{
@@ -365,7 +405,7 @@ export function BadgeDetailModal({ open, badge, onClose }: BadgeDetailModalProps
                           },
                         }}
                       >
-                        Se økt
+                        Se første økt
                       </Typography>
                     </Stack>
                   )}

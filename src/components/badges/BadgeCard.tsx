@@ -16,7 +16,7 @@ import { useState } from 'react';
 import { Card, CardContent, Box, Typography, Avatar, Chip } from '@mui/material';
 import LockIcon from '@mui/icons-material/Lock';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
-import type { Badge, UserBadge, BadgeProgress, UserBadgeWithDetails } from '../../types/badges';
+import type { Badge, UserBadge, BadgeProgress, UserBadgeGrouped } from '../../types/badges';
 import { BadgeProgressBar } from './BadgeProgress';
 import { BadgeDetailModal } from './BadgeDetailModal';
 
@@ -47,7 +47,7 @@ interface BadgeCardProps {
 }
 
 export function BadgeCard({ badge, earned, progress, onClick, compact = false }: BadgeCardProps) {
-  const [selectedBadge, setSelectedBadge] = useState<UserBadgeWithDetails | null>(null);
+  const [selectedBadge, setSelectedBadge] = useState<UserBadgeGrouped | null>(null);
   const isEarned = Boolean(earned);
   const isChristmas = badge.category === 'special';
   const tierColor = isChristmas ? CHRISTMAS_TIER_COLORS[badge.tier] : TIER_COLORS[badge.tier];
@@ -57,9 +57,16 @@ export function BadgeCard({ badge, earned, progress, onClick, compact = false }:
       onClick();
     } else if (isEarned && earned) {
       // Default behavior for earned badges: open detail modal
+      // Convert single badge to grouped format (count = 1)
       setSelectedBadge({
-        ...earned,
         badge,
+        count: 1,
+        first_earned: earned.earned_at,
+        last_earned: earned.earned_at,
+        instances: [{
+          ...earned,
+          badge,
+        }],
       });
     }
     // Locked badges don't open modal

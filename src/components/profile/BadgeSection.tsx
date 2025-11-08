@@ -17,6 +17,7 @@ import { BadgeShowcase } from '../badges/BadgeShowcase';
 import { useAuth } from '../../context/AuthContext';
 import { useAdmin } from '../../hooks/useAdmin';
 import BadgeAwardDialog from '../badges/BadgeAwardDialog';
+import { groupBadgesByCount, getUniqueBadgeCount } from '../../utils/badgeGrouping';
 
 interface BadgeSectionProps {
   userId: string;
@@ -39,19 +40,23 @@ export function BadgeSection({ userId }: BadgeSectionProps) {
     return null;
   }
 
-  // Sort badges by tier_order DESC (highest tier first), then by earned_at DESC (most recent first)
-  const sortedBadges = userBadges
-    ? [...userBadges].sort((a, b) => {
-        // First sort by tier (lower tier_order = higher tier)
-        const tierComparison = a.badge.tier_order - b.badge.tier_order;
-        if (tierComparison !== 0) return tierComparison;
+  // Group badges by badge_id to show count for repeated badges
+  const groupedBadges = userBadges ? groupBadgesByCount(userBadges) : [];
 
-        // If same tier, sort by recency (most recent first)
-        return new Date(b.earned_at).getTime() - new Date(a.earned_at).getTime();
-      })
-    : [];
+  // Sort grouped badges by tier_order (highest tier first), then by recency
+  const sortedGroupedBadges = groupedBadges.sort((a, b) => {
+    // First sort by tier (lower tier_order = higher tier)
+    const tierComparison = a.badge.tier_order - b.badge.tier_order;
+    if (tierComparison !== 0) return tierComparison;
 
-  const topBadges = sortedBadges.slice(0, 5);
+    // If same tier, sort by most recent earned date
+    return new Date(b.last_earned).getTime() - new Date(a.last_earned).getTime();
+  });
+
+  const topBadges = sortedGroupedBadges.slice(0, 5);
+
+  // Calculate unique badge count for stats
+  const uniqueBadgeCount = userBadges ? getUniqueBadgeCount(userBadges) : 0;
 
   if (badgesLoading || statsLoading) {
     return (
@@ -109,7 +114,7 @@ export function BadgeSection({ userId }: BadgeSectionProps) {
                   fontSize: '0.875rem',
                 }}
               >
-                {stats.total_earned} merker oppnådd • {stats.total_points} poeng
+                {uniqueBadgeCount} unike merker • {stats.total_earned} totalt oppnådd • {stats.total_points} poeng
               </Typography>
             )}
           </Box>
