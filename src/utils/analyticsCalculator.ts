@@ -60,24 +60,35 @@ export function calculateSessionAnalytics(
   const totalAlcoholGrams = calculateTotalAlcoholGrams(sessionDrinks);
   const totalCalories = calculateTotalCalories(sessionDrinks);
 
-  // Calculate peak BAC (at session end time)
-  const sessionEndTime = new Date(session.end_time);
-  const peakBAC = calculateBAC(sessionDrinks, profile, sessionEndTime);
-
-  // Calculate average BAC by sampling every 10 minutes
+  // Calculate peak BAC and average BAC by sampling throughout the session
+  let peakBAC = 0;
   let averageBAC = 0;
+
   if (sessionDrinks.length > 0) {
     const startTime = new Date(session.start_time).getTime();
-    const endTime = sessionEndTime.getTime();
-    // const duration = endTime - startTime;
+    const endTime = new Date(session.end_time).getTime();
     const sampleInterval = 10 * 60 * 1000; // 10 minutes in ms
     const samples: number[] = [];
 
+    // Sample BAC throughout the entire session
     for (let time = startTime; time <= endTime; time += sampleInterval) {
       const bac = calculateBAC(sessionDrinks, profile, new Date(time));
       samples.push(bac);
+
+      // Track peak BAC
+      if (bac > peakBAC) {
+        peakBAC = bac;
+      }
     }
 
+    // Also check at exact end time
+    const endBAC = calculateBAC(sessionDrinks, profile, new Date(endTime));
+    samples.push(endBAC);
+    if (endBAC > peakBAC) {
+      peakBAC = endBAC;
+    }
+
+    // Calculate average from all samples
     averageBAC = samples.reduce((sum, bac) => sum + bac, 0) / samples.length;
   }
 
