@@ -34,8 +34,8 @@ export function BadgeSection({ userId }: BadgeSectionProps) {
   const { data: userBadges, isLoading: badgesLoading } = useUserBadges(userId);
   const { data: stats, isLoading: statsLoading } = useUserBadgeStats(userId);
 
-  // Don't show section if no badges and not own profile
-  if (!badgesLoading && (!userBadges || userBadges.length === 0) && !isOwnProfile) {
+  // Don't show section if no badges and not own profile (unless admin viewing to award badges)
+  if (!badgesLoading && (!userBadges || userBadges.length === 0) && !isOwnProfile && !showAwardButton) {
     return null;
   }
 
