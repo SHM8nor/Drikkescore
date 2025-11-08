@@ -4,6 +4,7 @@ import { Badge } from '@mui/material';
 import { useAuth } from '../../../context/AuthContext';
 import { useAdmin } from '../../../hooks/useAdmin';
 import { useFriends } from '../../../hooks/useFriends';
+import { useBadgeCount } from '../../../hooks/useBadges';
 import BurgerIcon from './BurgerIcon';
 import MenuOverlay from './MenuOverlay';
 import MenuPanel from './MenuPanel';
@@ -50,6 +51,7 @@ export default function BurgerMenu() {
   const { user, profile, signOut } = useAuth();
   const isAdmin = useAdmin();
   const { pendingCount } = useFriends();
+  const badgeCount = useBadgeCount();
 
   // Build menu items array conditionally based on admin status
   const menuItems: MenuItemData[] = isAdmin
@@ -67,7 +69,7 @@ export default function BurgerMenu() {
     navigate('/login');
   };
 
-  // Render menu item with optional badge for Friends
+  // Render menu item with optional badge for Friends and Badges
   const renderMenuItem = (item: MenuItemData, index: number) => {
     const isActive = location.pathname === item.path;
 
@@ -83,6 +85,39 @@ export default function BurgerMenu() {
               height: '18px',
               minWidth: '18px',
               padding: '0 4px',
+            },
+          }}
+        >
+          {item.icon}
+        </Badge>
+      );
+
+      return (
+        <MenuItem
+          key={item.path}
+          item={{ ...item, icon: iconWithBadge }}
+          index={index}
+          isActive={isActive}
+          onClick={() => handleNavigation(item.path)}
+        />
+      );
+    }
+
+    // Add badge count for Badges menu item
+    if (item.path === '/badges' && badgeCount > 0) {
+      const iconWithBadge = (
+        <Badge
+          badgeContent={badgeCount}
+          color="primary"
+          sx={{
+            '& .MuiBadge-badge': {
+              fontSize: '0.65rem',
+              height: '18px',
+              minWidth: '18px',
+              padding: '0 4px',
+              background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+              color: '#000',
+              fontWeight: 'bold',
             },
           }}
         >

@@ -16,13 +16,17 @@ import {
   Typography,
   Box,
   CircularProgress,
+  Button,
 } from '@mui/material';
-import { Insights as InsightsIcon } from '@mui/icons-material';
+import { Insights as InsightsIcon, EmojiEvents as EmojiEventsIcon } from '@mui/icons-material';
+import { useBadgeCount, useBadgePoints } from '../hooks/useBadges';
 
 export function SettingsPage() {
   const { profile, user, retryFetchProfile, signOut } = useAuth();
   const { updateProfile, loading: updateLoading } = useUpdateProfile();
   const navigate = useNavigate();
+  const badgeCount = useBadgeCount();
+  const badgePoints = useBadgePoints();
 
   const [fullName, setFullName] = useState('');
   const [displayName, setDisplayName] = useState('');
@@ -485,6 +489,68 @@ export function SettingsPage() {
               </Typography>
             </Box>
           </div>
+
+          {/* Badge Stats Widget */}
+          {badgeCount > 0 && (
+            <div className="settings-card">
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                <EmojiEventsIcon sx={{ color: '#F77F00' }} />
+                <Typography
+                  variant="h5"
+                  component="h2"
+                  sx={{ color: '#003049', fontWeight: 600 }}
+                >
+                  Dine merker
+                </Typography>
+              </Box>
+
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    gap: 2,
+                    p: 2,
+                    background: 'linear-gradient(135deg, rgba(247, 127, 0, 0.1) 0%, rgba(255, 215, 0, 0.1) 100%)',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(247, 127, 0, 0.2)',
+                  }}
+                >
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="body2" sx={{ color: '#666', mb: 0.5 }}>
+                      Totalt antall merker
+                    </Typography>
+                    <Typography variant="h4" sx={{ color: '#003049', fontWeight: 700 }}>
+                      {badgeCount}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="body2" sx={{ color: '#666', mb: 0.5 }}>
+                      Totalt poeng
+                    </Typography>
+                    <Typography variant="h4" sx={{ color: '#F77F00', fontWeight: 700 }}>
+                      {badgePoints}
+                    </Typography>
+                  </Box>
+                </Box>
+
+                <Button
+                  variant="contained"
+                  onClick={() => navigate('/badges')}
+                  sx={{
+                    background: 'linear-gradient(135deg, #003049 0%, #005377 100%)',
+                    color: 'white',
+                    fontWeight: 600,
+                    py: 1.5,
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #002035 0%, #003049 100%)',
+                    },
+                  }}
+                >
+                  Se alle merker
+                </Button>
+              </Box>
+            </div>
+          )}
 
           <div className="settings-card">
             <h2>Endre e-post</h2>

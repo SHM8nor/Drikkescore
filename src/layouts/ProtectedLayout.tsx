@@ -6,6 +6,7 @@ import AnimatedHeader from '../components/header/AnimatedHeader';
 import DisclaimerModal from '../components/legal/DisclaimerModal';
 import SessionRecapModal from '../components/recap/SessionRecapModal';
 import { FriendRequestNotificationManager } from '../components/notifications/FriendRequestNotificationManager';
+import { BadgeNotificationManager } from '../components/badges/BadgeNotificationManager';
 import { useSessionRecap } from '../hooks/useSessionRecap';
 import { supabase } from '../lib/supabase';
 import '../styles/layouts.css';
@@ -169,6 +170,11 @@ export default function ProtectedLayout() {
         {/* Friend Request Notifications - only shown after terms are accepted */}
         {profile && profile.has_accepted_terms && (
           <FriendRequestNotificationManager />
+        )}
+
+        {/* Badge Award Notifications - only shown after terms are accepted */}
+        {profile && profile.has_accepted_terms && user && (
+          <BadgeNotificationManager userId={user.id} onBadgeClick={() => navigate('/badges')} />
         )}
 
         <main className="protected-layout__content">
