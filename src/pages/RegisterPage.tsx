@@ -78,6 +78,33 @@ export function RegisterPage() {
       return;
     }
 
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError('Vennligst oppgi en gyldig e-postadresse');
+      return;
+    }
+
+    // Check for common typos in email domains
+    const commonTypos = [
+      { wrong: /@gmial\./, correct: '@gmail.' },
+      { wrong: /@gmai\./, correct: '@gmail.' },
+      { wrong: /@gamil\./, correct: '@gmail.' },
+      { wrong: /@gmal\./, correct: '@gmail.' },
+      { wrong: /@hotmial\./, correct: '@hotmail.' },
+      { wrong: /@hotmil\./, correct: '@hotmail.' },
+      { wrong: /@yahooo\./, correct: '@yahoo.' },
+      { wrong: /@yaho\./, correct: '@yahoo.' },
+      { wrong: /@outlok\./, correct: '@outlook.' },
+    ];
+
+    for (const { wrong, correct } of commonTypos) {
+      if (wrong.test(formData.email)) {
+        setError(`Sjekk e-postadressen din. Mente du "${formData.email.replace(wrong, correct)}"?`);
+        return;
+      }
+    }
+
     if (formData.weight_kg <= 0 || formData.height_cm <= 0) {
       setError('Vekt og høyde må være positive tall');
       return;
