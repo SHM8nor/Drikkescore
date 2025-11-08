@@ -50,14 +50,31 @@ export function useCheckAndAwardBadges() {
     }
 
     // Filter to automatic badges only
-    const automaticBadges = activeBadges.filter(badge => badge.is_automatic);
+    let automaticBadges = activeBadges.filter(badge => badge.is_automatic);
+
+    // Filter badges by category based on context
+    if (context === 'drink_added') {
+      // On drink_added: Only check milestone and global badges
+      // These are achievement-based and can be earned mid-session
+      automaticBadges = automaticBadges.filter(
+        badge => badge.category === 'milestone' || badge.category === 'global'
+      );
+      console.debug('[BadgeAwarding] Context: drink_added - checking milestone/global badges only');
+    } else if (context === 'session_ended') {
+      // On session_ended: Only check session and social badges
+      // These require the full session to be complete for accurate evaluation
+      automaticBadges = automaticBadges.filter(
+        badge => badge.category === 'session' || badge.category === 'social'
+      );
+      console.debug('[BadgeAwarding] Context: session_ended - checking session/social badges only');
+    }
 
     if (automaticBadges.length === 0) {
-      console.debug('[BadgeAwarding] No automatic badges configured');
+      console.debug('[BadgeAwarding] No badges to check for context:', context);
       return { awarded: 0, skipped: 0, errors: 0 };
     }
 
-    console.debug('[BadgeAwarding] Checking', automaticBadges.length, 'automatic badges');
+    console.debug('[BadgeAwarding] Checking', automaticBadges.length, 'automatic badges for', context);
 
     try {
       // Batch check eligibility for all automatic badges

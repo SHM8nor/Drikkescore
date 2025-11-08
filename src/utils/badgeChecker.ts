@@ -241,10 +241,18 @@ export async function checkBadgeEligibility(
       }
 
       metrics[metric] = value;
+
+      // Debug logging for important metrics
+      if (metric === 'max_bac_in_session') {
+        console.debug(`[checkBadgeEligibility] ${badge.code}: max_bac_in_session = ${value.toFixed(4)}`);
+      }
     }
 
     // Evaluate criteria with extracted metrics
     const { eligible, progress } = evaluateCriteria(criteria, metrics);
+
+    // Debug log eligibility result
+    console.debug(`[checkBadgeEligibility] ${badge.code}: eligible=${eligible}, metrics=`, metrics);
 
     // Build metadata
     const metadata: Record<string, any> = {
