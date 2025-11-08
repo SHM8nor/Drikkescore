@@ -48,6 +48,19 @@ export const queryKeys = {
     root: ['users'] as const,
     profile: (userId: string) => ['users', 'profile', userId] as const,
   },
+  badges: {
+    all: ['badges'] as const,
+    lists: () => [...queryKeys.badges.all, 'list'] as const,
+    active: () => [...queryKeys.badges.all, 'active'] as const,
+    detail: (badgeId: string) => [...queryKeys.badges.all, 'detail', badgeId] as const,
+    user: (userId?: string | null) => [...queryKeys.badges.all, 'user', userId ?? 'anonymous'] as const,
+    progress: (userId?: string | null) => [...queryKeys.badges.all, 'progress', userId ?? 'anonymous'] as const,
+    stats: (userId?: string | null) => [...queryKeys.badges.all, 'stats', userId ?? 'anonymous'] as const,
+    recipients: (badgeId: string) => [...queryKeys.badges.all, 'recipients', badgeId] as const,
+    recent: (userId?: string | null) => [...queryKeys.badges.all, 'recent', userId ?? 'anonymous'] as const,
+    category: (category: string) => [...queryKeys.badges.all, 'category', category] as const,
+    tier: (tier: string) => [...queryKeys.badges.all, 'tier', tier] as const,
+  },
 };
 
 export type QueryKey = ReturnType<

@@ -4,6 +4,7 @@ import { Badge } from '@mui/material';
 import { useAuth } from '../../../context/AuthContext';
 import { useAdmin } from '../../../hooks/useAdmin';
 import { useFriends } from '../../../hooks/useFriends';
+import { useBadgeCount } from '../../../hooks/useBadges';
 import BurgerIcon from './BurgerIcon';
 import MenuOverlay from './MenuOverlay';
 import MenuPanel from './MenuPanel';
@@ -23,6 +24,7 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import GroupIcon from '@mui/icons-material/Group';
 import InsightsIcon from '@mui/icons-material/Insights';
 import LogoutIcon from '@mui/icons-material/Logout';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 
 import './BurgerMenu.css';
 
@@ -30,6 +32,7 @@ const baseMenuItems: MenuItemData[] = [
   { label: 'Hjem', path: '/', icon: <HomeIcon /> },
   { label: 'Venner', path: '/friends', icon: <PeopleIcon /> },
   { label: 'Historikk', path: '/history', icon: <HistoryIcon /> },
+  { label: 'Merker', path: '/badges', icon: <EmojiEventsIcon /> },
   { label: 'Analyse', path: '/analytics', icon: <AnalyticsIcon /> },
   { label: 'Innstillinger', path: '/settings', icon: <SettingsIcon /> },
 ];
@@ -38,6 +41,7 @@ const adminMenuItems: MenuItemData[] = [
   { label: 'Sesjoner', path: '/admin', icon: <DashboardIcon /> },
   { label: 'Brukere', path: '/admin/users', icon: <GroupIcon /> },
   { label: 'Analyse', path: '/admin/analytics', icon: <InsightsIcon /> },
+  { label: 'Merker', path: '/admin/badges', icon: <EmojiEventsIcon /> },
 ];
 
 export default function BurgerMenu() {
@@ -47,6 +51,7 @@ export default function BurgerMenu() {
   const { user, profile, signOut } = useAuth();
   const isAdmin = useAdmin();
   const { pendingCount } = useFriends();
+  const badgeCount = useBadgeCount();
 
   // Build menu items array conditionally based on admin status
   const menuItems: MenuItemData[] = isAdmin
@@ -64,7 +69,7 @@ export default function BurgerMenu() {
     navigate('/login');
   };
 
-  // Render menu item with optional badge for Friends
+  // Render menu item with optional badge for Friends and Badges
   const renderMenuItem = (item: MenuItemData, index: number) => {
     const isActive = location.pathname === item.path;
 
@@ -80,6 +85,39 @@ export default function BurgerMenu() {
               height: '18px',
               minWidth: '18px',
               padding: '0 4px',
+            },
+          }}
+        >
+          {item.icon}
+        </Badge>
+      );
+
+      return (
+        <MenuItem
+          key={item.path}
+          item={{ ...item, icon: iconWithBadge }}
+          index={index}
+          isActive={isActive}
+          onClick={() => handleNavigation(item.path)}
+        />
+      );
+    }
+
+    // Add badge count for Badges menu item
+    if (item.path === '/badges' && badgeCount > 0) {
+      const iconWithBadge = (
+        <Badge
+          badgeContent={badgeCount}
+          color="primary"
+          sx={{
+            '& .MuiBadge-badge': {
+              fontSize: '0.65rem',
+              height: '18px',
+              minWidth: '18px',
+              padding: '0 4px',
+              background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+              color: '#000',
+              fontWeight: 'bold',
             },
           }}
         >

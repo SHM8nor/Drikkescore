@@ -1,9 +1,10 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import type { Session } from '../types/database';
 import { useAuth } from '../context/AuthContext';
 import { queryKeys } from '../lib/queryKeys';
+import { useCheckAndAwardBadges } from './useBadgeAwarding';
 
 type ParticipantRow = { session_id: string };
 
@@ -12,6 +13,8 @@ type ParticipantRow = { session_id: string };
  */
 export function useSessionHistory() {
   const { user } = useAuth();
+  const { checkAndAward } = useCheckAndAwardBadges();
+  const checkedSessionsRef = useRef<Set<string>>(new Set());
 
   const query = useQuery({
     queryKey: queryKeys.sessions.history(user?.id ?? null),
@@ -46,6 +49,25 @@ export function useSessionHistory() {
     },
     enabled: Boolean(user),
   });
+
+  // Check badges for newly ended sessions
+  useEffect(() => {
+    if (!query.data || !user) return;
+
+    query.data.forEach((session) => {
+      // Use atomic check-and-set pattern to prevent duplicates
+      if (!checkedSessionsRef.current.has(session.id)) {
+        checkedSessionsRef.current.add(session.id);
+
+        // Check and award session-based badges (fire and forget)
+        checkAndAward('session_ended', session.id).catch((error) => {
+          // On error, remove from set to allow retry on next load
+          checkedSessionsRef.current.delete(session.id);
+          console.error('[BadgeAwarding] Error checking session badges:', error);
+        });
+      }
+    });
+  }, [query.data, user, checkAndAward]);
 
   const error = useMemo(() => {
     if (query.error instanceof Error) {

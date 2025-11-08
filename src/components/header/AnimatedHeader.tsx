@@ -1,6 +1,6 @@
 import { motion, useScroll, useMotionValueEvent } from 'framer-motion';
 import type { Variants } from 'framer-motion';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import './AnimatedHeader.css';
@@ -53,7 +53,8 @@ const getPageTitle = (pathname: string): string => {
 
 export default function AnimatedHeader() {
   const location = useLocation();
-  const { profile } = useAuth();
+  const navigate = useNavigate();
+  const { user, profile } = useAuth();
   const { scrollY } = useScroll();
   const [isScrolled, setIsScrolled] = useState(false);
   const [pageTitle, setPageTitle] = useState('');
@@ -101,12 +102,16 @@ export default function AnimatedHeader() {
         </motion.div>
 
         {/* User Info */}
-        {profile && (
+        {profile && user && (
           <motion.div
             className="animated-header__user"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3, delay: 0.1 }}
+            onClick={() => navigate(`/profile/${user.id}`)}
+            style={{ cursor: 'pointer' }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
             <div className="animated-header__user-info">
               <span className="animated-header__user-name">{profile.full_name}</span>

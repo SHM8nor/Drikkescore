@@ -30,6 +30,7 @@ import { getUserProfileWithPrivacy, type PublicProfile, type FullProfileView } f
 import { sendFriendRequest } from '../api/friendships';
 import { queryKeys } from '../lib/queryKeys';
 import { useAuth } from '../context/AuthContext';
+import { BadgeSection } from '../components/profile/BadgeSection';
 
 function isFullProfile(profile: PublicProfile | FullProfileView): profile is FullProfileView {
   return 'full_name' in profile;
@@ -299,6 +300,11 @@ export default function ProfilePage() {
                   )}
                 </Box>
               </Stack>
+
+              <Divider sx={{ my: 3 }} />
+
+              {/* Badge Section */}
+              {userId && <BadgeSection userId={userId} />}
 
               <Divider sx={{ my: 3 }} />
 

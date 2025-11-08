@@ -37,6 +37,10 @@ import type { Session } from '../../types/database';
 import type { SessionAnalytics } from '../../types/analytics';
 import { formatBAC } from '../../utils/bacCalculator';
 import RecapStatCard from './RecapStatCard';
+import { useAuth } from '../../context/AuthContext';
+import { useUserBadges } from '../../hooks/useBadges';
+import { BadgeCard } from '../badges/BadgeCard';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 
 interface SessionRecapModalProps {
   open: boolean;
@@ -163,6 +167,19 @@ export default function SessionRecapModal({
 }: SessionRecapModalProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const { user } = useAuth();
+
+  // Fetch badges earned during this session
+  const { data: userBadges } = useUserBadges(user?.id);
+
+  // Filter badges earned during this session (within session timeframe)
+  const sessionBadges = userBadges?.filter((ub) => {
+    if (!session) return false;
+    const earnedAt = new Date(ub.earned_at);
+    const sessionStart = new Date(session.start_time);
+    const sessionEnd = new Date(session.end_time);
+    return earnedAt >= sessionStart && earnedAt <= sessionEnd;
+  }) || [];
 
   if (!session || !analytics) {
     return null;
@@ -339,6 +356,56 @@ export default function SessionRecapModal({
             ))}
           </Grid>
         </Box>
+
+        {/* Badges Earned Section */}
+        {sessionBadges.length > 0 && (
+          <>
+            <Divider sx={{ my: 3, borderColor: 'rgba(0, 48, 73, 0.1)' }} />
+            <Box sx={{ mb: 3 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                <EmojiEventsIcon sx={{ color: 'var(--orange-wheel)', fontSize: '1.5rem' }} />
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 600,
+                    color: 'var(--prussian-blue)',
+                    fontSize: { xs: '1rem', sm: '1.125rem' },
+                  }}
+                >
+                  Merker opptjent ({sessionBadges.length})
+                </Typography>
+              </Box>
+              <Box
+                sx={{
+                  display: 'flex',
+                  gap: 2,
+                  overflowX: 'auto',
+                  pb: 1,
+                  '&::-webkit-scrollbar': {
+                    height: 6,
+                  },
+                  '&::-webkit-scrollbar-track': {
+                    background: 'rgba(0, 48, 73, 0.1)',
+                    borderRadius: 3,
+                  },
+                  '&::-webkit-scrollbar-thumb': {
+                    background: 'rgba(0, 48, 73, 0.3)',
+                    borderRadius: 3,
+                    '&:hover': {
+                      background: 'rgba(0, 48, 73, 0.5)',
+                    },
+                  },
+                }}
+              >
+                {sessionBadges.map((userBadge) => (
+                  <Box key={userBadge.id} sx={{ minWidth: 200, maxWidth: 240 }}>
+                    <BadgeCard badge={userBadge.badge} earned={userBadge} compact />
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+          </>
+        )}
 
         <Divider sx={{ my: 3, borderColor: 'rgba(0, 48, 73, 0.1)' }} />
 
