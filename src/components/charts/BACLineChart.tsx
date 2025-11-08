@@ -3,6 +3,7 @@ import { LineChart } from "@mui/x-charts/LineChart";
 import { axisClasses } from "@mui/x-charts/ChartsAxis";
 import type { Profile, DrinkEntry } from "../../types/database";
 import { prepareLineChartData } from "../../utils/chartHelpers";
+import { calculateBAC } from "../../utils/bacCalculator";
 import "../../styles/components/bac-line-chart.css";
 
 interface BACLineChartProps {
@@ -118,7 +119,20 @@ export default function BACLineChart({
       return participantColors.get(participant.id) ?? "#1976d2";
     });
 
-    return { series, colors, xAxisMax };
+    // Generate drink markers (scatter plot data) - only at drink entry timestamps
+    const sessionStartMs = sessionStartTime.getTime();
+    const drinkMarkers = displayParticipants.map((participant) => {
+      const participantDrinks = drinks.filter((d) => d.user_id === participant.id);
+      const markerData = participantDrinks.map((drink) => {
+        const drinkTime = new Date(drink.consumed_at);
+        const minutesSinceStart = (drinkTime.getTime() - sessionStartMs) / (1000 * 60);
+        const bac = calculateBAC(participantDrinks, participant, drinkTime);
+        return { x: Math.round(minutesSinceStart * 10) / 10, y: bac };
+      });
+      return markerData;
+    });
+
+    return { series, colors, xAxisMax, drinkMarkers };
   }, [
     participants,
     drinks,
@@ -187,13 +201,34 @@ export default function BACLineChart({
     const alignedData = xAxisData.map((x) => dataMap.get(x) ?? null);
 
     return {
+      type: 'line' as const,
       data: alignedData,
       label: s.label,
       color: chartData.colors[index],
       connectNulls: true, // Connect the line even if there are null values
       curve: 'monotoneX' as const, // Smooth curve interpolation (monotone to avoid overshooting)
+      showMark: false, // Hide markers on the dense sampled line
     };
   });
+
+  // Add marker-only series for drink timestamps (line hidden, only markers shown)
+  const drinkMarkerSeries = chartData.drinkMarkers.map((markers, index) => {
+    // Align drink markers to x-axis
+    const markerMap = new Map(markers.map((m) => [m.x, m.y]));
+    const alignedMarkers = xAxisData.map((x) => markerMap.get(x) ?? null);
+
+    return {
+      type: 'line' as const,
+      data: alignedMarkers,
+      label: `${chartData.series[index]?.label} - drikker`,
+      color: chartData.colors[index],
+      showMark: true, // Show markers for drink points
+      connectNulls: false, // Don't connect null values
+    };
+  });
+
+  // Combine line series and marker series
+  const allSeries = [...seriesConfig, ...drinkMarkerSeries];
 
   const legendItems = participants.map((participant) => ({
     id: participant.id,
@@ -258,7 +293,7 @@ export default function BACLineChart({
             min: 0,
           },
         ]}
-        series={seriesConfig}
+        series={allSeries}
         margin={{ top: 20, right: 32, bottom: 60, left: 72 }}
         grid={{ vertical: false, horizontal: true }}
         axisHighlight={{ x: "none", y: "none" }}
