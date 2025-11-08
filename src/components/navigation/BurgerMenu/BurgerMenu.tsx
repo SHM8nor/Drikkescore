@@ -23,6 +23,7 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import GroupIcon from '@mui/icons-material/Group';
 import InsightsIcon from '@mui/icons-material/Insights';
 import LogoutIcon from '@mui/icons-material/Logout';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 
 import './BurgerMenu.css';
 
@@ -30,6 +31,7 @@ const baseMenuItems: MenuItemData[] = [
   { label: 'Hjem', path: '/', icon: <HomeIcon /> },
   { label: 'Venner', path: '/friends', icon: <PeopleIcon /> },
   { label: 'Historikk', path: '/history', icon: <HistoryIcon /> },
+  { label: 'Merker', path: '/badges', icon: <EmojiEventsIcon /> },
   { label: 'Analyse', path: '/analytics', icon: <AnalyticsIcon /> },
   { label: 'Innstillinger', path: '/settings', icon: <SettingsIcon /> },
 ];
@@ -38,6 +40,7 @@ const adminMenuItems: MenuItemData[] = [
   { label: 'Sesjoner', path: '/admin', icon: <DashboardIcon /> },
   { label: 'Brukere', path: '/admin/users', icon: <GroupIcon /> },
   { label: 'Analyse', path: '/admin/analytics', icon: <InsightsIcon /> },
+  { label: 'Merker', path: '/admin/badges', icon: <EmojiEventsIcon /> },
 ];
 
 export default function BurgerMenu() {

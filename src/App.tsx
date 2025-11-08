@@ -13,6 +13,8 @@ import ProfilePage from './pages/ProfilePage';
 import AdminPage from './pages/AdminPage';
 import AdminUsersPage from './pages/AdminUsersPage';
 import AdminAnalyticsPage from './pages/AdminAnalyticsPage';
+import BadgesPage from './pages/BadgesPage';
+import AdminBadgesPage from './pages/AdminBadgesPage';
 import AccountDeletedPage from './pages/AccountDeletedPage';
 import ProtectedLayout from './layouts/ProtectedLayout';
 import PublicLayout from './layouts/PublicLayout';
@@ -44,6 +46,7 @@ function App() {
             <Route path="/profile/:userId" element={<ProfilePage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/history" element={<HistoryPage />} />
+            <Route path="/badges" element={<BadgesPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
           </Route>
 
@@ -74,6 +77,16 @@ function App() {
               <AdminGuard>
                 <AdminLayout>
                   <AdminAnalyticsPage />
+                </AdminLayout>
+              </AdminGuard>
+            }
+          />
+          <Route
+            path="/admin/badges"
+            element={
+              <AdminGuard>
+                <AdminLayout>
+                  <AdminBadgesPage />
                 </AdminLayout>
               </AdminGuard>
             }

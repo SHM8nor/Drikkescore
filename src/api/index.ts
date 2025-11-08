@@ -90,3 +90,27 @@ export type {
   ActivityHeatmap,
   TopUser,
 } from './systemAnalytics';
+
+// Badge API
+export {
+  getBadges,
+  getBadge,
+  getBadgeByCode,
+  createBadge,
+  updateBadge,
+  deleteBadge,
+  getUserBadges,
+  getBadgeProgress,
+  getUserBadgeProgress,
+  awardBadge,
+  revokeBadge,
+  getUserBadgeStats,
+  getBadgeRecipients,
+  getRecentBadges,
+  getActiveBadges,
+  getBadgesByCategory,
+  getBadgesByTier,
+  subscribeUserBadges,
+  subscribeBadgeProgress,
+  BadgeError,
+} from './badges';
