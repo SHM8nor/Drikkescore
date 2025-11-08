@@ -200,6 +200,11 @@ export default function BACLineChart({
     // For each x value in the axis, get the corresponding y value or null
     const alignedData = xAxisData.map((x) => dataMap.get(x) ?? null);
 
+    // Get drink timestamps for this specific participant to conditionally show markers
+    const participantDrinkTimestamps = new Set(
+      chartData.drinkMarkers[index]?.map(m => m.x) ?? []
+    );
+
     return {
       type: 'line' as const,
       data: alignedData,
@@ -207,31 +212,8 @@ export default function BACLineChart({
       color: chartData.colors[index],
       connectNulls: true, // Connect the line even if there are null values
       curve: 'monotoneX' as const, // Smooth curve interpolation (monotone to avoid overshooting)
-      showMark: false, // Hide markers on the dense sampled line
-    };
-  });
-
-  // For markers, we need to use showMark function on the main series
-  // MUI X-Charts doesn't show markers on isolated points (only on line segments)
-  // So we'll enable markers on the main line series but only at drink timestamps
-
-  // Create a Set of x-values where drinks occurred for quick lookup
-  const drinkTimestamps = new Set<number>();
-  chartData.drinkMarkers.forEach(markers => {
-    markers.forEach(m => drinkTimestamps.add(m.x));
-  });
-
-  // Update series config to show markers only at drink timestamps
-  const seriesWithMarkers = seriesConfig.map((s, seriesIndex) => {
-    // Get drink timestamps for this specific participant
-    const participantDrinkTimestamps = new Set(
-      chartData.drinkMarkers[seriesIndex]?.map(m => m.x) ?? []
-    );
-
-    return {
-      ...s,
+      // Show markers only at drink entry timestamps
       showMark: (params: any) => {
-        // params has: dataIndex, seriesId, axisValue
         const xValue = xAxisData[params.dataIndex];
         return participantDrinkTimestamps.has(xValue);
       },
@@ -301,7 +283,7 @@ export default function BACLineChart({
             min: 0,
           },
         ]}
-        series={seriesWithMarkers}
+        series={seriesConfig}
         margin={{ top: 20, right: 32, bottom: 60, left: 72 }}
         grid={{ vertical: false, horizontal: true }}
         axisHighlight={{ x: "none", y: "none" }}
