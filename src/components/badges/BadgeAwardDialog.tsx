@@ -82,7 +82,7 @@ export default function BadgeAwardDialog({
   // STATE & HOOKS
   // ============================================================================
 
-  const { isAdmin } = useAdmin();
+  const isAdmin = useAdmin();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<BadgeCategory | 'all'>('all');
