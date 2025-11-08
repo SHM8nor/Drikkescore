@@ -88,7 +88,7 @@ const starterBadges = [
       type: 'threshold',
       conditions: [
         {
-          metric: 'max_bac',
+          metric: 'max_bac_in_session',
           operator: '>=',
           value: 0.08,
           timeframe: 'session'
