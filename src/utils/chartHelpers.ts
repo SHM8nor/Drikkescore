@@ -127,7 +127,8 @@ export function convertGramsToBeers(grams: number): number {
 /**
  * Prepare data format for MUI LineChart
  * Creates one series per participant showing BAC over time
- * Shows points at drink consumption times and current time
+ * Uses dense sampling (5-minute intervals) to accurately represent BAC curves
+ * including absorption peaks and elimination slopes between drink entries
  *
  * @param participants Array of participant profiles
  * @param drinks Array of all drink entries
@@ -154,39 +155,32 @@ export function prepareLineChartData(
 
     const data: LineChartPoint[] = [];
 
-    // Always start at 0 BAC at session start
-    data.push({
-      x: 0,
-      y: 0,
-    });
+    // Use dense sampling to accurately represent BAC curves
+    // This captures absorption peaks and elimination slopes that would be
+    // missed with sparse points only at drink entry times
+    const timeSeries = calculateBACTimeSeries(
+      participantDrinks,
+      participant,
+      sessionStartTime,
+      currentTime
+    );
 
-    // Add a point for each drink consumed
-    for (const drink of participantDrinks) {
-      const drinkTime = new Date(drink.consumed_at);
-      const minutesSinceStart = (drinkTime.getTime() - sessionStartMs) / (1000 * 60);
-
-      // Calculate BAC at the time this drink was consumed
-      const bac = calculateBAC(participantDrinks, participant, drinkTime);
-
+    // Convert TimeSeriesPoint[] to LineChartPoint[] format
+    for (const point of timeSeries) {
+      const minutesSinceStart = (point.time.getTime() - sessionStartMs) / (1000 * 60);
       data.push({
-        x: Math.round(minutesSinceStart * 10) / 10,
-        y: bac,
+        x: Math.round(minutesSinceStart * 10) / 10, // Round to 1 decimal
+        y: point.bac,
       });
     }
 
-    // Add current time point to show current BAC
-    if (participantDrinks.length > 0) {
-      const minutesSinceStart = (currentTime.getTime() - sessionStartMs) / (1000 * 60);
-      const currentBAC = calculateBAC(participantDrinks, participant, currentTime);
-
+    // If no drinks, add a single point at session start with 0 BAC
+    if (data.length === 0) {
       data.push({
-        x: Math.round(minutesSinceStart * 10) / 10,
-        y: currentBAC,
+        x: 0,
+        y: 0,
       });
     }
-
-    // Sort by x value (time) to ensure proper line drawing
-    data.sort((a, b) => a.x - b.x);
 
     series.push({
       id: participant.id,

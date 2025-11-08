@@ -36,6 +36,9 @@ const CHART_COLORS = [
  *
  * Displays BAC evolution over time for session participants using MUI LineChart.
  * Shows one colored line per participant with their BAC progression from session start.
+ * Uses dense sampling (5-minute intervals) to accurately represent BAC absorption curves
+ * and elimination slopes, ensuring peaks and valleys are visible even between drink entries.
+ *
  * The x-axis dynamically adjusts: for active sessions, it shows from start to current time
  * (+ 5 min buffer); for completed sessions, it shows the full duration.
  *
@@ -188,6 +191,7 @@ export default function BACLineChart({
       label: s.label,
       color: chartData.colors[index],
       connectNulls: true, // Connect the line even if there are null values
+      curve: 'monotoneX' as const, // Smooth curve interpolation (monotone to avoid overshooting)
     };
   });
 
