@@ -173,7 +173,8 @@ export async function updateBadge(
   if (data.category !== undefined) updateData.category = data.category;
   if (data.tier !== undefined) updateData.tier = data.tier;
   if (data.tier_order !== undefined) updateData.tier_order = data.tier_order;
-  if (data.icon_url !== undefined) updateData.icon_url = data.icon_url;
+  // Allow icon_url to be set to null (for deletion)
+  if ('icon_url' in data) updateData.icon_url = data.icon_url;
   if (data.criteria !== undefined) updateData.criteria = data.criteria;
   if (data.is_active !== undefined) updateData.is_active = data.is_active;
   if (data.is_automatic !== undefined) updateData.is_automatic = data.is_automatic;

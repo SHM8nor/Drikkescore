@@ -223,7 +223,7 @@ export interface UpdateBadgeFormData {
   category?: BadgeCategory;
   tier?: BadgeTier;
   tier_order?: number;
-  icon_url?: string;
+  icon_url?: string | null;
   criteria?: BadgeCriteria;
   is_active?: boolean;
   is_automatic?: boolean;

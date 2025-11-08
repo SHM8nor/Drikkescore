@@ -145,7 +145,7 @@ export default function BadgeEditDialog({
           category,
           tier,
           tier_order: tierOrder,
-          icon_url: iconUrl || undefined,
+          icon_url: iconUrl,
           criteria,
           is_active: isActive,
           is_automatic: isAutomatic,
@@ -167,7 +167,7 @@ export default function BadgeEditDialog({
     onClose();
   };
 
-  const handleIconUpload = (url: string) => {
+  const handleIconUpload = (url: string, _path: string) => {
     setIconUrl(url);
   };
 
