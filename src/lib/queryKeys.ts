@@ -37,12 +37,15 @@ export const queryKeys = {
       'activeUsers',
       sessionId ?? 'unknown',
     ] as const,
+    byType: (sessionType?: string | null) => ['sessions', 'byType', sessionType ?? 'all'] as const,
   },
   admin: {
     sessions: ['admin', 'sessions'] as const,
     users: ['admin', 'users'] as const,
     analytics: ['admin', 'analytics'] as const,
     sessionDetail: (id: string) => ['admin', 'sessions', 'detail', id] as const,
+    themes: ['admin', 'themes'] as const,
+    themeConfig: ['admin', 'themeConfig'] as const,
   },
   users: {
     root: ['users'] as const,

@@ -7,6 +7,10 @@
 /* Design System Variables */
 @import './styles/variables.css';
 
+/* Theme System - Import theme variations */
+@import './styles/themes/standard.css';
+@import './styles/themes/julebord.css';
+
 /* Global Styles & Reset */
 @import './styles/global.css';
 

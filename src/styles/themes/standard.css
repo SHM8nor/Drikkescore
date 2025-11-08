@@ -1,0 +1,88 @@
+/**
+ * Standard Theme
+ *
+ * Default theme using the original Drikkescore color palette.
+ * Based on the design system: guidelines/DESIGN_SYSTEM.md
+ */
+
+[data-theme='standard'] {
+  /* ========================================
+     PRIMARY COLOR PALETTE
+     ======================================== */
+
+  --prussian-blue: #003049;
+  --fire-engine-red: #d62828;
+  --orange-wheel: #f77f00;
+  --xanthous: #fcbf49;
+  --vanilla: #eae2b7;
+
+  /* Color Variations - Prussian Blue */
+  --prussian-blue-light: #004d73;
+  --prussian-blue-dark: #002333;
+  --prussian-blue-bg: rgba(0, 48, 73, 0.1);
+
+  /* Color Variations - Fire Engine Red */
+  --fire-engine-red-light: #e85d5d;
+  --fire-engine-red-dark: #a61f1f;
+  --fire-engine-red-bg: rgba(214, 40, 40, 0.1);
+
+  /* Color Variations - Orange Wheel */
+  --orange-wheel-light: #ff9533;
+  --orange-wheel-dark: #c66200;
+  --orange-wheel-bg: rgba(247, 127, 0, 0.1);
+
+  /* Color Variations - Xanthous */
+  --xanthous-light: #ffd56f;
+  --xanthous-dark: #d9a03a;
+  --xanthous-bg: rgba(252, 191, 73, 0.1);
+
+  /* Color Variations - Vanilla */
+  --vanilla-light: #f5f0e0;
+  --vanilla-dark: #d4cba5;
+
+  /* ========================================
+     SEMANTIC COLOR MAPPINGS
+     ======================================== */
+
+  --color-primary: var(--prussian-blue);
+  --color-primary-dark: var(--prussian-blue-dark);
+  --color-secondary: var(--orange-wheel);
+  --color-accent: var(--xanthous);
+  --color-danger: var(--fire-engine-red);
+
+  /* ========================================
+     BACKGROUND COLORS
+     ======================================== */
+
+  --color-background-primary: #ffffff;
+  --color-background-secondary: var(--vanilla);
+  --color-background-tertiary: #f5f5f5;
+
+  /* ========================================
+     COMPONENT-SPECIFIC
+     ======================================== */
+
+  /* Navbar */
+  --navbar-background: var(--prussian-blue);
+
+  /* Inputs */
+  --input-focus-border-color: var(--prussian-blue);
+  --input-focus-shadow: 0 0 0 3px var(--prussian-blue-bg);
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(
+    135deg,
+    var(--prussian-blue),
+    var(--prussian-blue-light)
+  );
+  --gradient-secondary: linear-gradient(
+    135deg,
+    var(--orange-wheel),
+    var(--xanthous)
+  );
+  --gradient-danger: linear-gradient(
+    135deg,
+    var(--fire-engine-red),
+    var(--fire-engine-red-dark)
+  );
+}

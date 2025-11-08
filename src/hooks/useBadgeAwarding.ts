@@ -54,19 +54,23 @@ export function useCheckAndAwardBadges() {
 
     // Filter badges by category based on context
     if (context === 'drink_added') {
-      // On drink_added: Only check milestone and global badges
+      // On drink_added: Only check milestone, global, and special badges
       // These are achievement-based and can be earned mid-session
       automaticBadges = automaticBadges.filter(
-        badge => badge.category === 'milestone' || badge.category === 'global'
+        badge => badge.category === 'milestone' ||
+                 badge.category === 'global' ||
+                 badge.category === 'special'
       );
-      console.debug('[BadgeAwarding] Context: drink_added - checking milestone/global badges only');
+      console.debug('[BadgeAwarding] Context: drink_added - checking milestone/global/special badges');
     } else if (context === 'session_ended') {
-      // On session_ended: Only check session and social badges
+      // On session_ended: Only check session, social, and special badges
       // These require the full session to be complete for accurate evaluation
       automaticBadges = automaticBadges.filter(
-        badge => badge.category === 'session' || badge.category === 'social'
+        badge => badge.category === 'session' ||
+                 badge.category === 'social' ||
+                 badge.category === 'special'
       );
-      console.debug('[BadgeAwarding] Context: session_ended - checking session/social badges only');
+      console.debug('[BadgeAwarding] Context: session_ended - checking session/social/special badges');
     }
 
     if (automaticBadges.length === 0) {

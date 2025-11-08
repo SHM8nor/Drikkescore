@@ -108,7 +108,7 @@ export interface UserBadge {
   /** Optional session where badge was earned (null for global/milestone badges) */
   session_id: string | null;
   /** Optional metadata about earning context (JSONB) */
-  metadata: Record<string, any> | null;
+  metadata: Record<string, unknown> | null;
 }
 
 /**
@@ -239,5 +239,5 @@ export interface AwardBadgeFormData {
   user_id: string;
   badge_id: string;
   session_id?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }

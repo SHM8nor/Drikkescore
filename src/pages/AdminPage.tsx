@@ -1,18 +1,19 @@
 import { useState } from 'react';
-import { Box, Paper, Typography, Container, Snackbar, Alert } from '@mui/material';
+import { Box, Paper, Typography, Container, Snackbar, Alert, Tabs, Tab } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import AdminSessionsGrid from '../components/admin/AdminSessionsGrid';
 import AdminActionsToolbar from '../components/admin/AdminActionsToolbar';
 import AdminStatsHeader from '../components/admin/AdminStatsHeader';
 import DeleteConfirmDialog from '../components/admin/DeleteConfirmDialog';
 import SessionEditDialog from '../components/admin/SessionEditDialog';
+import ThemeManagement from '../components/admin/ThemeManagement';
 import { useAdminSessions, type AdminSession } from '../hooks/useAdminSessions';
 import type { Session } from '../types/database';
 import { supabase } from '../lib/supabase';
 import { queryKeys } from '../lib/queryKeys';
 
 /**
- * Admin page for managing all sessions
+ * Admin page for managing all sessions and theme system
  * Features:
  * - System statistics header with real-time counts
  * - View all sessions in a data grid
@@ -22,6 +23,7 @@ import { queryKeys } from '../lib/queryKeys';
  * - Real-time updates via Supabase subscription
  * - Duration column with color coding
  * - View creator action
+ * - Theme management panel with analytics
  */
 export default function AdminPage() {
   const queryClient = useQueryClient();
@@ -31,6 +33,7 @@ export default function AdminPage() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'ended'>('all');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'sessions' | 'themes'>('sessions');
 
   // Snackbar state
   const [snackbar, setSnackbar] = useState<{
@@ -209,43 +212,62 @@ export default function AdminPage() {
     <Container maxWidth="xl" sx={{ py: 4 }}>
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom>
-          Sesjonsadministrasjon
+          Administrasjon
         </Typography>
         <Typography variant="body1" color="text.secondary" paragraph>
-          Administrer alle sesjoner i systemet. Du kan redigere sesjonsnavn ved å dobbeltklikke på
-          en celle, søke etter sesjoner, og utføre masseoperasjoner på valgte sesjoner.
+          Administrer sesjoner, temaer og systeminnstillinger.
         </Typography>
       </Box>
 
-      {/* Stats Header */}
-      <AdminStatsHeader />
+      {/* Tabs */}
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+        <Tabs
+          value={activeTab}
+          onChange={(_, newValue) => setActiveTab(newValue)}
+          aria-label="admin tabs"
+        >
+          <Tab label="Sesjoner" value="sessions" />
+          <Tab label="Tema" value="themes" />
+        </Tabs>
+      </Box>
 
-      <Paper
-        elevation={2}
-        sx={{
-          p: 3,
-          backgroundColor: 'background.paper',
-          borderRadius: 2,
-        }}
-      >
-        {/* Actions Toolbar */}
-        <AdminActionsToolbar
-          selectedSessions={selectedSessions}
-          onBulkDelete={() => setDeleteDialogOpen(true)}
-          onBulkEdit={() => setEditDialogOpen(true)}
-          onSearch={handleSearch}
-          onStatusFilter={handleStatusFilter}
-          onExport={handleExport}
-          onRefresh={refetch}
-        />
+      {/* Sessions Tab */}
+      {activeTab === 'sessions' && (
+        <>
+          {/* Stats Header */}
+          <AdminStatsHeader />
 
-        {/* Data Grid */}
-        <AdminSessionsGrid
-          onSelectionChange={handleSelectionChange}
-          searchQuery={searchQuery}
-          statusFilter={statusFilter}
-        />
-      </Paper>
+          <Paper
+            elevation={2}
+            sx={{
+              p: 3,
+              backgroundColor: 'background.paper',
+              borderRadius: 2,
+            }}
+          >
+            {/* Actions Toolbar */}
+            <AdminActionsToolbar
+              selectedSessions={selectedSessions}
+              onBulkDelete={() => setDeleteDialogOpen(true)}
+              onBulkEdit={() => setEditDialogOpen(true)}
+              onSearch={handleSearch}
+              onStatusFilter={handleStatusFilter}
+              onExport={handleExport}
+              onRefresh={refetch}
+            />
+
+            {/* Data Grid */}
+            <AdminSessionsGrid
+              onSelectionChange={handleSelectionChange}
+              searchQuery={searchQuery}
+              statusFilter={statusFilter}
+            />
+          </Paper>
+        </>
+      )}
+
+      {/* Themes Tab */}
+      {activeTab === 'themes' && <ThemeManagement />}
 
       {/* Delete Confirmation Dialog */}
       <DeleteConfirmDialog

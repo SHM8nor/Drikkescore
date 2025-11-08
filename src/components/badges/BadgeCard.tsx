@@ -29,6 +29,15 @@ const TIER_COLORS = {
   legendary: '#9C27B0',
 } as const;
 
+// Special category (Christmas) uses different tier colors
+const CHRISTMAS_TIER_COLORS = {
+  bronze: '#C87533',
+  silver: '#C0C0C0',
+  gold: '#FFD700',
+  platinum: '#E5E4E2',
+  legendary: '#8B0000', // Dark red for Christmas
+} as const;
+
 interface BadgeCardProps {
   badge: Badge;
   earned?: UserBadge;
@@ -40,7 +49,8 @@ interface BadgeCardProps {
 export function BadgeCard({ badge, earned, progress, onClick, compact = false }: BadgeCardProps) {
   const [selectedBadge, setSelectedBadge] = useState<UserBadgeWithDetails | null>(null);
   const isEarned = Boolean(earned);
-  const tierColor = TIER_COLORS[badge.tier];
+  const isChristmas = badge.category === 'special';
+  const tierColor = isChristmas ? CHRISTMAS_TIER_COLORS[badge.tier] : TIER_COLORS[badge.tier];
 
   const handleClick = () => {
     if (onClick) {
@@ -75,15 +85,17 @@ export function BadgeCard({ badge, earned, progress, onClick, compact = false }:
           } : {},
         }}
       >
-        {/* Tier indicator stripe */}
+        {/* Tier indicator stripe - Christmas badges get festive gradient */}
         <Box
           sx={{
             position: 'absolute',
             top: 0,
             left: 0,
             right: 0,
-            height: 4,
-            backgroundColor: tierColor,
+            height: isChristmas ? 6 : 4,
+            background: isChristmas
+              ? `linear-gradient(90deg, #8B0000 0%, ${tierColor} 50%, #006400 100%)`
+              : tierColor,
           }}
         />
 

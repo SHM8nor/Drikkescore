@@ -4,6 +4,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useSession } from '../hooks/useSession';
 import { useSessionPresence } from '../hooks/useSessionPresence';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { formatBAC, getBACDescription, calculateTimeToPeak } from '../utils/bacCalculator';
 import { calculateTotalAlcoholGrams, convertGramsToBeers } from '../utils/chartHelpers';
 import BACLineChart from '../components/charts/BACLineChart';
@@ -11,6 +12,8 @@ import AlcoholConsumptionChart from '../components/charts/AlcoholConsumptionChar
 import ChartContainer from '../components/charts/ChartContainer';
 import { ShareSessionModal } from '../components/session/ShareSessionModal';
 import { ActiveUsersIndicator } from '../components/session/ActiveUsersIndicator';
+import { SessionTypeIndicator } from '../components/session/SessionTypeIndicator';
+import { SnowflakeDecoration } from '../components/session/SnowflakeDecoration';
 import { PageContainer } from '../components/layout/PageContainer';
 import napoleonImage from '/Napoleonic Ruse.png';
 
@@ -57,6 +60,7 @@ export function SessionPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { setSessionType } = useTheme();
   const {
     session,
     leaderboard,
@@ -70,6 +74,20 @@ export function SessionPage() {
     extendSession,
     isExtending,
   } = useSession(sessionId || null);
+
+  // Apply theme when session loads
+  useEffect(() => {
+    if (session?.session_type) {
+      setSessionType(session.session_type);
+    }
+  }, [session?.session_type, setSessionType]);
+
+  // Reset to standard theme only on component unmount (leaving page)
+  useEffect(() => {
+    return () => {
+      setSessionType('standard');
+    };
+  }, [setSessionType]);
 
   // FIX #6: Check if user is session participant before enabling presence
   const isParticipant = useMemo(() => {
@@ -308,6 +326,9 @@ export function SessionPage() {
 
   return (
     <PageContainer>
+      {/* Snowflake decoration for julebord theme */}
+      <SnowflakeDecoration enabled={true} snowflakeCount={20} />
+
       <div className="session-page">
         {/* Session info banner - spans full width */}
         <div style={{
@@ -325,6 +346,8 @@ export function SessionPage() {
             <span style={{ fontWeight: 600, fontSize: '16px', color: 'var(--prussian-blue)' }}>
               {session.session_name || 'Økt'}: <strong>{session.session_code}</strong>
             </span>
+            {/* Session type indicator */}
+            <SessionTypeIndicator sessionType={session.session_type} size="small" />
             <span style={{ fontSize: '15px', color: sessionEnded ? 'var(--fire-engine-red)' : 'var(--prussian-blue)' }}>
               {sessionEnded ? (
                 <strong>Økten er avsluttet!</strong>
