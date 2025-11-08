@@ -21,6 +21,7 @@ import {
 } from '@tanstack/react-query';
 import {
   getBadges,
+  getPublicBadges,
   getActiveBadges,
   getBadge,
   getBadgeByCode,
@@ -59,6 +60,20 @@ export function useBadges(enabled: boolean = true) {
   return useQuery({
     queryKey: queryKeys.badges.lists(),
     queryFn: getBadges,
+    enabled,
+  });
+}
+
+/**
+ * Get public badges (excludes special/admin-only badges)
+ * Used for main badges page where users browse earnable badges
+ * @param enabled - Whether to enable the query (default: true)
+ * @returns Query result with public badges only
+ */
+export function usePublicBadges(enabled: boolean = true) {
+  return useQuery({
+    queryKey: [...queryKeys.badges.lists(), 'public'],
+    queryFn: getPublicBadges,
     enabled,
   });
 }

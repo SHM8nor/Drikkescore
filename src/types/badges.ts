@@ -15,8 +15,9 @@ export type BadgeTier = 'bronze' | 'silver' | 'gold' | 'platinum' | 'legendary';
  * - global: Based on all-time statistics
  * - social: Related to friend interactions
  * - milestone: Special one-time achievements
+ * - special: Admin-only honorary badges (hidden from main badges page)
  */
-export type BadgeCategory = 'session' | 'global' | 'social' | 'milestone';
+export type BadgeCategory = 'session' | 'global' | 'social' | 'milestone' | 'special';
 
 /**
  * Comparison operators for badge criteria conditions

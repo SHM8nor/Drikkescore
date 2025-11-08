@@ -59,6 +59,28 @@ export async function getBadges(): Promise<Badge[]> {
 }
 
 /**
+ * Fetch public badges (excludes special/admin-only badges)
+ * Used for main badges page where users browse earnable badges
+ * @returns Array of public badges
+ * @throws {BadgeError} If the request fails
+ */
+export async function getPublicBadges(): Promise<Badge[]> {
+  const { data, error } = await supabase
+    .from('badges')
+    .select('*')
+    .neq('category', 'special')
+    .order('tier_order', { ascending: true })
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching public badges:', error);
+    throw new BadgeError('Kunne ikke hente offentlige merker');
+  }
+
+  return data || [];
+}
+
+/**
  * Get a single badge by ID
  * @param badgeId - The badge ID to fetch
  * @returns The badge or null if not found

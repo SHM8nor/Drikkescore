@@ -36,7 +36,7 @@ import { BadgeGrid } from '../components/badges/BadgeGrid';
 import { BadgeFilter } from '../components/badges/BadgeFilter';
 import { BadgeDetailDialog } from '../components/badges/BadgeDetailDialog';
 import {
-  useActiveBadges,
+  usePublicBadges,
   useUserBadges,
   useBadgeProgress,
   useUserBadgeStats,
@@ -86,8 +86,8 @@ export default function BadgesPage() {
   const touchStartX = useRef<number>(0);
   const touchEndX = useRef<number>(0);
 
-  // Fetch data
-  const { data: activeBadges, isLoading: badgesLoading } = useActiveBadges();
+  // Fetch data - using usePublicBadges instead of useActiveBadges to exclude special badges
+  const { data: publicBadges, isLoading: badgesLoading } = usePublicBadges();
   const { data: userBadges, isLoading: userBadgesLoading } = useUserBadges();
   const { data: badgeProgress, isLoading: progressLoading } = useBadgeProgress();
   const { data: stats, isLoading: statsLoading } = useUserBadgeStats();
@@ -96,9 +96,9 @@ export default function BadgesPage() {
 
   // Combine badges with user progress
   const badgesWithProgress: BadgeWithProgress[] = useMemo(() => {
-    if (!activeBadges) return [];
+    if (!publicBadges) return [];
 
-    return activeBadges.map((badge) => {
+    return publicBadges.map((badge) => {
       const earned = userBadges?.find((ub) => ub.badge_id === badge.id);
       const progress = badgeProgress?.find((bp) => bp.badge_id === badge.id);
 
@@ -112,7 +112,7 @@ export default function BadgesPage() {
           : 0,
       };
     });
-  }, [activeBadges, userBadges, badgeProgress]);
+  }, [publicBadges, userBadges, badgeProgress]);
 
   // Filter badges by tab
   const filteredBadges = useMemo(() => {
@@ -147,7 +147,7 @@ export default function BadgesPage() {
   const inProgressCount = badgesWithProgress.filter((b) => b.isLocked && b.progress).length;
 
   // Calculate stats
-  const totalBadges = activeBadges?.length || 0;
+  const totalBadges = publicBadges?.length || 0;
   const totalEarned = stats?.total_earned || 0;
   const totalPoints = stats?.total_points || 0;
   const progressPercentage =
@@ -205,7 +205,7 @@ export default function BadgesPage() {
     ? badgeProgress?.find((bp) => bp.badge_id === selectedBadge.id)
     : undefined;
 
-  if (loading && !activeBadges) {
+  if (loading && !publicBadges) {
     return (
       <Box
         sx={{

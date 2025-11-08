@@ -6,13 +6,17 @@
  * Matches glass-morphism styling of profile page.
  */
 
-import { Box, Typography, Stack, Skeleton, Button } from '@mui/material';
+import { useState } from 'react';
+import { Box, Typography, Stack, Skeleton, Button, IconButton, Tooltip } from '@mui/material';
 import { Link } from 'react-router-dom';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import AddIcon from '@mui/icons-material/Add';
 import { useUserBadges, useUserBadgeStats } from '../../hooks/useBadges';
 import { BadgeShowcase } from '../badges/BadgeShowcase';
 import { useAuth } from '../../context/AuthContext';
+import { useAdmin } from '../../hooks/useAdmin';
+import BadgeAwardDialog from '../badges/BadgeAwardDialog';
 
 interface BadgeSectionProps {
   userId: string;
@@ -20,7 +24,12 @@ interface BadgeSectionProps {
 
 export function BadgeSection({ userId }: BadgeSectionProps) {
   const { user } = useAuth();
+  const isAdmin = useAdmin();
   const isOwnProfile = user?.id === userId;
+  const isOtherUserProfile = userId !== user?.id;
+  const showAwardButton = isAdmin && isOtherUserProfile;
+
+  const [awardDialogOpen, setAwardDialogOpen] = useState(false);
 
   const { data: userBadges, isLoading: badgesLoading } = useUserBadges(userId);
   const { data: stats, isLoading: statsLoading } = useUserBadgeStats(userId);
@@ -106,23 +115,43 @@ export function BadgeSection({ userId }: BadgeSectionProps) {
           </Box>
         </Stack>
 
-        {/* View All Link (Desktop) */}
-        <Button
-          component={Link}
-          to="/badges"
-          endIcon={<ArrowForwardIcon />}
-          sx={{
-            display: { xs: 'none', sm: 'flex' },
-            color: 'var(--orange-wheel)',
-            fontWeight: 600,
-            textTransform: 'none',
-            '&:hover': {
-              backgroundColor: 'rgba(247, 127, 0, 0.08)',
-            },
-          }}
-        >
-          Se alle merker
-        </Button>
+        {/* Actions Section (Desktop) */}
+        <Stack direction="row" spacing={1} alignItems="center" sx={{ display: { xs: 'none', sm: 'flex' } }}>
+          {/* Admin Award Button */}
+          {showAwardButton && (
+            <Tooltip title="Tildel merke">
+              <IconButton
+                onClick={() => setAwardDialogOpen(true)}
+                sx={{
+                  color: 'var(--orange-wheel)',
+                  backgroundColor: 'rgba(247, 127, 0, 0.08)',
+                  '&:hover': {
+                    backgroundColor: 'rgba(247, 127, 0, 0.16)',
+                  },
+                }}
+              >
+                <AddIcon />
+              </IconButton>
+            </Tooltip>
+          )}
+
+          {/* View All Link */}
+          <Button
+            component={Link}
+            to="/badges"
+            endIcon={<ArrowForwardIcon />}
+            sx={{
+              color: 'var(--orange-wheel)',
+              fontWeight: 600,
+              textTransform: 'none',
+              '&:hover': {
+                backgroundColor: 'rgba(247, 127, 0, 0.08)',
+              },
+            }}
+          >
+            Se alle merker
+          </Button>
+        </Stack>
       </Stack>
 
       {/* Badge Showcase */}
@@ -182,26 +211,59 @@ export function BadgeSection({ userId }: BadgeSectionProps) {
         </Box>
       )}
 
-      {/* View All Link (Mobile) */}
-      <Button
-        component={Link}
-        to="/badges"
-        endIcon={<ArrowForwardIcon />}
-        fullWidth
-        sx={{
-          display: { xs: 'flex', sm: 'none' },
-          mt: 2,
-          color: 'var(--orange-wheel)',
-          fontWeight: 600,
-          textTransform: 'none',
-          justifyContent: 'center',
-          '&:hover': {
-            backgroundColor: 'rgba(247, 127, 0, 0.08)',
-          },
+      {/* Mobile Actions Section */}
+      <Stack direction="column" spacing={1} sx={{ display: { xs: 'flex', sm: 'none' }, mt: 2 }}>
+        {/* Admin Award Button (Mobile) */}
+        {showAwardButton && (
+          <Button
+            onClick={() => setAwardDialogOpen(true)}
+            startIcon={<AddIcon />}
+            fullWidth
+            sx={{
+              color: 'var(--orange-wheel)',
+              fontWeight: 600,
+              textTransform: 'none',
+              justifyContent: 'center',
+              backgroundColor: 'rgba(247, 127, 0, 0.08)',
+              '&:hover': {
+                backgroundColor: 'rgba(247, 127, 0, 0.16)',
+              },
+            }}
+          >
+            Tildel merke
+          </Button>
+        )}
+
+        {/* View All Link (Mobile) */}
+        <Button
+          component={Link}
+          to="/badges"
+          endIcon={<ArrowForwardIcon />}
+          fullWidth
+          sx={{
+            color: 'var(--orange-wheel)',
+            fontWeight: 600,
+            textTransform: 'none',
+            justifyContent: 'center',
+            '&:hover': {
+              backgroundColor: 'rgba(247, 127, 0, 0.08)',
+            },
+          }}
+        >
+          Se alle merker
+        </Button>
+      </Stack>
+
+      {/* Badge Award Dialog */}
+      <BadgeAwardDialog
+        open={awardDialogOpen}
+        userId={userId}
+        onClose={() => setAwardDialogOpen(false)}
+        onSuccess={() => {
+          // Success handled by dialog, just close it
+          setAwardDialogOpen(false);
         }}
-      >
-        Se alle merker
-      </Button>
+      />
     </Box>
   );
 }

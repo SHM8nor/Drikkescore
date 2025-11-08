@@ -15,6 +15,7 @@ import {
   Switch,
   Alert,
   CircularProgress,
+  FormHelperText,
 } from '@mui/material';
 import { useUpdateBadge } from '../../hooks/useBadges';
 import BadgeIconUploader from './BadgeIconUploader';
@@ -247,7 +248,13 @@ export default function BadgeEditDialog({
               <MenuItem value="global">Global</MenuItem>
               <MenuItem value="social">Sosial</MenuItem>
               <MenuItem value="milestone">Milepæl</MenuItem>
+              <MenuItem value="special">Spesiell</MenuItem>
             </Select>
+            <FormHelperText>
+              {category === 'special'
+                ? 'Spesielle merker er kun synlige for de som har tjent dem, og vises ikke på merkesiden'
+                : 'Velg kategorien som passer best for dette merket'}
+            </FormHelperText>
           </FormControl>
 
           {/* Tier */}

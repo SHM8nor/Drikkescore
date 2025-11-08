@@ -3,7 +3,7 @@
  *
  * Filter controls for filtering badges by category and tier.
  * Features:
- * - Category dropdown (session, global, social, milestone)
+ * - Category dropdown (session, global, social, milestone, special)
  * - Tier dropdown (bronze, silver, gold, platinum, legendary)
  * - Active filter chips with individual clear buttons
  * - Clear all filters button
@@ -29,6 +29,7 @@ const CATEGORY_LABELS: Record<BadgeCategory, string> = {
   global: 'Global',
   social: 'Sosial',
   milestone: 'Milepæl',
+  special: 'Spesiell',
 };
 
 // Norwegian labels for tiers
