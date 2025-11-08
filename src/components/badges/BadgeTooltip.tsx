@@ -31,6 +31,7 @@ const CATEGORY_LABELS = {
   global: 'Global',
   social: 'Sosial',
   milestone: 'Milepæl',
+  special: 'Spesiell',
 } as const;
 
 interface BadgeTooltipProps {

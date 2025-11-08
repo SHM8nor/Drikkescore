@@ -180,6 +180,7 @@ export interface UserBadgeStats {
     global: number;
     social: number;
     milestone: number;
+    special: number;
   };
 }
 

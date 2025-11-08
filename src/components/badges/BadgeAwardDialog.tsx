@@ -7,7 +7,6 @@ import {
   Button,
   TextField,
   Box,
-  Grid,
   Card,
   CardContent,
   CardActionArea,
@@ -21,7 +20,7 @@ import {
 import { Image as ImageIcon, EmojiEvents as TrophyIcon } from '@mui/icons-material';
 import { useBadges, useUserBadges, useAwardBadge } from '../../hooks/useBadges';
 import { useAdmin } from '../../hooks/useAdmin';
-import type { Badge, BadgeCategory } from '../../types/badges';
+import type { BadgeCategory } from '../../types/badges';
 
 // ============================================================================
 // TYPES
@@ -161,9 +160,9 @@ export default function BadgeAwardDialog({
       setTimeout(() => {
         handleClose();
       }, 1500);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Award badge error:', err);
-      const errorMsg = err?.message || 'Kunne ikke tildele merke';
+      const errorMsg = (err as Error)?.message || 'Kunne ikke tildele merke';
 
       // Handle specific error cases
       if (errorMsg.includes('already earned')) {
@@ -273,94 +272,101 @@ export default function BadgeAwardDialog({
 
                 {/* Badge Grid */}
                 {filteredBadges.length > 0 && (
-                  <Grid container spacing={2} sx={{ maxHeight: '400px', overflowY: 'auto' }}>
+                  <Box
+                    sx={{
+                      display: 'grid',
+                      gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' },
+                      gap: 2,
+                      maxHeight: '400px',
+                      overflowY: 'auto',
+                    }}
+                  >
                     {filteredBadges.map((badge) => (
-                      <Grid item xs={12} sm={6} key={badge.id}>
-                        <Card
-                          sx={{
-                            border:
-                              selectedBadgeId === badge.id
-                                ? `2px solid ${TIER_COLORS[badge.tier] || '#1976d2'}`
-                                : '2px solid transparent',
-                            backgroundColor:
-                              selectedBadgeId === badge.id
-                                ? 'action.selected'
-                                : 'background.paper',
-                            transition: 'all 0.2s',
-                            '&:hover': {
-                              boxShadow: 4,
-                              transform: 'translateY(-2px)',
-                            },
-                          }}
-                        >
-                          <CardActionArea onClick={() => handleBadgeSelect(badge.id)}>
-                            <CardContent>
-                              <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
-                                {/* Badge Icon */}
-                                <Avatar
-                                  src={badge.icon_url || undefined}
+                      <Card
+                        key={badge.id}
+                        sx={{
+                          border:
+                            selectedBadgeId === badge.id
+                              ? `2px solid ${TIER_COLORS[badge.tier] || '#1976d2'}`
+                              : '2px solid transparent',
+                          backgroundColor:
+                            selectedBadgeId === badge.id
+                              ? 'action.selected'
+                              : 'background.paper',
+                          transition: 'all 0.2s',
+                          '&:hover': {
+                            boxShadow: 4,
+                            transform: 'translateY(-2px)',
+                          },
+                        }}
+                      >
+                        <CardActionArea onClick={() => handleBadgeSelect(badge.id)}>
+                          <CardContent>
+                            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                              {/* Badge Icon */}
+                              <Avatar
+                                src={badge.icon_url || undefined}
+                                sx={{
+                                  width: 48,
+                                  height: 48,
+                                  bgcolor: TIER_COLORS[badge.tier] || 'primary.main',
+                                }}
+                              >
+                                {badge.icon_url ? (
+                                  <ImageIcon />
+                                ) : (
+                                  <TrophyIcon />
+                                )}
+                              </Avatar>
+
+                              {/* Badge Info */}
+                              <Box sx={{ flex: 1, minWidth: 0 }}>
+                                <Typography variant="h6" component="div" noWrap>
+                                  {badge.title}
+                                </Typography>
+                                <Box sx={{ display: 'flex', gap: 0.5, mb: 1 }}>
+                                  <Chip
+                                    label={TIER_LABELS[badge.tier]}
+                                    size="small"
+                                    sx={{
+                                      backgroundColor: TIER_COLORS[badge.tier],
+                                      color: badge.tier === 'silver' || badge.tier === 'platinum' ? 'black' : 'white',
+                                      fontWeight: 'bold',
+                                    }}
+                                  />
+                                  <Chip
+                                    label={CATEGORY_LABELS[badge.category]}
+                                    size="small"
+                                    variant="outlined"
+                                  />
+                                </Box>
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
                                   sx={{
-                                    width: 48,
-                                    height: 48,
-                                    bgcolor: TIER_COLORS[badge.tier] || 'primary.main',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: 'vertical',
                                   }}
                                 >
-                                  {badge.icon_url ? (
-                                    <ImageIcon />
-                                  ) : (
-                                    <TrophyIcon />
-                                  )}
-                                </Avatar>
-
-                                {/* Badge Info */}
-                                <Box sx={{ flex: 1, minWidth: 0 }}>
-                                  <Typography variant="h6" component="div" noWrap>
-                                    {badge.title}
-                                  </Typography>
-                                  <Box sx={{ display: 'flex', gap: 0.5, mb: 1 }}>
-                                    <Chip
-                                      label={TIER_LABELS[badge.tier]}
-                                      size="small"
-                                      sx={{
-                                        backgroundColor: TIER_COLORS[badge.tier],
-                                        color: badge.tier === 'silver' || badge.tier === 'platinum' ? 'black' : 'white',
-                                        fontWeight: 'bold',
-                                      }}
-                                    />
-                                    <Chip
-                                      label={CATEGORY_LABELS[badge.category]}
-                                      size="small"
-                                      variant="outlined"
-                                    />
-                                  </Box>
-                                  <Typography
-                                    variant="body2"
-                                    color="text.secondary"
-                                    sx={{
-                                      overflow: 'hidden',
-                                      textOverflow: 'ellipsis',
-                                      display: '-webkit-box',
-                                      WebkitLineClamp: 2,
-                                      WebkitBoxOrient: 'vertical',
-                                    }}
-                                  >
-                                    {badge.description}
-                                  </Typography>
-                                  <Typography
-                                    variant="caption"
-                                    color="text.secondary"
-                                    sx={{ mt: 1, display: 'block' }}
-                                  >
-                                    {badge.points} poeng
-                                  </Typography>
-                                </Box>
+                                  {badge.description}
+                                </Typography>
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                  sx={{ mt: 1, display: 'block' }}
+                                >
+                                  {badge.points} poeng
+                                </Typography>
                               </Box>
-                            </CardContent>
-                          </CardActionArea>
-                        </Card>
-                      </Grid>
+                            </Box>
+                          </CardContent>
+                        </CardActionArea>
+                      </Card>
                     ))}
-                  </Grid>
+                  </Box>
                 )}
               </>
             )}

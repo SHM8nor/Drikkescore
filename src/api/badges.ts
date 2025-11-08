@@ -434,6 +434,7 @@ export async function getUserBadgeStats(userId: string): Promise<UserBadgeStats>
       global: 0,
       social: 0,
       milestone: 0,
+      special: 0,
     },
   };
 
