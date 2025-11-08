@@ -4,6 +4,7 @@ export type Gender = 'male' | 'female';
 export type UserRole = 'user' | 'admin';
 export type FriendshipStatus = 'pending' | 'accepted' | 'declined' | 'blocked';
 export type SessionStatus = 'active' | 'idle' | 'offline';
+export type SessionType = 'standard' | 'julebord';
 
 export interface Profile {
   id: string;
@@ -29,6 +30,7 @@ export interface Session {
   id: string;
   session_code: string;
   session_name: string;
+  session_type: SessionType;
   created_by: string;
   start_time: string;
   end_time: string;
@@ -133,6 +135,20 @@ export interface SessionActiveUser {
 }
 
 // =============================================================================
+// Theme Configuration Types
+// =============================================================================
+
+export interface ThemeConfig {
+  id: string;
+  julebord_enabled: boolean;
+  auto_seasonal_switch: boolean;
+  seasonal_start_date: string | null;
+  seasonal_end_date: string | null;
+  updated_at: string;
+  updated_by: string | null;
+}
+
+// =============================================================================
 // Form Data Types
 // =============================================================================
 
@@ -154,6 +170,7 @@ export interface LoginFormData {
 
 export interface CreateSessionFormData {
   session_name: string;
+  session_type?: SessionType;
   start_time: string;
   end_time: string;
 }

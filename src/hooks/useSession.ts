@@ -5,7 +5,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
-import type { Session, DrinkEntry, LeaderboardEntry, Profile } from '../types/database';
+import type { Session, DrinkEntry, LeaderboardEntry, Profile, SessionType } from '../types/database';
 import { calculateBAC } from '../utils/bacCalculator';
 import { useAuth } from '../context/AuthContext';
 import { queryKeys } from '../lib/queryKeys';
@@ -323,16 +323,19 @@ export function useSession(sessionId: string | null) {
 export function useCreateSession() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { checkAndAward } = useCheckAndAwardBadges();
 
   const mutation = useMutation({
     mutationFn: async ({
       sessionName,
       startTime,
       endTime,
+      sessionType = 'standard',
     }: {
       sessionName: string;
       startTime: Date;
       endTime: Date;
+      sessionType?: SessionType;
     }) => {
       if (!user) {
         throw new Error('User not authenticated');
@@ -346,6 +349,7 @@ export function useCreateSession() {
         .insert({
           session_code: sessionCode,
           session_name: sessionName,
+          session_type: sessionType,
           created_by: user.id,
           start_time: startTime.toISOString(),
           end_time: endTime.toISOString(),
@@ -364,19 +368,26 @@ export function useCreateSession() {
 
       return sessionData as Session;
     },
-    onSuccess: async () => {
+    onSuccess: async (sessionData) => {
       if (user) {
         await Promise.all([
           queryClient.invalidateQueries({ queryKey: queryKeys.sessions.active(user.id) }),
           queryClient.invalidateQueries({ queryKey: queryKeys.sessions.history(user.id) }),
         ]);
+
+        // Check for "Julenisse" badge if this is a julebord session (fire and forget)
+        if (sessionData.session_type === 'julebord') {
+          checkAndAward('session_ended', sessionData.id).catch((error) => {
+            console.error('[BadgeAwarding] Error checking badges after julebord creation:', error);
+          });
+        }
       }
     },
   });
 
   return {
-    createSession: (sessionName: string, startTime: Date, endTime: Date) =>
-      mutation.mutateAsync({ sessionName, startTime, endTime }),
+    createSession: (sessionName: string, startTime: Date, endTime: Date, sessionType?: SessionType) =>
+      mutation.mutateAsync({ sessionName, startTime, endTime, sessionType }),
     loading: mutation.isPending,
     error: mutation.error instanceof Error ? mutation.error.message : null,
   };
@@ -388,6 +399,7 @@ export function useCreateSession() {
 export function useJoinSession() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { checkAndAward } = useCheckAndAwardBadges();
 
   const mutation = useMutation({
     mutationFn: async (sessionCode: string) => {
@@ -423,12 +435,19 @@ export function useJoinSession() {
 
       return sessionData as Session;
     },
-    onSuccess: async () => {
+    onSuccess: async (sessionData) => {
       if (user) {
         await Promise.all([
           queryClient.invalidateQueries({ queryKey: queryKeys.sessions.active(user.id) }),
           queryClient.invalidateQueries({ queryKey: queryKeys.sessions.history(user.id) }),
         ]);
+
+        // Check for "Juleglede" and "Nissehue" badges if joining julebord (fire and forget)
+        if (sessionData.session_type === 'julebord') {
+          checkAndAward('session_ended', sessionData.id).catch((error) => {
+            console.error('[BadgeAwarding] Error checking badges after julebord join:', error);
+          });
+        }
       }
     },
   });

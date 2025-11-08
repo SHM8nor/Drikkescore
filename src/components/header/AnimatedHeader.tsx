@@ -3,6 +3,7 @@ import type { Variants } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import './AnimatedHeader.css';
 
 // Animation variants with proper TypeScript types
@@ -55,6 +56,7 @@ export default function AnimatedHeader() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, profile } = useAuth();
+  const { sessionType } = useTheme();
   const { scrollY } = useScroll();
   const [isScrolled, setIsScrolled] = useState(false);
   const [pageTitle, setPageTitle] = useState('');
@@ -82,15 +84,42 @@ export default function AnimatedHeader() {
       .slice(0, 2);
   };
 
+  // Get decorative elements based on theme
+  const getThemeDecoration = () => {
+    if (sessionType === 'julebord') {
+      return (
+        <motion.span
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          style={{
+            marginLeft: '12px',
+            fontSize: '1.5rem',
+            display: 'inline-block',
+          }}
+        >
+          🎄
+        </motion.span>
+      );
+    }
+    return null;
+  };
+
   return (
     <motion.header
       className="animated-header"
       variants={prefersReducedMotion ? undefined : headerVariants}
       initial="top"
       animate={isScrolled ? 'scrolled' : 'top'}
+      style={{
+        background: sessionType === 'julebord'
+          ? 'linear-gradient(135deg, var(--christmas-green), var(--christmas-holly))'
+          : undefined,
+        transition: 'background 0.5s ease',
+      }}
     >
       <div className="animated-header__container">
-        {/* Page Title */}
+        {/* Page Title with theme decoration */}
         <motion.div
           className="animated-header__title"
           variants={prefersReducedMotion ? undefined : titleVariants}
@@ -98,7 +127,10 @@ export default function AnimatedHeader() {
           animate="visible"
           key={pageTitle} // Re-animate when title changes
         >
-          <h1>{pageTitle}</h1>
+          <h1>
+            {pageTitle}
+            {getThemeDecoration()}
+          </h1>
         </motion.div>
 
         {/* User Info */}

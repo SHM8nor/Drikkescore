@@ -7,6 +7,7 @@
 import type { Badge, BadgeCriteria, BadgeCondition } from '../types/badges';
 import type { Profile } from '../types/database';
 import type { SupabaseClient } from '@supabase/supabase-js';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import {
   getTotalDrinks,
   getSessionCount,
@@ -15,6 +16,15 @@ import {
   getUniqueFriendsInSession,
   getTotalVolume,
   getFriendCount,
+  getSessionHasBeer,
+  getSessionHasWine,
+  getSessionFriendHasBeer,
+  getSessionFriendHasWine,
+  getSessionEndedAfterMidnight,
+  getJulebordSessionCount,
+  getIsJulebordSession,
+  getCreatedJulebordSessionCount,
+  getAdminAwardedFlag,
 } from './badgeMetrics';
 
 /**
@@ -160,7 +170,7 @@ export async function checkBadgeEligibility(
 ): Promise<{
   eligible: boolean;
   metrics: Record<string, number>;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }> {
   try {
     const { criteria } = badge;
@@ -235,6 +245,66 @@ export async function checkBadgeEligibility(
           value = await getFriendCount(supabase, userId);
           break;
 
+        case 'session_has_beer':
+          if (sessionId) {
+            value = await getSessionHasBeer(supabase, sessionId, userId);
+          } else {
+            console.warn('[checkBadgeEligibility] session_has_beer requires sessionId');
+          }
+          break;
+
+        case 'session_has_wine':
+          if (sessionId) {
+            value = await getSessionHasWine(supabase, sessionId, userId);
+          } else {
+            console.warn('[checkBadgeEligibility] session_has_wine requires sessionId');
+          }
+          break;
+
+        case 'session_friend_has_beer':
+          if (sessionId) {
+            value = await getSessionFriendHasBeer(supabase, sessionId, userId);
+          } else {
+            console.warn('[checkBadgeEligibility] session_friend_has_beer requires sessionId');
+          }
+          break;
+
+        case 'session_friend_has_wine':
+          if (sessionId) {
+            value = await getSessionFriendHasWine(supabase, sessionId, userId);
+          } else {
+            console.warn('[checkBadgeEligibility] session_friend_has_wine requires sessionId');
+          }
+          break;
+
+        case 'session_ended_after_midnight':
+          if (sessionId) {
+            value = await getSessionEndedAfterMidnight(supabase, sessionId);
+          } else {
+            console.warn('[checkBadgeEligibility] session_ended_after_midnight requires sessionId');
+          }
+          break;
+
+        case 'julebord_session_count':
+          value = await getJulebordSessionCount(supabase, userId);
+          break;
+
+        case 'is_julebord_session':
+          if (sessionId) {
+            value = await getIsJulebordSession(supabase, sessionId);
+          } else {
+            console.warn('[checkBadgeEligibility] is_julebord_session requires sessionId');
+          }
+          break;
+
+        case 'created_julebord_session':
+          value = await getCreatedJulebordSessionCount(supabase, userId);
+          break;
+
+        case 'admin_awarded':
+          value = getAdminAwardedFlag();
+          break;
+
         default:
           console.warn('[checkBadgeEligibility] Unknown metric:', metric);
           break;
@@ -255,7 +325,7 @@ export async function checkBadgeEligibility(
     console.debug(`[checkBadgeEligibility] ${badge.code}: eligible=${eligible}, metrics=`, metrics);
 
     // Build metadata
-    const metadata: Record<string, any> = {
+    const metadata: Record<string, unknown> = {
       progress,
       metrics,
       evaluated_at: new Date().toISOString(),
@@ -295,7 +365,7 @@ export async function checkMultipleBadges(
     badge: Badge;
     eligible: boolean;
     metrics: Record<string, number>;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }>
 > {
   const results = await Promise.all(
@@ -331,13 +401,13 @@ export function filterEligibleBadges(
     badge: Badge;
     eligible: boolean;
     metrics: Record<string, number>;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }>
 ): Array<{
   badge: Badge;
   eligible: boolean;
   metrics: Record<string, number>;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }> {
   return results.filter((result) => result.eligible);
 }

@@ -1,17 +1,25 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCreateSession, useJoinSession } from "../hooks/useSession";
 import { useActiveSession } from "../hooks/useActiveSession";
+import { useThemeConfig } from "../hooks/useThemeConfig";
 import { QRScanner } from "../components/session/QRScanner";
 import { ActiveSessions } from "../components/friends/ActiveSessions";
+import { SessionTypeIndicator } from "../components/session/SessionTypeIndicator";
 import { PageContainer } from "../components/layout/PageContainer";
+import type { SessionType } from "../types/database";
+import { Box, Paper, Typography } from "@mui/material";
+import { isThemeAvailable, getRecommendedTheme } from "../config/themes";
 
 export function HomePage() {
   const navigate = useNavigate();
   const { createSession, loading: createLoading } = useCreateSession();
   const { joinSession, loading: joinLoading } = useJoinSession();
   const { activeSessions, loading: activeSessionsLoading } = useActiveSession();
+
+  // Fetch theme configuration from database
+  const { data: themeConfig } = useThemeConfig();
 
   const [activeTab, setActiveTab] = useState<"create" | "join">("create");
   const [error, setError] = useState<string | null>(null);
@@ -20,6 +28,15 @@ export function HomePage() {
   // Create session form state
   const [duration, setDuration] = useState(60); // default 1 hour in minutes
   const [sessionName, setSessionName] = useState("");
+  const [sessionType, setSessionType] = useState<SessionType>("standard");
+
+  // Set recommended theme on mount (based on seasonal settings)
+  useEffect(() => {
+    const recommended = getRecommendedTheme();
+    if (isThemeAvailable(recommended)) {
+      setSessionType(recommended);
+    }
+  }, []);
 
   // Join session form state
   const [sessionCode, setSessionCode] = useState("");
@@ -33,12 +50,17 @@ export function HomePage() {
       return;
     }
 
+    if (!sessionName.trim()) {
+      setError("Vennligst skriv inn et øktnavn");
+      return;
+    }
+
     // Calculate start and end times based on duration
     const start = new Date();
     const end = new Date(start.getTime() + duration * 60 * 1000); // duration in ms
 
     try {
-      const session = await createSession(sessionName.trim(), start, end);
+      const session = await createSession(sessionName.trim(), start, end, sessionType);
       navigate(`/session/${session.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Kunne ikke opprette økt");
@@ -96,6 +118,24 @@ export function HomePage() {
     return `${diffMinutes}m igjen`;
   };
 
+  // Get theme colors for preview
+  const getThemePreview = () => {
+    if (sessionType === "julebord") {
+      return {
+        primary: "#165B33",
+        secondary: "#C41E3A",
+        accent: "#FFD700",
+        danger: "#8B0000",
+      };
+    }
+    return {
+      primary: "#003049",
+      secondary: "#f77f00",
+      accent: "#fcbf49",
+      danger: "#d62828",
+    };
+  };
+
   return (
     <PageContainer>
       <div className="home-page">
@@ -149,16 +189,19 @@ export function HomePage() {
                     }}
                   >
                     <div>
-                      <h3
-                        style={{
-                          color: "var(--color-text-primary)",
-                          marginBottom: "var(--spacing-xs)",
-                          fontSize: "var(--font-size-base)",
-                          fontWeight: "var(--font-weight-medium)",
-                        }}
-                      >
-                        {session.session_name}
-                      </h3>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 'var(--spacing-xs)' }}>
+                        <h3
+                          style={{
+                            color: "var(--color-text-primary)",
+                            fontSize: "var(--font-size-base)",
+                            fontWeight: "var(--font-weight-medium)",
+                            margin: 0,
+                          }}
+                        >
+                          {session.session_name}
+                        </h3>
+                        <SessionTypeIndicator sessionType={session.session_type} size="small" />
+                      </div>
                       <p
                         style={{
                           color: "var(--color-text-secondary)",
@@ -229,7 +272,7 @@ export function HomePage() {
               <form onSubmit={handleCreateSession} className="session-form">
                 <h2>Opprett ny økt</h2>
                 <p className="form-description">
-                  Velg hvor lenge drikkeøkten skal vare
+                  Velg hvor lenge drikkeøkten skal vare og hvilket tema du ønsker
                 </p>
 
                 <div className="form-group">
@@ -268,10 +311,123 @@ export function HomePage() {
                   </select>
                 </div>
 
+                <div className="form-group">
+                  <label htmlFor="session_type">Tema</label>
+                  <Box sx={{ mt: 1 }}>
+                    <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+                      <button
+                        type="button"
+                        className={sessionType === "standard" ? "btn-primary" : "btn-secondary"}
+                        onClick={() => setSessionType("standard")}
+                        style={{ flex: 1 }}
+                      >
+                        Standard
+                      </button>
+                      {themeConfig?.julebord_enabled && (
+                        <button
+                          type="button"
+                          className={sessionType === "julebord" ? "btn-primary" : "btn-secondary"}
+                          onClick={() => setSessionType("julebord")}
+                          style={{
+                            flex: 1,
+                            backgroundColor: sessionType === "julebord" ? "#C41E3A" : undefined,
+                            borderColor: sessionType === "julebord" ? "#C41E3A" : undefined,
+                          }}
+                        >
+                          🎄 Julebord
+                        </button>
+                      )}
+                    </Box>
+
+                    {/* Theme Preview */}
+                    {sessionType !== "standard" && (
+                      <Paper
+                        elevation={1}
+                        sx={{
+                          p: 2,
+                          backgroundColor: "#f5f5f5",
+                          borderRadius: 2,
+                        }}
+                      >
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            mb: 1.5,
+                            fontWeight: 600,
+                            color: "#666"
+                          }}
+                        >
+                          Forhåndsvisning av fargepalett:
+                        </Typography>
+                        <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                          <Box
+                            sx={{
+                              width: 48,
+                              height: 48,
+                              backgroundColor: getThemePreview().primary,
+                              borderRadius: 1,
+                              border: "1px solid #ddd",
+                              transition: "all 0.3s ease",
+                            }}
+                            title="Primærfarge"
+                          />
+                          <Box
+                            sx={{
+                              width: 48,
+                              height: 48,
+                              backgroundColor: getThemePreview().secondary,
+                              borderRadius: 1,
+                              border: "1px solid #ddd",
+                              transition: "all 0.3s ease",
+                            }}
+                            title="Sekundærfarge"
+                          />
+                          <Box
+                            sx={{
+                              width: 48,
+                              height: 48,
+                              backgroundColor: getThemePreview().accent,
+                              borderRadius: 1,
+                              border: "1px solid #ddd",
+                              transition: "all 0.3s ease",
+                            }}
+                            title="Aksentfarge"
+                          />
+                          <Box
+                            sx={{
+                              width: 48,
+                              height: 48,
+                              backgroundColor: getThemePreview().danger,
+                              borderRadius: 1,
+                              border: "1px solid #ddd",
+                              transition: "all 0.3s ease",
+                            }}
+                            title="Farefarge"
+                          />
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              ml: 1.5,
+                              color: "#666",
+                              fontStyle: "italic"
+                            }}
+                          >
+                            Julebordstema aktiveres når økten starter
+                          </Typography>
+                        </Box>
+                      </Paper>
+                    )}
+                  </Box>
+                </div>
+
                 <button
                   type="submit"
                   className="btn-primary"
                   disabled={createLoading}
+                  style={{
+                    backgroundColor: sessionType === "julebord" ? "#C41E3A" : undefined,
+                    borderColor: sessionType === "julebord" ? "#C41E3A" : undefined,
+                  }}
                 >
                   {createLoading ? "Oppretter..." : "Opprett økt"}
                 </button>

@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { HomePage } from './pages/HomePage';
@@ -25,76 +26,78 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          {/* Public routes */}
-          <Route element={<PublicLayout />}>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-          </Route>
+        <ThemeProvider>
+          <Routes>
+            {/* Public routes */}
+            <Route element={<PublicLayout />}>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+            </Route>
 
-          {/* Account deleted page - public route */}
-          <Route path="/konto-slettet" element={<AccountDeletedPage />} />
+            {/* Account deleted page - public route */}
+            <Route path="/konto-slettet" element={<AccountDeletedPage />} />
 
-          {/* Join session route - accessible to both authenticated and unauthenticated users */}
-          <Route path="/join/:sessionId" element={<JoinSession />} />
+            {/* Join session route - accessible to both authenticated and unauthenticated users */}
+            <Route path="/join/:sessionId" element={<JoinSession />} />
 
-          {/* Protected routes */}
-          <Route element={<ProtectedLayout />}>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/session/:sessionId" element={<SessionPage />} />
-            <Route path="/friends" element={<FriendsPage />} />
-            <Route path="/profile/:userId" element={<ProfilePage />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/history" element={<HistoryPage />} />
-            <Route path="/badges" element={<BadgesPage />} />
-            <Route path="/analytics" element={<AnalyticsPage />} />
-          </Route>
+            {/* Protected routes */}
+            <Route element={<ProtectedLayout />}>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/session/:sessionId" element={<SessionPage />} />
+              <Route path="/friends" element={<FriendsPage />} />
+              <Route path="/profile/:userId" element={<ProfilePage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/history" element={<HistoryPage />} />
+              <Route path="/badges" element={<BadgesPage />} />
+              <Route path="/analytics" element={<AnalyticsPage />} />
+            </Route>
 
-          {/* Admin routes - protected by AdminGuard */}
-          <Route
-            path="/admin"
-            element={
-              <AdminGuard>
-                <AdminLayout>
-                  <AdminPage />
-                </AdminLayout>
-              </AdminGuard>
-            }
-          />
-          <Route
-            path="/admin/users"
-            element={
-              <AdminGuard>
-                <AdminLayout>
-                  <AdminUsersPage />
-                </AdminLayout>
-              </AdminGuard>
-            }
-          />
-          <Route
-            path="/admin/analytics"
-            element={
-              <AdminGuard>
-                <AdminLayout>
-                  <AdminAnalyticsPage />
-                </AdminLayout>
-              </AdminGuard>
-            }
-          />
-          <Route
-            path="/admin/badges"
-            element={
-              <AdminGuard>
-                <AdminLayout>
-                  <AdminBadgesPage />
-                </AdminLayout>
-              </AdminGuard>
-            }
-          />
+            {/* Admin routes - protected by AdminGuard */}
+            <Route
+              path="/admin"
+              element={
+                <AdminGuard>
+                  <AdminLayout>
+                    <AdminPage />
+                  </AdminLayout>
+                </AdminGuard>
+              }
+            />
+            <Route
+              path="/admin/users"
+              element={
+                <AdminGuard>
+                  <AdminLayout>
+                    <AdminUsersPage />
+                  </AdminLayout>
+                </AdminGuard>
+              }
+            />
+            <Route
+              path="/admin/analytics"
+              element={
+                <AdminGuard>
+                  <AdminLayout>
+                    <AdminAnalyticsPage />
+                  </AdminLayout>
+                </AdminGuard>
+              }
+            />
+            <Route
+              path="/admin/badges"
+              element={
+                <AdminGuard>
+                  <AdminLayout>
+                    <AdminBadgesPage />
+                  </AdminLayout>
+                </AdminGuard>
+              }
+            />
 
-          {/* Catch all - redirect to home */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+            {/* Catch all - redirect to home */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </ThemeProvider>
       </AuthProvider>
     </BrowserRouter>
   );

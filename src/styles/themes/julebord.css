@@ -1,0 +1,112 @@
+/**
+ * Julebord (Christmas) Theme
+ *
+ * Festive Christmas-themed color palette for special holiday sessions.
+ * Transforms the app into a winter wonderland experience.
+ */
+
+[data-theme='julebord'] {
+  /* ========================================
+     PRIMARY COLOR PALETTE
+     ======================================== */
+
+  /* Christmas Green (replaces Prussian Blue) */
+  --prussian-blue: #165b33;
+  --prussian-blue-light: #1e7a45;
+  --prussian-blue-dark: #0f3d22;
+  --prussian-blue-bg: rgba(22, 91, 51, 0.1);
+
+  /* Christmas Red (replaces Fire Engine Red) */
+  --fire-engine-red: #c41e3a;
+  --fire-engine-red-light: #e03a52;
+  --fire-engine-red-dark: #8b0000;
+  --fire-engine-red-bg: rgba(196, 30, 58, 0.1);
+
+  /* Gold (replaces Orange Wheel) */
+  --orange-wheel: #ffd700;
+  --orange-wheel-light: #ffe44d;
+  --orange-wheel-dark: #ccac00;
+  --orange-wheel-bg: rgba(255, 215, 0, 0.1);
+
+  /* Silver/White Gold (replaces Xanthous) */
+  --xanthous: #f0f0f0;
+  --xanthous-light: #ffffff;
+  --xanthous-dark: #c0c0c0;
+  --xanthous-bg: rgba(240, 240, 240, 0.1);
+
+  /* Snow White (replaces Vanilla) */
+  --vanilla: #ffffff;
+  --vanilla-light: #ffffff;
+  --vanilla-dark: #f5f5f5;
+
+  /* ========================================
+     CHRISTMAS-SPECIFIC COLORS
+     ======================================== */
+
+  /* Additional Christmas colors */
+  --christmas-green: #165b33;
+  --christmas-red: #c41e3a;
+  --christmas-gold: #ffd700;
+  --christmas-silver: #c0c0c0;
+  --christmas-snow: #ffffff;
+  --christmas-pine: #0f3d22;
+  --christmas-holly: #1e7a45;
+  --christmas-cranberry: #8b0000;
+  --christmas-ice-blue: #e6f3ff;
+
+  /* ========================================
+     SEMANTIC COLOR MAPPINGS
+     ======================================== */
+
+  --color-primary: var(--christmas-green);
+  --color-primary-dark: var(--christmas-pine);
+  --color-secondary: var(--christmas-red);
+  --color-accent: var(--christmas-gold);
+  --color-danger: var(--christmas-cranberry);
+
+  /* ========================================
+     BACKGROUND COLORS
+     ======================================== */
+
+  --color-background-primary: #ffffff;
+  --color-background-secondary: #f8f8f8;
+  --color-background-tertiary: var(--christmas-ice-blue);
+
+  /* ========================================
+     COMPONENT-SPECIFIC
+     ======================================== */
+
+  /* Navbar */
+  --navbar-background: var(--christmas-green);
+
+  /* Inputs */
+  --input-focus-border-color: var(--christmas-green);
+  --input-focus-shadow: 0 0 0 3px var(--prussian-blue-bg);
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(
+    135deg,
+    var(--christmas-green),
+    var(--christmas-holly)
+  );
+  --gradient-secondary: linear-gradient(
+    135deg,
+    var(--christmas-red),
+    var(--christmas-gold)
+  );
+  --gradient-danger: linear-gradient(
+    135deg,
+    var(--christmas-red),
+    var(--christmas-cranberry)
+  );
+
+  /* ========================================
+     CHRISTMAS EFFECTS (Optional)
+     ======================================== */
+
+  /* Festive shadows */
+  --shadow-festive: 0 4px 20px rgba(255, 215, 0, 0.3);
+  --shadow-glow-green: 0 0 20px rgba(22, 91, 51, 0.4);
+  --shadow-glow-red: 0 0 20px rgba(196, 30, 58, 0.4);
+  --shadow-glow-gold: 0 0 20px rgba(255, 215, 0, 0.5);
+}
