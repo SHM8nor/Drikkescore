@@ -52,7 +52,7 @@ export function HistoryPage() {
           </div>
         ) : (
           <>
-            <Box sx={{ mb: 3 }}>
+            <Box sx={{ mt: 2, mb: 3 }}>
               <FormControl fullWidth>
                 <InputLabel id="session-select-label">Velg økt</InputLabel>
                 <Select
