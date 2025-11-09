@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, FormControl, InputLabel, Select, MenuItem, Typography } from '@mui/material';
 import { useSessionHistory } from '../hooks/useSessionHistory';
-import { useSession } from '../hooks/useSession';
+import { useHistoricalSession } from '../hooks/useHistoricalSession';
 import { ReadOnlySessionView } from '../components/ReadOnlySessionView';
 
 export function HistoryPage() {
@@ -16,7 +16,7 @@ export function HistoryPage() {
     drinks,
     loading: sessionLoading,
     error: sessionError,
-  } = useSession(selectedSessionId);
+  } = useHistoricalSession(selectedSessionId);
 
   useEffect(() => {
     if (sessions.length > 0 && !selectedSessionId) {

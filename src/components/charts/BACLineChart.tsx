@@ -44,9 +44,10 @@ export default function BACLineChart({
   view,
 }: BACLineChartProps) {
   const theme = useTheme();
-  const CHART_COLORS = getChartColors(theme);
+  
+  // Memoize chart colors to prevent recreation on every render
+  const CHART_COLORS = useMemo(() => getChartColors(theme), [theme]);
 
-  const [chartKey, setChartKey] = useState(0);
   const [selectedParticipantId, setSelectedParticipantId] = useState<string | null>(null);
 
   const participantColors = useMemo(() => {
@@ -119,11 +120,6 @@ export default function BACLineChart({
     participantColors,
     CHART_COLORS,
   ]);
-
-  // Force a re-render when core inputs change so the chart is ready without manual toggling
-  useEffect(() => {
-    setChartKey((prev) => prev + 1);
-  }, [view, participants.length, drinks.length, selectedParticipantId]);
 
   // Reset selection when switching away from "all" view
   useEffect(() => {
@@ -218,7 +214,6 @@ export default function BACLineChart({
         </div>
       )}
       <LineChart
-        key={chartKey}
         height={Number(theme.spacing(45))}
         xAxis={[
           {
