@@ -1,8 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { LineChart } from "@mui/x-charts/LineChart";
 import { axisClasses } from "@mui/x-charts/ChartsAxis";
+import { useTheme } from "@mui/material/styles";
+import { Box } from "@mui/material";
 import type { Profile, DrinkEntry } from "../../types/database";
 import { prepareLineChartData } from "../../utils/chartHelpers";
+import { getChartColors, getEmptyStateStyles } from "../../utils/chartTheme";
 import "../../styles/components/bac-line-chart.css";
 
 interface BACLineChartProps {
@@ -13,23 +16,6 @@ interface BACLineChartProps {
   currentUserId: string;
   view: "all" | "self";
 }
-
-/**
- * Default color palette for participant lines
- * Colors chosen for good contrast and accessibility
- */
-const CHART_COLORS = [
-  "#1976d2", // Blue
-  "#d32f2f", // Red
-  "#388e3c", // Green
-  "#f57c00", // Orange
-  "#7b1fa2", // Purple
-  "#0097a7", // Cyan
-  "#c2185b", // Pink
-  "#fbc02d", // Yellow
-  "#5d4037", // Brown
-  "#455a64", // Blue Grey
-];
 
 /**
  * BACLineChart Component
@@ -57,7 +43,11 @@ export default function BACLineChart({
   currentUserId,
   view,
 }: BACLineChartProps) {
-  const [chartKey, setChartKey] = useState(0);
+  const theme = useTheme();
+  
+  // Memoize chart colors to prevent recreation on every render
+  const CHART_COLORS = useMemo(() => getChartColors(theme), [theme]);
+
   const [selectedParticipantId, setSelectedParticipantId] = useState<string | null>(null);
 
   const participantColors = useMemo(() => {
@@ -65,12 +55,12 @@ export default function BACLineChart({
     participants.forEach((participant, index) => {
       const color =
         participant.id === currentUserId
-          ? "#1976d2"
+          ? CHART_COLORS[0]
           : CHART_COLORS[index % CHART_COLORS.length];
       colors.set(participant.id, color);
     });
     return colors;
-  }, [participants, currentUserId]);
+  }, [participants, currentUserId, CHART_COLORS]);
 
   // Prepare chart data using memoization for performance
   const chartData = useMemo(() => {
@@ -106,16 +96,18 @@ export default function BACLineChart({
     }
 
     // Generate line chart series for each participant
+    // Use sessionEndTime for completed sessions to show historical BAC data
+    const referenceTime = isSessionActive ? currentTime : sessionEndTime;
     const series = prepareLineChartData(
       displayParticipants,
       drinks,
       sessionStartTime,
-      currentTime
+      referenceTime
     );
 
     // Assign colors to participants
     const colors = displayParticipants.map((participant) => {
-      return participantColors.get(participant.id) ?? "#1976d2";
+      return participantColors.get(participant.id) ?? CHART_COLORS[0];
     });
 
     return { series, colors, xAxisMax };
@@ -128,12 +120,8 @@ export default function BACLineChart({
     view,
     selectedParticipantId,
     participantColors,
+    CHART_COLORS,
   ]);
-
-  // Force a re-render when core inputs change so the chart is ready without manual toggling
-  useEffect(() => {
-    setChartKey((prev) => prev + 1);
-  }, [view, participants.length, drinks.length, selectedParticipantId]);
 
   // Reset selection when switching away from "all" view
   useEffect(() => {
@@ -155,19 +143,10 @@ export default function BACLineChart({
   // Handle empty state
   if (chartData.series.length === 0) {
     return (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: 300,
-          color: "#666",
-          fontSize: "14px",
-        }}
-      >
-        Ingen promilledata tilgjengelig ennǿ. Legg til noen enheter for Ǿ se
+      <Box sx={getEmptyStateStyles(theme)}>
+        Ingen promilledata tilgjengelig ennå. Legg til noen enheter for å se
         grafen!
-      </div>
+      </Box>
     );
   }
 
@@ -203,7 +182,7 @@ export default function BACLineChart({
   const legendItems = participants.map((participant) => ({
     id: participant.id,
     label: participant.display_name,
-    color: participantColors.get(participant.id) ?? "#1976d2",
+    color: participantColors.get(participant.id) ?? CHART_COLORS[0],
     isSelected: selectedParticipantId === participant.id,
   }));
 
@@ -237,8 +216,7 @@ export default function BACLineChart({
         </div>
       )}
       <LineChart
-        key={chartKey}
-        height={360}
+        height={parseInt(theme.spacing(45))}
         xAxis={[
           {
             data: xAxisData,
@@ -264,7 +242,12 @@ export default function BACLineChart({
           },
         ]}
         series={seriesConfig}
-        margin={{ top: 20, right: 32, bottom: 60, left: 72 }}
+        margin={{
+          top: parseInt(theme.spacing(2.5)),
+          right: parseInt(theme.spacing(4)),
+          bottom: parseInt(theme.spacing(7.5)),
+          left: parseInt(theme.spacing(9))
+        }}
         grid={{ vertical: false, horizontal: true }}
         axisHighlight={{ x: "none", y: "none" }}
         tooltip={{ trigger: "none" }}
@@ -278,22 +261,27 @@ export default function BACLineChart({
           height: "100%",
           flex: 1,
           [`& .${axisClasses.left} .${axisClasses.label}`]: {
-            transform: "translateX(-10px)",
+            transform: `translateX(-${theme.spacing(1.25)})`,
           },
           "& .MuiLineElement-root": {
-            strokeWidth: 2,
+            strokeWidth: parseInt(theme.spacing(0.25)),
           },
           "& .MuiMarkElement-root": {
-            scale: "1.2", // Larger markers to make them visible
-            strokeWidth: 2,
-            fill: "currentColor", // Ensure markers are filled
+            scale: "1.2",
+            strokeWidth: parseInt(theme.spacing(0.25)),
+            fill: "currentColor",
           },
           "& .MuiChartsAxis-label": {
-            fontSize: "14px",
-            fontWeight: 500,
+            fontSize: theme.typography.body2.fontSize,
+            fontWeight: theme.typography.fontWeightMedium,
+            fill: theme.palette.text.primary,
           },
           "& .MuiChartsAxis-tickLabel": {
-            fontSize: "12px",
+            fontSize: theme.typography.caption.fontSize,
+            fill: theme.palette.text.secondary,
+          },
+          "& .MuiChartsGrid-line": {
+            stroke: theme.palette.divider,
           },
         }}
       />

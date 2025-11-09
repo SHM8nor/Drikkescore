@@ -694,3 +694,23 @@
     padding: var(--page-padding-desktop);
   }
 }
+
+/* ========================================
+   HISTORY PAGE
+   ======================================== */
+
+.history-page {
+  min-height: 100vh;
+  padding: var(--spacing-2xl) var(--spacing-lg);
+}
+
+.history-content {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .history-page {
+    padding: var(--spacing-xl) var(--spacing-md);
+  }
+}

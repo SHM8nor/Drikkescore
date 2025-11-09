@@ -185,7 +185,7 @@ export function prepareLineChartData(
     series.push({
       id: participant.id,
       data: data,
-      label: participant.full_name,
+      label: participant.display_name,
     });
   }
 
@@ -220,7 +220,7 @@ export function prepareBarChartData(
     const value = unit === 'beers' ? convertGramsToBeers(totalGrams) : totalGrams;
 
     data.push({
-      participant: participant.full_name,
+      participant: participant.display_name,
       value: Math.round(value * 100) / 100, // Round to 2 decimals
     });
   }

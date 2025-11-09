@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Box, FormControl, InputLabel, Select, MenuItem, Typography } from '@mui/material';
 import { useSessionHistory } from '../hooks/useSessionHistory';
-import { useSession } from '../hooks/useSession';
+import { useHistoricalSession } from '../hooks/useHistoricalSession';
 import { ReadOnlySessionView } from '../components/ReadOnlySessionView';
 
 export function HistoryPage() {
@@ -15,7 +16,7 @@ export function HistoryPage() {
     drinks,
     loading: sessionLoading,
     error: sessionError,
-  } = useSession(selectedSessionId);
+  } = useHistoricalSession(selectedSessionId);
 
   useEffect(() => {
     if (sessions.length > 0 && !selectedSessionId) {
@@ -51,21 +52,71 @@ export function HistoryPage() {
           </div>
         ) : (
           <>
-            <div className="session-selector">
-              <label htmlFor="session-select">Velg økt:</label>
-              <select
-                id="session-select"
-                value={selectedSessionId || ''}
-                onChange={(e) => setSelectedSessionId(e.target.value)}
-                className="session-dropdown"
-              >
-                {sessions.map((session) => (
-                  <option key={session.id} value={session.id}>
-                    {session.session_name || 'Økt'} - {new Date(session.start_time).toLocaleDateString('no-NO')}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <Box sx={{ mt: 2, mb: 3 }}>
+              <FormControl fullWidth>
+                <InputLabel id="session-select-label">Velg økt</InputLabel>
+                <Select
+                  labelId="session-select-label"
+                  id="session-select"
+                  value={selectedSessionId || ''}
+                  label="Velg økt"
+                  onChange={(e) => setSelectedSessionId(e.target.value)}
+                  sx={{
+                    backgroundColor: 'white',
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'rgba(0, 48, 73, 0.2)',
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'var(--prussian-blue)',
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'var(--prussian-blue)',
+                    },
+                  }}
+                >
+                  {sessions.map((session) => {
+                    const date = new Date(session.start_time);
+                    const formattedDate = date.toLocaleDateString('no-NO', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                    });
+
+                    return (
+                      <MenuItem key={session.id} value={session.id}>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 0.5,
+                            width: '100%',
+                          }}
+                        >
+                          <Typography
+                            variant="body1"
+                            sx={{
+                              fontWeight: 600,
+                              color: 'var(--prussian-blue)',
+                            }}
+                          >
+                            {session.session_name || 'Økt'}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              color: 'var(--color-text-secondary)',
+                              fontSize: '0.875rem',
+                            }}
+                          >
+                            {formattedDate}
+                          </Typography>
+                        </Box>
+                      </MenuItem>
+                    );
+                  })}
+                </Select>
+              </FormControl>
+            </Box>
 
             {sessionLoading && <div className="loading">Laster øktdata...</div>}
 
