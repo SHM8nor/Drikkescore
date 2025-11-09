@@ -1,5 +1,5 @@
-import { ReactElement } from 'react';
-import { render, RenderOptions } from '@testing-library/react';
+import type { ReactElement } from 'react';
+import { render, type RenderOptions } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 /**
@@ -15,11 +15,6 @@ export function createTestQueryClient() {
       mutations: {
         retry: false,
       },
-    },
-    logger: {
-      log: console.log,
-      warn: console.warn,
-      error: () => {}, // Suppress error logs in tests
     },
   });
 }
