@@ -186,10 +186,10 @@ export default function AlcoholConsumptionChart({
         ]}
         series={series}
         margin={{
-          top: Number(theme.spacing(2.5)),
-          right: Number(theme.spacing(2.5)),
-          bottom: Number(theme.spacing(7.5)),
-          left: Number(theme.spacing(10))
+          top: parseInt(theme.spacing(2.5)),
+          right: parseInt(theme.spacing(2.5)),
+          bottom: parseInt(theme.spacing(7.5)),
+          left: parseInt(theme.spacing(10))
         }}
         grid={{ vertical: false, horizontal: true }}
         axisHighlight={{ x: "none", y: "none" }}

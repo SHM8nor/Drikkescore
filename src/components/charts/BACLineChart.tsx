@@ -96,11 +96,13 @@ export default function BACLineChart({
     }
 
     // Generate line chart series for each participant
+    // Use sessionEndTime for completed sessions to show historical BAC data
+    const referenceTime = isSessionActive ? currentTime : sessionEndTime;
     const series = prepareLineChartData(
       displayParticipants,
       drinks,
       sessionStartTime,
-      currentTime
+      referenceTime
     );
 
     // Assign colors to participants
@@ -214,7 +216,7 @@ export default function BACLineChart({
         </div>
       )}
       <LineChart
-        height={Number(theme.spacing(45))}
+        height={parseInt(theme.spacing(45))}
         xAxis={[
           {
             data: xAxisData,

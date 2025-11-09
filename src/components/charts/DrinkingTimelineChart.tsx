@@ -256,12 +256,12 @@ export default function DrinkingTimelineChart({
           },
         ]}
         series={series}
-        height={Number(theme.spacing(45))} // 360px
+        height={parseInt(theme.spacing(45))} // 360px
         margin={{
-          top: Number(theme.spacing(2.5)), // 20px
-          right: Number(theme.spacing(2.5)), // 20px
-          bottom: Number(theme.spacing(7.5)), // 60px
-          left: Number(theme.spacing(10)), // 80px
+          top: parseInt(theme.spacing(2.5)), // 20px
+          right: parseInt(theme.spacing(2.5)), // 20px
+          bottom: parseInt(theme.spacing(7.5)), // 60px
+          left: parseInt(theme.spacing(10)), // 80px
         }}
         grid={{ vertical: false, horizontal: true }}
         axisHighlight={{ x: "band", y: "none" }}
