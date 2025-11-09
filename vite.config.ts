@@ -9,103 +9,56 @@ export default defineConfig({
     chunkSizeWarningLimit: 600,
     rollupOptions: {
       output: {
-        // Manual chunking strategy for optimal caching and loading
+        // Manual chunking strategy for vendor libraries only
+        // Application code is automatically split by Vite through React.lazy() dynamic imports
         manualChunks: (id) => {
-          // Vendor chunks - these change rarely and can be cached long-term
+          // Only chunk vendor libraries from node_modules
+          // Do NOT manually chunk application code (src/) - causes duplicate modules
           if (id.includes('node_modules')) {
-            // NOTE: React and React Query stay in main bundle together because:
-            // 1. React Query depends on React's createContext and other APIs
-            // 2. Vite can't guarantee chunk load order for dependencies
-            // 3. Splitting them causes runtime errors where React Query loads before React
+            // Core dependencies stay in main bundle:
+            // - React (foundational, needed by all chunks)
+            // - React Query (depends on React.createContext)
+            // - React Router (needed early for routing)
+            // These must load first to avoid dependency issues
 
-            // MUI core components (excluding icons and data components)
+            // MUI core components and styling
             if (id.includes('@mui/material') || id.includes('@emotion')) {
-              return 'vendor-mui-core';
+              return 'vendor-mui';
             }
 
-            // MUI icons - separate chunk as they're large
+            // MUI icons - large, frequently used
             if (id.includes('@mui/icons-material')) {
               return 'vendor-mui-icons';
             }
 
-            // MUI X Charts - only loaded on analytics page
+            // MUI X Charts - only for analytics pages
             if (id.includes('@mui/x-charts')) {
-              return 'vendor-mui-charts';
+              return 'vendor-charts';
             }
 
-            // MUI DataGrid - only loaded for admin pages
+            // MUI DataGrid - only for admin pages
             if (id.includes('@mui/x-data-grid')) {
-              return 'vendor-mui-datagrid';
+              return 'vendor-datagrid';
             }
 
-            // Supabase - backend SDK
+            // Supabase client - backend communication
             if (id.includes('@supabase')) {
               return 'vendor-supabase';
             }
 
-            // React Query stays in main bundle with React (see note above)
-            // DO NOT extract to separate chunk - it breaks production builds
-
-            // QR code libraries
+            // QR code scanning and generation
             if (id.includes('qrcode') || id.includes('html5-qrcode')) {
               return 'vendor-qr';
             }
 
-            // Animation library
+            // Framer Motion animations
             if (id.includes('framer-motion')) {
               return 'vendor-animation';
             }
-
-            // Router
-            if (id.includes('react-router')) {
-              return 'vendor-router';
-            }
           }
 
-          // Feature-based chunks for application code
-          if (id.includes('src/')) {
-            // Admin features - only for admin users
-            if (id.includes('src/pages/Admin') || id.includes('src/components/admin')) {
-              return 'feature-admin';
-            }
-
-            // Analytics features - charts and analytics
-            if (id.includes('src/pages/AnalyticsPage') ||
-                id.includes('src/components/charts') ||
-                id.includes('src/utils/analyticsCalculator') ||
-                id.includes('src/utils/chartHelpers')) {
-              return 'feature-analytics';
-            }
-
-            // Badge system
-            if (id.includes('src/pages/BadgesPage') ||
-                id.includes('src/pages/AdminBadgesPage') ||
-                id.includes('src/components/badges') ||
-                id.includes('src/utils/badgeChecker') ||
-                id.includes('src/utils/badgeMetrics')) {
-              return 'feature-badges';
-            }
-
-            // Friend system
-            if (id.includes('src/pages/FriendsPage') ||
-                id.includes('src/pages/ProfilePage') ||
-                id.includes('src/components/friends')) {
-              return 'feature-social';
-            }
-
-            // Session features
-            if (id.includes('src/pages/SessionPage') ||
-                id.includes('src/components/session')) {
-              return 'feature-session';
-            }
-
-            // Settings and history
-            if (id.includes('src/pages/SettingsPage') ||
-                id.includes('src/pages/HistoryPage') ||
-                id.includes('src/components/settings')) {
-              return 'feature-settings';
-            }
-          }
+          // Let Vite automatically split application code based on dynamic imports
+          // This prevents duplicate module instances and "already declared" errors
         },
       },
     },
