@@ -10,6 +10,7 @@ import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
+  Drawer,
   Box,
   Typography,
   Chip,
@@ -20,6 +21,8 @@ import {
   Fade,
   Zoom,
   Paper,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import {
   Close as CloseIcon,
@@ -57,6 +60,8 @@ interface BadgeDetailModalProps {
 
 export function BadgeDetailModal({ open, badge, onClose }: BadgeDetailModalProps) {
   const [showContent, setShowContent] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   // Trigger content animation after dialog opens
   useEffect(() => {
@@ -85,34 +90,54 @@ export function BadgeDetailModal({ open, badge, onClose }: BadgeDetailModalProps
   const tierTextColor =
     badge.badge.tier === 'silver' || badge.badge.tier === 'platinum' ? 'black' : 'white';
 
-  return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="sm"
-      fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: 'var(--radius-lg)',
-          overflow: 'visible',
-          background: 'transparent',
-          boxShadow: 'none',
+  // Shared content wrapper styles
+  const contentWrapperSx = {
+    position: 'relative' as const,
+    background: `linear-gradient(135deg, ${tierColor}08 0%, ${tierColor}15 100%)`,
+    backdropFilter: 'blur(20px)',
+    borderRadius: isMobile ? 'var(--radius-lg) var(--radius-lg) 0 0' : 'var(--radius-lg)',
+    border: `2px solid ${tierColor}`,
+    boxShadow: `0 20px 60px ${tierColor}40, 0 0 40px ${tierColor}20`,
+    overflow: 'hidden',
+  };
+
+  // Use Drawer on mobile, Dialog on desktop
+  const Container = isMobile ? Drawer : Dialog;
+  const containerProps = isMobile
+    ? {
+        anchor: 'bottom' as const,
+        open,
+        onClose,
+        PaperProps: {
+          sx: {
+            maxHeight: '85vh',
+            borderRadius: 'var(--radius-lg) var(--radius-lg) 0 0',
+            background: 'transparent',
+            boxShadow: 'none',
+            overflow: 'visible',
+          },
         },
-      }}
-      TransitionComponent={Fade}
-      transitionDuration={300}
-    >
-      <Box
-        sx={{
-          position: 'relative',
-          background: `linear-gradient(135deg, ${tierColor}08 0%, ${tierColor}15 100%)`,
-          backdropFilter: 'blur(20px)',
-          borderRadius: 'var(--radius-lg)',
-          border: `2px solid ${tierColor}`,
-          boxShadow: `0 20px 60px ${tierColor}40, 0 0 40px ${tierColor}20`,
-          overflow: 'hidden',
-        }}
-      >
+      }
+    : {
+        open,
+        onClose,
+        maxWidth: 'sm' as const,
+        fullWidth: true,
+        PaperProps: {
+          sx: {
+            borderRadius: 'var(--radius-lg)',
+            overflow: 'visible',
+            background: 'transparent',
+            boxShadow: 'none',
+          },
+        },
+        TransitionComponent: Fade,
+        transitionDuration: 300,
+      };
+
+  return (
+    <Container {...containerProps}>
+      <Box sx={contentWrapperSx}>
         {/* Animated gradient background overlay */}
         <Box
           sx={{
@@ -128,12 +153,28 @@ export function BadgeDetailModal({ open, badge, onClose }: BadgeDetailModalProps
           }}
         />
 
+        {/* Mobile Drawer Handle */}
+        {isMobile && (
+          <Box
+            sx={{
+              width: 40,
+              height: 4,
+              backgroundColor: tierColor,
+              borderRadius: 2,
+              mx: 'auto',
+              mt: 1,
+              mb: 0.5,
+              opacity: 0.5,
+            }}
+          />
+        )}
+
         {/* Close Button */}
         <IconButton
           onClick={onClose}
           sx={{
             position: 'absolute',
-            top: 12,
+            top: isMobile ? 16 : 12,
             right: 12,
             zIndex: 10,
             backgroundColor: 'rgba(255, 255, 255, 0.9)',
@@ -153,6 +194,8 @@ export function BadgeDetailModal({ open, badge, onClose }: BadgeDetailModalProps
           sx={{
             p: { xs: 3, sm: 4 },
             position: 'relative',
+            maxHeight: isMobile ? 'calc(85vh - 60px)' : 'none',
+            overflowY: isMobile ? 'auto' : 'visible',
           }}
         >
           <Stack spacing={3} alignItems="center">
@@ -472,7 +515,7 @@ export function BadgeDetailModal({ open, badge, onClose }: BadgeDetailModalProps
           </Stack>
         </DialogContent>
       </Box>
-    </Dialog>
+    </Container>
   );
 }
 
