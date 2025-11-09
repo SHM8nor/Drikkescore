@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import {
   Box,
   Typography,
@@ -9,22 +9,40 @@ import {
   Paper,
   CircularProgress,
   Alert,
+  Skeleton,
 } from '@mui/material';
 import { PageContainer } from '../components/layout/PageContainer';
 import { useAuth } from '../context/AuthContext';
 import { useAnalytics } from '../hooks/useAnalytics';
-import { useDrinkPrices } from '../hooks/useDrinkPrices';
 import StatsOverviewCards from '../components/analytics/StatsOverviewCards';
-import WeeklyStatsChart from '../components/charts/WeeklyStatsChart';
-import MonthlyStatsChart from '../components/charts/MonthlyStatsChart';
-import BACTrendsChart from '../components/charts/BACTrendsChart';
-import WHOComparisonGauge from '../components/charts/WHOComparisonGauge';
-import HealthInsights from '../components/analytics/HealthInsights';
+import { calculateWHOComparison } from '../utils/whoGuidelines';
+import type { AnalyticsData } from '../types/analytics';
+
+// Lazy load chart components - these are heavy with MUI X-Charts
+// Only loaded when the respective tab is viewed
+const WeeklyStatsChart = lazy(() => import('../components/charts/WeeklyStatsChart'));
+const MonthlyStatsChart = lazy(() => import('../components/charts/MonthlyStatsChart'));
+const BACTrendsChart = lazy(() => import('../components/charts/BACTrendsChart'));
+const WHOComparisonGauge = lazy(() => import('../components/charts/WHOComparisonGauge'));
+
+// Lazy load analytics components
+const HealthInsights = lazy(() => import('../components/analytics/HealthInsights'));
+
+// These need to be imported directly due to prop type issues
 import CalorieChart from '../components/charts/CalorieChart';
 import ConsumptionBreakdown from '../components/analytics/ConsumptionBreakdown';
 import DrinkPriceManager from '../components/analytics/DrinkPriceManager';
-import { calculateWHOComparison } from '../utils/whoGuidelines';
-import type { AnalyticsData } from '../types/analytics';
+
+// Loading component for charts
+const ChartSkeleton = () => (
+  <Box sx={{ width: '100%' }}>
+    <Skeleton variant="rectangular" height={300} />
+    <Box sx={{ mt: 2 }}>
+      <Skeleton variant="text" width="60%" />
+      <Skeleton variant="text" width="40%" />
+    </Box>
+  </Box>
+);
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -58,8 +76,6 @@ export function AnalyticsPage() {
     loading: analyticsLoading,
     error: analyticsError,
   } = useAnalytics(period);
-
-  const { prices } = useDrinkPrices();
 
   const handlePeriodChange = (
     _event: React.MouseEvent<HTMLElement>,
@@ -198,17 +214,19 @@ export function AnalyticsPage() {
                 Oversikt over alkoholkonsum fordelt på uker og måneder
               </Typography>
 
-              {analyticsData.weeklyConsumption.length > 0 && (
-                <Box sx={{ mb: 4 }}>
-                  <WeeklyStatsChart weeklyData={analyticsData.weeklyConsumption} />
-                </Box>
-              )}
+              <Suspense fallback={<ChartSkeleton />}>
+                {analyticsData.weeklyConsumption.length > 0 && (
+                  <Box sx={{ mb: 4 }}>
+                    <WeeklyStatsChart weeklyData={analyticsData.weeklyConsumption} />
+                  </Box>
+                )}
 
-              {analyticsData.monthlyConsumption.length > 0 && (
-                <Box sx={{ mb: 4 }}>
-                  <MonthlyStatsChart monthlyData={analyticsData.monthlyConsumption} />
-                </Box>
-              )}
+                {analyticsData.monthlyConsumption.length > 0 && (
+                  <Box sx={{ mb: 4 }}>
+                    <MonthlyStatsChart monthlyData={analyticsData.monthlyConsumption} />
+                  </Box>
+                )}
+              </Suspense>
 
               {analyticsData.weeklyConsumption.length === 0 &&
                 analyticsData.monthlyConsumption.length === 0 && (
@@ -227,23 +245,25 @@ export function AnalyticsPage() {
                 BAC-utvikling og sammenligning med WHO-anbefalinger
               </Typography>
 
-              {whoData && (
-                <Box sx={{ mb: 4 }}>
-                  <WHOComparisonGauge whoData={whoData} />
-                </Box>
-              )}
+              <Suspense fallback={<ChartSkeleton />}>
+                {whoData && (
+                  <Box sx={{ mb: 4 }}>
+                    <WHOComparisonGauge whoData={whoData} />
+                  </Box>
+                )}
 
-              {whoData && (
-                <Box sx={{ mb: 4 }}>
-                  <HealthInsights whoData={whoData} gender={profile.gender} />
-                </Box>
-              )}
+                {whoData && (
+                  <Box sx={{ mb: 4 }}>
+                    <HealthInsights whoData={whoData} gender={profile.gender} />
+                  </Box>
+                )}
 
-              {analyticsData.bacTrend.length > 0 && (
-                <Box sx={{ mb: 4 }}>
-                  <BACTrendsChart bacTrend={analyticsData.bacTrend} />
-                </Box>
-              )}
+                {analyticsData.bacTrend.length > 0 && (
+                  <Box sx={{ mb: 4 }}>
+                    <BACTrendsChart bacTrend={analyticsData.bacTrend} />
+                  </Box>
+                )}
+              </Suspense>
 
               {!whoData && analyticsData.bacTrend.length === 0 && (
                 <Alert severity="info">Ingen helsedata for valgt periode</Alert>
@@ -255,34 +275,35 @@ export function AnalyticsPage() {
           <TabPanel value={activeTab} index={2}>
             <Box sx={{ p: 2 }}>
               <Typography variant="h6" gutterBottom>
-                Kalorier fra Alkohol
+                Kaloriinntak fra alkohol
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                Kaloriinntak og næringssammenligning
+                Oversikt over kalorier fra alkoholforbruk
               </Typography>
 
-              {analyticsData.weeklyConsumption.length > 0 && (
-                <Box sx={{ mb: 4 }}>
-                  <CalorieChart
-                    weeklyData={analyticsData.weeklyConsumption.map((w) => ({
-                      week: w.week,
-                      calories: w.calories,
-                    }))}
-                    monthlyData={analyticsData.monthlyConsumption.map((m) => ({
-                      month: m.month,
-                      calories: m.calories,
-                    }))}
+              {analyticsData.stats.totalCalories > 0 ? (
+                <Box>
+                  <Box sx={{ mb: 4 }}>
+                    <CalorieChart
+                      weeklyData={analyticsData.weeklyConsumption.map(w => ({
+                        week: w.week,
+                        calories: Math.round((w.grams / 0.789) * 7) // Convert grams of alcohol to calories
+                      }))}
+                      monthlyData={analyticsData.monthlyConsumption.map(m => ({
+                        month: m.month,
+                        calories: Math.round((m.grams / 0.789) * 7)
+                      }))}
+                    />
+                  </Box>
+                  <ConsumptionBreakdown
+                    totalCalories={analyticsData.stats.totalCalories}
+                    totalAlcoholGrams={analyticsData.weeklyConsumption.reduce((sum, w) => sum + w.grams, 0)}
+                    periodDays={periodDays}
                   />
                 </Box>
+              ) : (
+                <Alert severity="info">Ingen kaloridata for valgt periode</Alert>
               )}
-
-              <Box sx={{ mb: 4 }}>
-                <ConsumptionBreakdown
-                  totalCalories={analyticsData.stats.totalCalories}
-                  totalAlcoholGrams={analyticsData.stats.totalAlcoholGrams}
-                  periodDays={periodDays}
-                />
-              </Box>
             </Box>
           </TabPanel>
 
@@ -290,34 +311,13 @@ export function AnalyticsPage() {
           <TabPanel value={activeTab} index={3}>
             <Box sx={{ p: 2 }}>
               <Typography variant="h6" gutterBottom>
-                Utgifter og Prisstyring
+                Estimerte utgifter
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                Kostnadsoversikt og administrasjon av drikkepriser
+                Beregn dine alkoholutgifter basert på egendefinerte priser
               </Typography>
 
-              {/* Spending Info */}
-              <Box sx={{ mb: 4 }}>
-                {prices.length === 0 ? (
-                  <Alert severity="info">
-                    <Typography variant="body2" fontWeight="bold" gutterBottom>
-                      Ingen priser lagt til
-                    </Typography>
-                    <Typography variant="body2">
-                      For å spore utgifter må du først legge til prisene på drikkevarene dine nedenfor.
-                    </Typography>
-                  </Alert>
-                ) : (
-                  <Typography variant="body2" color="text.secondary">
-                    Utgiftsanalyse vil vises når du har lagt til priser på drikkene dine.
-                  </Typography>
-                )}
-              </Box>
-
-              {/* Price Manager */}
-              <Box sx={{ mb: 4 }}>
-                <DrinkPriceManager />
-              </Box>
+              <DrinkPriceManager />
             </Box>
           </TabPanel>
         </Paper>
