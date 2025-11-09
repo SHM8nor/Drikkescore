@@ -13,10 +13,8 @@ export default defineConfig({
         manualChunks: (id) => {
           // Vendor chunks - these change rarely and can be cached long-term
           if (id.includes('node_modules')) {
-            // React core - fundamental framework
-            if (id.includes('react') && !id.includes('react-router') && !id.includes('@tanstack')) {
-              return 'vendor-react';
-            }
+            // NOTE: React is NOT split into a separate chunk because many vendor chunks
+            // depend on it, and Vite can't guarantee load order. React stays in main bundle.
 
             // MUI core components (excluding icons and data components)
             if (id.includes('@mui/material') || id.includes('@emotion')) {
