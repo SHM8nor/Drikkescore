@@ -1,4 +1,6 @@
 import { useMemo } from "react";
+import { useTheme } from "@mui/material/styles";
+import { Box, Typography } from "@mui/material";
 import { BarChart } from "@mui/x-charts/BarChart";
 import { axisClasses } from "@mui/x-charts/ChartsAxis";
 import type { Profile, DrinkEntry } from "../../types/database";
@@ -7,6 +9,14 @@ import {
   calculateTotalAlcoholGrams,
   convertGramsToBeers,
 } from "../../utils/chartHelpers";
+import {
+  getChartColors,
+  getEmptyStateStyles,
+  getBarLabelStyles,
+  getLegendStyles,
+  getTotalValueStyles,
+  getChartContainerStyles,
+} from "../../utils/chartTheme";
 
 interface AlcoholConsumptionChartProps {
   participants: Profile[];
@@ -15,22 +25,6 @@ interface AlcoholConsumptionChartProps {
   unit: "grams" | "beers";
   currentUserId?: string; // Optional: to match colors with BAC chart
 }
-
-/**
- * Color palette matching BACLineChart for consistency
- */
-const CHART_COLORS = [
-  "#1976d2", // Blue
-  "#d32f2f", // Red
-  "#388e3c", // Green
-  "#f57c00", // Orange
-  "#7b1fa2", // Purple
-  "#0097a7", // Cyan
-  "#c2185b", // Pink
-  "#fbc02d", // Yellow
-  "#5d4037", // Brown
-  "#455a64", // Blue Grey
-];
 
 /**
  * AlcoholConsumptionChart Component
@@ -50,6 +44,14 @@ export default function AlcoholConsumptionChart({
   unit,
   currentUserId,
 }: AlcoholConsumptionChartProps) {
+  const theme = useTheme();
+  const CHART_COLORS = getChartColors(theme);
+  const emptyStateStyles = getEmptyStateStyles(theme);
+  const barLabelStyles = getBarLabelStyles(theme);
+  const legendStyles = getLegendStyles(theme);
+  const totalValueStyles = getTotalValueStyles(theme);
+  const containerStyles = getChartContainerStyles(theme);
+
   // Prepare chart data based on view mode
   const chartData = useMemo(() => {
     if (view === "per-participant") {
@@ -64,7 +66,7 @@ export default function AlcoholConsumptionChart({
         let color: string;
 
         if (currentUserId && participant?.id === currentUserId) {
-          color = "#1976d2"; // Primary blue for current user
+          color = theme.palette.primary.main; // Primary color for current user
         } else {
           color = CHART_COLORS[index % CHART_COLORS.length];
         }
@@ -81,11 +83,11 @@ export default function AlcoholConsumptionChart({
         {
           participant: "Total",
           value: Math.round(value * 100) / 100,
-          color: "#1976d2",
+          color: theme.palette.primary.main,
         },
       ];
     }
-  }, [participants, drinks, view, unit, currentUserId]);
+  }, [participants, drinks, view, unit, currentUserId, theme, CHART_COLORS]);
 
   // Format value for display based on unit
   const formatValue = (value: number): string => {
@@ -101,35 +103,17 @@ export default function AlcoholConsumptionChart({
   // Handle edge cases
   if (participants.length === 0) {
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: 300,
-          color: "var(--color-text-secondary)",
-          fontSize: "14px",
-        }}
-      >
+      <Box sx={emptyStateStyles}>
         Ingen deltakere i denne økten
-      </div>
+      </Box>
     );
   }
 
   if (drinks.length === 0) {
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: 300,
-          color: "var(--color-text-secondary)",
-          fontSize: "14px",
-        }}
-      >
+      <Box sx={emptyStateStyles}>
         Ingen enheter registrert ennå
-      </div>
+      </Box>
     );
   }
 
@@ -155,64 +139,33 @@ export default function AlcoholConsumptionChart({
   });
 
   return (
-    <div
-      style={{
-        width: "100%",
-        height: "100%",
-        minHeight: "350px",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
+    <Box sx={containerStyles}>
       {/* Custom legend for per-participant view */}
       {view === "per-participant" && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: "15px",
-            padding: "8px 0 12px 0",
-          }}
-        >
+        <Box sx={legendStyles.container}>
           {chartData.map((item) => (
-            <div
+            <Box
               key={item.participant}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "5px",
-              }}
+              sx={legendStyles.item}
             >
-              <div
-                style={{
-                  width: "10px",
-                  height: "10px",
+              <Box
+                sx={{
+                  ...legendStyles.colorBox,
                   backgroundColor: item.color,
-                  borderRadius: "2px",
                 }}
               />
-              <span style={{ fontSize: "13px", fontWeight: 500 }}>
+              <Typography sx={legendStyles.label}>
                 {item.participant}
-              </span>
-            </div>
+              </Typography>
+            </Box>
           ))}
-        </div>
+        </Box>
       )}
       {/* Display total value prominently when in session-total view */}
       {view === "session-total" && chartData.length > 0 && (
-        <div
-          style={{
-            textAlign: "center",
-            padding: "16px 0 8px 0",
-            fontSize: "24px",
-            fontWeight: "bold",
-            color: "var(--primary-color)",
-          }}
-        >
+        <Typography sx={totalValueStyles}>
           {formatValue(chartData[0].value)} {unit === "beers" ? "enheter" : "g"}
-        </div>
+        </Typography>
       )}
       <BarChart
         xAxis={[
@@ -232,17 +185,18 @@ export default function AlcoholConsumptionChart({
           },
         ]}
         series={series}
-        margin={{ top: 20, right: 20, bottom: 60, left: 80 }}
+        margin={{
+          top: Number(theme.spacing(2.5)),
+          right: Number(theme.spacing(2.5)),
+          bottom: Number(theme.spacing(7.5)),
+          left: Number(theme.spacing(10))
+        }}
         grid={{ vertical: false, horizontal: true }}
         axisHighlight={{ x: "none", y: "none" }}
         barLabel="value"
         slotProps={{
           barLabel: {
-            style: {
-              fontSize: "12px",
-              fontWeight: 600,
-              fill: "#fff",
-            },
+            style: barLabelStyles,
           },
         }}
         slots={{
@@ -253,10 +207,10 @@ export default function AlcoholConsumptionChart({
           height: "100%",
           flex: 1,
           [`& .${axisClasses.left} .${axisClasses.label}`]: {
-            transform: "translateX(-10px)",
+            transform: `translateX(${theme.spacing(-1.25)})`,
           },
         }}
       />
-    </div>
+    </Box>
   );
 }

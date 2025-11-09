@@ -101,6 +101,10 @@
   --color-border-dark: #9ca3af;
   --color-border-focus: var(--prussian-blue);
 
+  --border-width-thin: 1px;
+  --border-width-base: 2px;
+  --border-width-thick: 4px;
+
   /* ========================================
      TYPOGRAPHY
      ======================================== */
@@ -126,7 +130,10 @@
   --font-size-h6: 1rem; /* 16px */
   --font-size-base: 1rem; /* 16px */
   --font-size-small: 0.875rem; /* 14px */
+  --font-size-xs: 0.8125rem; /* 13px */
   --font-size-tiny: 0.75rem; /* 12px */
+  --font-size-display: 1.5rem; /* 24px - For large stat displays */
+  --font-size-subheading: 1.125rem; /* 18px - For prominent text */
 
   /* Line Heights */
   --line-height-tight: 1.2;
@@ -227,6 +234,10 @@
   --navbar-height: 64px;
   --navbar-padding: var(--spacing-md);
   --navbar-background: var(--prussian-blue);
+
+  /* Charts */
+  --chart-height: 360px;
+  --chart-min-height: 350px;
 
   /* ========================================
      GRADIENTS (Optional - for future use)

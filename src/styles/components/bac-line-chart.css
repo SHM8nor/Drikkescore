@@ -3,7 +3,7 @@
  */
 .bac-line-chart {
   width: 100%;
-  min-height: 360px;
+  min-height: var(--chart-height);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
@@ -13,7 +13,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--spacing-xs);
-  max-height: 96px;
+  max-height: var(--spacing-4xl);
   overflow-y: auto;
   padding-right: var(--spacing-xs);
 }
@@ -21,11 +21,11 @@
 .bac-line-chart__legend-item {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
   border-radius: var(--radius-sm);
   background: var(--color-background-secondary, rgba(0, 0, 0, 0.04));
-  font-size: 13px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
   white-space: nowrap;
   border: 1px solid transparent;
@@ -35,7 +35,7 @@
 
 .bac-line-chart__legend-item[data-selected="true"] {
   border-color: var(--prussian-blue, #0d47a1);
-  background: rgba(13, 71, 161, 0.08);
+  background: var(--prussian-blue-bg);
   color: var(--color-text-primary);
 }
 
@@ -45,9 +45,9 @@
 }
 
 .bac-line-chart__legend-mark {
-  width: 12px;
-  height: 12px;
-  border-radius: 3px;
+  width: var(--spacing-md);
+  height: var(--spacing-md);
+  border-radius: var(--radius-sm);
   display: inline-block;
 }
 
