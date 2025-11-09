@@ -8,13 +8,15 @@
  * 4. Session validation
  */
 
+import { describe, test, expect, vi } from 'vitest';
+
 // Mock the Html5Qrcode library
-jest.mock('html5-qrcode', () => ({
-  Html5Qrcode: jest.fn().mockImplementation(() => ({
-    start: jest.fn(),
-    stop: jest.fn(),
-    clear: jest.fn(),
-    getState: jest.fn().mockReturnValue(0), // SCANNING state
+vi.mock('html5-qrcode', () => ({
+  Html5Qrcode: vi.fn().mockImplementation(() => ({
+    start: vi.fn(),
+    stop: vi.fn(),
+    clear: vi.fn(),
+    getState: vi.fn().mockReturnValue(0), // SCANNING state
   })),
   Html5QrcodeScannerState: {
     SCANNING: 0,
