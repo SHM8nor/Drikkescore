@@ -42,7 +42,7 @@ interface BadgeCardProps {
   badge: Badge;
   earned?: UserBadge;
   progress?: BadgeProgress;
-  onClick?: () => void;
+  onClick?: (event: React.MouseEvent) => void;
   compact?: boolean;
 }
 
@@ -52,9 +52,12 @@ export function BadgeCard({ badge, earned, progress, onClick, compact = false }:
   const isChristmas = badge.category === 'special';
   const tierColor = isChristmas ? CHRISTMAS_TIER_COLORS[badge.tier] : TIER_COLORS[badge.tier];
 
-  const handleClick = () => {
+  const handleClick = (event: React.MouseEvent) => {
+    // Prevent event from bubbling up to parent swipe handlers
+    event.stopPropagation();
+
     if (onClick) {
-      onClick();
+      onClick(event);
     } else if (isEarned && earned) {
       // Default behavior for earned badges: open detail modal
       // Convert single badge to grouped format (count = 1)
