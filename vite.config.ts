@@ -13,8 +13,10 @@ export default defineConfig({
         manualChunks: (id) => {
           // Vendor chunks - these change rarely and can be cached long-term
           if (id.includes('node_modules')) {
-            // NOTE: React is NOT split into a separate chunk because many vendor chunks
-            // depend on it, and Vite can't guarantee load order. React stays in main bundle.
+            // NOTE: React and React Query stay in main bundle together because:
+            // 1. React Query depends on React's createContext and other APIs
+            // 2. Vite can't guarantee chunk load order for dependencies
+            // 3. Splitting them causes runtime errors where React Query loads before React
 
             // MUI core components (excluding icons and data components)
             if (id.includes('@mui/material') || id.includes('@emotion')) {
@@ -41,10 +43,8 @@ export default defineConfig({
               return 'vendor-supabase';
             }
 
-            // React Query - state management
-            if (id.includes('@tanstack/react-query')) {
-              return 'vendor-query';
-            }
+            // React Query stays in main bundle with React (see note above)
+            // DO NOT extract to separate chunk - it breaks production builds
 
             // QR code libraries
             if (id.includes('qrcode') || id.includes('html5-qrcode')) {
